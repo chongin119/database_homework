@@ -1,0 +1,5 @@
+{% extends 'bootstrap/base.html' %}
+{% block content %}
+<h1>welcome {{name}}</h1>
+<button><a href="{{url_for('logout',username = name)}}">logout</a></button>
+{% endblock %}
