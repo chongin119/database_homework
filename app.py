@@ -15,6 +15,10 @@ app.config['SECRET_KEY'] = "my_secret_key"
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1)
 bootstrap = Bootstrap(app)
 
+doctorItems = [
+                {"isTitle": False,"name":"主頁","icon":"grid-fill","filename":"doctor.html","url":'doctor'},
+                {"isTitle": True,"name":"功能"}    
+]
 
 @app.route('/',methods=['GET','POST'])
 def login():
@@ -90,7 +94,8 @@ def patient(username):
 @app.route('/doctor/?<string:username>',methods=['GET','POST'])
 def doctor(username):
     if session.get(username) is not None:
-        return render_template('doctor.html',name = username)
+        
+        return render_template('doctor.html',name = username,sidebarItems = doctorItems)
     return redirect(url_for('login'))
 
 if __name__ == "__main__":
