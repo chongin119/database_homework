@@ -8,6 +8,7 @@ from datetime import timedelta
 from werkzeug.utils import redirect
 from dbfunc import *
 
+from sliderbaritem import *
 
 app = Flask(__name__)
 databasePATH = "testing.db"
@@ -15,10 +16,7 @@ app.config['SECRET_KEY'] = "my_secret_key"
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1)
 bootstrap = Bootstrap(app)
 
-doctorItems = [
-                {"isTitle": False,"name":"主頁","icon":"grid-fill","filename":"doctor.html","url":'doctor'},
-                {"isTitle": True,"name":"功能"}    
-]
+
 
 @app.route('/',methods=['GET','POST'])
 def login():
