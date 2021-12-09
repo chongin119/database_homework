@@ -6,7 +6,7 @@ from flask import g
 from datetime import timedelta
 
 from werkzeug.utils import redirect
-from dbfunc import *
+from dbfunc import insert_user_pwd,connect_db,disconnect_db,match_user_pwd,get_domain
 
 from sliderbaritem import *
 
@@ -67,13 +67,13 @@ def register():
         username = request.form['username']
         password = request.form['password']
         repeat_password = request.form['repeat_password']
-
+        domain = request.form['domain']
         if password != repeat_password:
             flash('password is not equal to confirm_password!')
             return redirect(url_for('register'))
 
         db = connect_db(databasePATH)
-        judge = insert_user_pwd(db,username,password)
+        judge = insert_user_pwd(db,username,password,domain)
         disconnect_db(db)
 
         if judge == True:

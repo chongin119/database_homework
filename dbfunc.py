@@ -10,7 +10,7 @@ def connect_db(DB_path):
 def disconnect_db(db):
     db.close()
 
-def insert_user_pwd(db,user,pwd):
+def insert_user_pwd(db,user,pwd,domain):
     cur = db.cursor()
     last_id_cur = cur.execute('''select max(id) 
                             from login_inf      
@@ -20,7 +20,7 @@ def insert_user_pwd(db,user,pwd):
     last_id = last_id + 1
     
     try :
-        cur.execute("insert into login_inf Values ('%d','%s','%s',0)" %(last_id, user, pwd))
+        cur.execute("insert into login_inf Values ('%d','%s','%s','%s')" %(last_id, user, pwd,domain))
         db.commit()
         return True
     except sqlite3.Error:
