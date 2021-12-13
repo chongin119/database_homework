@@ -2,7 +2,7 @@ import sqlite3
 from sqlite3.dbapi2 import connect
 
 DB_path = 'testing.db'
-
+databasePATH = "testing.db"
 def connect_db(DB_path):
     db  = sqlite3.connect(DB_path)
     return db
