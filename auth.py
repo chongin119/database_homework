@@ -60,13 +60,13 @@ def register():
         username = request.form['username']
         password = request.form['password']
         repeat_password = request.form['repeat_password']
-        domain = request.form['domain']
+        # domain = request.form['domain']
         if password != repeat_password:
             flash('password is not equal to confirm_password!')
             return redirect(url_for('auth.register'))
 
         db = connect_db(databasePATH)
-        judge = insert_user_pwd(db, username, password, domain)
+        judge = insert_user_pwd(db, username, password, 2)
         disconnect_db(db)
 
         if judge == True:
