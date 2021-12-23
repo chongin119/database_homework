@@ -31,16 +31,17 @@ def appointments(username):
 def add_appointment(username):
     if request.method == 'POST':
         """api to add the patient in the database"""
-        appointInput = request.get_json(force=True)
-        app_date = appointInput['date']
+        app_date = request.form['date']
         patient_id = get_id(db,username)
-        department_id = appointInput['de_id']
-        doc_id = appointInput['doc_id']
+        department_id = request.form['de_id']
+        doc_id = request.form['doc_id']
         survey = None
-        appointInput['app_id'] = db.execute('''INSERT INTO appointment(date,patient_id,department_id,doc_id,survey)
+        app_id = db.execute('''INSERT INTO appointment(date,patient_id,department_id,doc_id,epidemic_survey)
                     VALUES(?,?,?,?,?)''', (app_date, patient_id, department_id, doc_id, survey)).lastrowid
         db.commit()
         return redirect(url_for('appointment.appointments'))
+
+
 
 
 

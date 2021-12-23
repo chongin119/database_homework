@@ -20,18 +20,18 @@ def patients():
 def add_patient():
     if request.method == 'POST':
         """api to add the patient in the database"""
-        patientInput = request.get_json(force=True)
-        pat_name = patientInput['pat_name']
-        pat_date = patientInput['pat_date']
-        pat_passport = patientInput['passport']
-        pat_gender = patientInput['pat_gender']
-        pat_phone = patientInput['pat_phone']
-        pat_email = patientInput['pat_email']
-        pat_username = patientInput['pat_username']
-        pat_password = patientInput['pat_password']
+        request.form = request.get_json(force=True)
+        pat_name = request.form['pat_name']
+        pat_date = request.form['pat_date']
+        pat_passport = request.form['passport']
+        pat_gender = request.form['pat_gender']
+        pat_phone = request.form['pat_phone']
+        pat_email = request.form['pat_email']
+        pat_username = request.form['pat_username']
+        pat_password = request.form['pat_password']
         error=None
         try:
-            patientInput['pat_id'] = db.execute('''INSERT INTO patient(name,DOB,passport,gender,phone,email,username,password)
+            request.form['pat_id'] = db.execute('''INSERT INTO patient(name,DOB,passport,gender,phone,email,username,password)
                         VALUES(?,?,?,?,?,?,?,?)''', (
             pat_name, pat_date, pat_passport, pat_gender, pat_phone,pat_email,pat_username,pat_password)).lastrowid
             db.commit()
@@ -48,15 +48,14 @@ def add_patient():
 def update_patients(id):
     patient = db.execute("SELECT * FROM patient WHERE pat_id=?", (id,)).fetchall()
     if request.method == 'POST':
-        patientInput = request.get_json(force=True)
-        pat_name = patientInput['pat_name']
-        pat_date = patientInput['pat_date']
-        pat_passport = patientInput['passport']
-        pat_gender = patientInput['pat_gender']
-        pat_phone = patientInput['pat_phone']
-        pat_email = patientInput['pat_email']
-        pat_username = patientInput['pat_username']
-        # pat_password = patientInput['pat_password']
+        pat_name = request.form['pat_name']
+        pat_date = request.form['pat_date']
+        pat_passport = request.form['passport']
+        pat_gender = request.form['pat_gender']
+        pat_phone = request.form['pat_phone']
+        pat_email = request.form['pat_email']
+        pat_username = request.form['pat_username']
+        # pat_password = request.form['pat_password']
         db.execute(
             "UPDATE patient SET name=?,DOB=?,passport=?,gender=?,phone=?,email=?,username=?, WHERE patient_id=?",
             (pat_name, pat_date, pat_passport, pat_gender, pat_phone, pat_email, pat_username))
