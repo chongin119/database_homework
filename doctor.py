@@ -19,10 +19,10 @@ def get_id(db,user):
 @bp.route('/doctor/?<string:username>', methods=['GET', 'POST'])
 def doctor(username):
     if session.get(username) is not None:
-        doctor = db.execute("SELECT * FROM doctor WHERE username=?", (username,)).fetchall()
+        doctor = db.execute("SELECT * FROM hospital WHERE username=?", (username,)).fetchall()
         return render_template('doctor.html', name=username, sidebarItems=doctorItems,doctor=doctor)
     return redirect(url_for('auth.login'))
-@bp.route('/doctor/?<string:username>/appointments',method=['GET', 'POST'])
+@bp.route('/doctor/?<string:username>/appointments',methods=['GET', 'POST'])
 def appoinments(username):
     doc_id = get_id(db,username)
     appointments = db.execute("SELECT date , p.name, p.phone FROM appointment a \
@@ -31,7 +31,7 @@ def appoinments(username):
                                 WHERE e_id=? ORDER BY date DESC", (doc_id,)).fetchall()
     return render_template('doctor_app.html',appointments=appointments)
 
-@bp.route('/doctor/?<string:username>/prescription',method=['GET', 'POST'])
+@bp.route('/doctor/?<string:username>/prescription',methods=['GET', 'POST'])
 def prescription(username):
     doc_id = get_id(db, username)
     prescription = db.execute("SELECT date , p.name, p.phone, med_id, med_quantity, med_name,  FROM prescription pre \
