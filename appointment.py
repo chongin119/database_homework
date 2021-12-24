@@ -4,7 +4,7 @@ from flask import (
 )
 from dbfunc import connect_db,match_user_pwd,disconnect_db,get_domain,insert_user_pwd
 from dbfunc import databasePATH
-from sliderbaritem import doctorItems
+from sliderbaritem import patientItems
 bp = Blueprint('appointment', __name__)
 
 db = connect_db(databasePATH)
@@ -17,18 +17,18 @@ def get_id(db,user):
     for i in tt:
         return i[0]
 
-@bp.route('/patient/?<string:username>/appointments',methods=['GET','POST'])
-def appointments(username):
+@bp.route('/patient/?<string:username>/patient_appointments',methods=['GET','POST'])
+def patient_appointments(username):
     appointments = db.execute(
         '''SELECT date, department_name, name
         FROM appointment a LEFT JOIN employees e ON e_id = doc_id 
         LEFT JOIN department d ON d.department_id = a.department_id 
          ORDER BY date DESC'''
     ).fetchall()
-    return render_template('appointments.html', appointments=appointments)
+    return render_template('patient_appointments.html', name = username,sidebarItems=patientItems,appointments=appointments,hav = len(appointments))
 
 @bp.route('/patient/?<string:username>/add_appointment',methods=['GET','POST'])
-def add_appointment(username):
+def patient_add_appointment(username):
     if request.method == 'POST':
         """api to add the patient in the database"""
         app_date = request.form['date']
@@ -40,6 +40,8 @@ def add_appointment(username):
                     VALUES(?,?,?,?,?)''', (app_date, patient_id, department_id, doc_id, survey)).lastrowid
         db.commit()
         return redirect(url_for('appointment.appointments'))
+
+    return render_template('patient_add_appointment.html', name = username,sidebarItems=patientItems)
 
 
 

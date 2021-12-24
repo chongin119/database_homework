@@ -19,9 +19,10 @@ def get_id(db,user):
 @bp.route('/doctor/?<string:username>', methods=['GET', 'POST'])
 def doctor(username):
     if session.get(username) is not None:
-        doctor = db.execute("SELECT * FROM hospital WHERE username=?", (username,)).fetchall()
+        doctor = db.execute("SELECT * FROM employees WHERE username=?", (username,)).fetchall()
         return render_template('doctor.html', name=username, sidebarItems=doctorItems,doctor=doctor)
     return redirect(url_for('auth.login'))
+
 @bp.route('/doctor/?<string:username>/appointments',methods=['GET', 'POST'])
 def appoinments(username):
     doc_id = get_id(db,username)

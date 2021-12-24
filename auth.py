@@ -4,7 +4,7 @@ from flask import (
 )
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from dbfunc import connect_db,match_user_pwd,disconnect_db,get_domain,insert_user_pwd
+from dbfunc import connect_db,match_user_pwd,disconnect_db,get_domain,insert_user_pwd,insert_patient_inf
 from dbfunc import databasePATH
 bp = Blueprint('auth', __name__)
 
@@ -78,12 +78,7 @@ def register():
 
         if judge == True:
             flash('Register Success!')
-            db = connect_db(databasePATH)
-            patient_id = db.execute('''INSERT INTO patient(name,DOB,passport,gender,phone,email,username,password)
-                                    VALUES(?,?,?,?,?,?,?,?)''', (
-                pat_name, pat_date, pat_passport, pat_gender, pat_phone, pat_email, username,
-                password)).lastrowid
-            db.commit()
+            patient_id = insert_patient_inf(db,pat_name, pat_date, pat_passport, pat_gender, pat_phone, pat_email, username,password)
             return redirect(url_for('auth.login'))
         else:
             flash('something wrong')

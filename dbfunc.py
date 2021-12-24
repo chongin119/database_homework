@@ -27,6 +27,15 @@ def insert_user_pwd(db,user,pwd,domain):
     except sqlite3.Error:
         return False
 
+def insert_patient_inf(db,pat_name, pat_date, pat_passport, pat_gender, pat_phone, pat_email, username,password):
+    patient_id = db.execute('''INSERT INTO patient(name,DOB,passport,gender,phone,email,username,password)
+                                    VALUES(?,?,?,?,?,?,?,?)''', (
+                pat_name, pat_date, pat_passport, pat_gender, pat_phone, pat_email, username,
+                password)).lastrowid
+    db.commit()
+    return patient_id
+    
+
 def match_user_pwd(db,user,pwd):
     cur = db.cursor()
     tt = cur.execute("select username,password \

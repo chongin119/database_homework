@@ -5,7 +5,7 @@ from flask import (
 )
 from dbfunc import connect_db,match_user_pwd,disconnect_db,get_domain,insert_user_pwd
 from dbfunc import databasePATH
-from sliderbaritem import doctorItems
+from sliderbaritem import patientItems
 bp = Blueprint('patient', __name__)
 
 db = connect_db(databasePATH)
@@ -22,7 +22,7 @@ def get_id(db,user):
 def patient(username):
     if session.get(username) is not None:
         patient = db.execute("SELECT * FROM patient WHERE username=?", (username,)).fetchall()
-        return render_template('patient.html',name = username,patient=patient)
+        return render_template('patient.html',name = username,sidebarItems=patientItems, patient=patient)
     return redirect(url_for('auth.login'))
 
 
