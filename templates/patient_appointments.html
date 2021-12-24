@@ -1,5 +1,5 @@
 {% set title = 'Dashboard' %}
-{% set filename = 'pattient_appointments.html' %}
+{% set filename = 'patient_appointments.html' %}
 
 {% extends 'layouts/master.html' %}
 
@@ -17,7 +17,6 @@
     </div>
 </div>
 <div class="page-content">
-
         <div class="col-12  ">
             <div class="row">
                 <div class="col-6 col-lg-3 col-md-6">
@@ -93,7 +92,7 @@
                 <div class="card">
                     <div class="card-header">
                         <h4 style="float: left; width: 85%;">你的所有预约</h4>
-                        <button class="btn btn-primary" style="float: left; width: 15%;"><a href="#" class="btn btn-primary btn-block">新增预约</a></button>
+                        <button class="btn btn-primary" style="float: left; width: 15%;"><a href="{{ url_for('appointment.patient_add_appointment',username = name) }}" class="btn btn-primary btn-block">新增预约</a></button>
                     </div>
                         
                     <div class="card-body">

@@ -26,6 +26,8 @@ def patient_appointments(username):
         LEFT JOIN department d ON d.department_id = a.department_id \
         WHERE patient_id=? ORDER BY date DESC", (patient_id,)
     ).fetchall()
+    print(patient_id)
+    print(appointments)
     return render_template('patient_appointments.html', name = username,sidebarItems=patientItems,appointments=appointments,hav = len(appointments))
 
 @bp.route('/patient/?<string:username>/add_appointment',methods=['GET','POST'])

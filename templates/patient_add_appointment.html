@@ -22,47 +22,94 @@
             <div class="card-header">
                 <h4>新增预约</h4>
             </div>
-                
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover table-lg">
-                        <thead>
-                            <tr>
-                                <th>日期</th>
-                                <th>部门</th>
-                                <th>主诊医生</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for appointment in appointments %}
-                            {% if hav != 0 %}
-                                <tr>
-                                    <td class="col-3">
-                                        <div class="d-flex align-items-center">
-                                            <div class="avatar avatar-md">
-                                                <img src="{{ url_for('static', filename='images/faces/5.jpg') }}">
-                                            </div>
-                                            <p class="font-bold ms-3 mb-0">{{appointment[0]}}</p>
-                                        </div>
-                                    </td>
-                                    <td class="col-auto">
-                                        <p class=" mb-0">{{appointment[1]}}</p>
-                                    </td>
-                                    <td class="col-auto">
-                                        <p class=" mb-0">{{appointment[2]}}</p>
-                                    </td>
-                                </tr>
-                            {% endif %}
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+            <div id="cardbody" class="card-body">
+                <input class="alert alert-secondary" style=";margin-left: 2%; height: 35px;width: 300px" id="date" type="date" value="">
+                    <div style="margin-left: 10%" class="btn-group mb-1">
+                        <div class="dropdown">
+                            <button class="btn btn-primary dropdown-toggle me-1" type="button"
+                                id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true"
+                                aria-expanded="false">
+                                Primary
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <a class="dropdown-item" href="#">Option 1</a>
+                                <a class="dropdown-item" href="#">Option 2</a>
+                                <a class="dropdown-item" href="#">Option 3</a>
+                            </div>
+                        </div>
+                    </div>
             </div>
-        </div>
+
     </div>
 </div>
 {% endblock %}
 {% block js %}
-<script src="{{ url_for('static', filename='vendors/apexcharts/apexcharts.js') }}"></script>
-<script src="{{ url_for('static', filename='js/pages/dashboard.js') }}"></script>
+    <script src="{{ url_for('static', filename='vendors/apexcharts/apexcharts.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/pages/dashboard.js') }}"></script>
+    <script>
+        String.prototype.format = function (){
+            let args = Array.prototype.slice.call(arguments);
+            let count=0;
+            return this.replace(/%s/g, function (s,i){
+                return args[count++];
+            });
+        }
+
+        document.getElementById("date").addEventListener("input", myFunction);
+        function myFunction(){
+            let temp1 = document.getElementById("date")
+            let val = temp1.value
+            console.log(val)
+            document.getElementById("cardbody").innerHTML =
+                `<input class="alert alert-secondary" style=";margin-left: 2%; height: 35px;width: 300px" id="date" type="date" value="">
+                    <div style="margin-left: 10%" class="btn-group mb-1">
+                        <div class="dropdown">
+                            <button class="btn btn-primary dropdown-toggle me-1" type="button"
+                                id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true"
+                                aria-expanded="false">
+                                Primary
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <a class="dropdown-item" href="#">Option 1</a>
+                                <a class="dropdown-item" href="#">Option 2</a>
+                                <a class="dropdown-item" href="#">Option 3</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-lg">
+                            <thead>
+                                <tr>
+                                    <th>日期</th>
+                                    <th>部门</th>
+                                    <th>主诊医生</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appointment in appointments %}
+                                {% if hav != 0 %}
+                                    <tr>
+                                        <td class="col-3">
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar avatar-md">
+                                                    <img src="{{ url_for('static', filename='images/faces/5.jpg') }}">
+                                                </div>
+                                                <p class="font-bold ms-3 mb-0">{{appointment[0]}}</p>
+                                            </div>
+                                        </td>
+                                        <td class="col-auto">
+                                            <p class=" mb-0">{{appointment[1]}}</p>
+                                        </td>
+                                        <td class="col-auto">
+                                            <p class=" mb-0">{{appointment[2]}}</p>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>`
+        }
+    </script>
 {% endblock %}
