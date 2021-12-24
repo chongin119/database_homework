@@ -25,4 +25,24 @@ def patient(username):
         return render_template('patient.html',name = username,sidebarItems=patientItems, patient=patient)
     return redirect(url_for('auth.login'))
 
+@bp.route('/patient/?<string:username>/departments')
+def departments(username):
+    departments = db.execute("SELECT * FROM department").fetchall()
+    return render_template('patient_departments.html', departments=departments)
+
+@bp.route('/patient/?<string:username>/department/<id>')
+def department(username,id):
+    department = db.execute('SELECT * FROM department WHERE department_id=?', (id,)).fetchall()
+    return render_template('patient_department.html', department=department)
+
+@bp.route('/patient/?<string:username>/doctors')
+def doctors(username):
+    doctors = db.execute("SELECT * FROM employees").fetchall()
+    return render_template('patient_doctors.html', doctors=doctors)
+
+@bp.route('/patient/?<string:username>/doctor/<id>')
+def doctor(username, id):
+    doctor = db.execute('SELECT * FROM employees WHERE e_id=?', (id,)).fetchall()
+    return render_template('patient_doctor.html', doctor=doctor)
+
 
