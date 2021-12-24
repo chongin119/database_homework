@@ -2,9 +2,10 @@ import sqlite3
 from sqlite3.dbapi2 import connect
 
 DB_path = 'testing.db'
-databasePATH = "testing.db"
+databasePATH = "hospital.db"
+
 def connect_db(DB_path):
-    db  = sqlite3.connect(DB_path)
+    db  = sqlite3.connect(DB_path,check_same_thread=False)
     return db
 
 def disconnect_db(db):

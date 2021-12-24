@@ -60,21 +60,37 @@ def register():
         username = request.form['username']
         password = request.form['password']
         repeat_password = request.form['repeat_password']
-        domain = request.form['domain']
+        pat_name = request.form['pat_name']
+        pat_date = request.form['pat_date']
+        pat_passport = request.form['passport']
+        pat_gender = request.form['pat_gender']
+        pat_phone = request.form['pat_phone']
+        pat_email = request.form['email']
+        # domain = request.form['domain']
         if password != repeat_password:
             flash('password is not equal to confirm_password!')
             return redirect(url_for('auth.register'))
 
         db = connect_db(databasePATH)
-        judge = insert_user_pwd(db, username, password, domain)
+        judge = insert_user_pwd(db, username, password, 2)
+
         disconnect_db(db)
 
         if judge == True:
             flash('Register Success!')
+            db = connect_db(databasePATH)
+            patient_id = db.execute('''INSERT INTO patient(name,DOB,passport,gender,phone,email,username,password)
+                                    VALUES(?,?,?,?,?,?,?,?)''', (
+                pat_name, pat_date, pat_passport, pat_gender, pat_phone, pat_email, username,
+                password)).lastrowid
+            db.commit()
             return redirect(url_for('auth.login'))
         else:
+            flash('something wrong')
             return redirect(url_for('auth.register'))
     return render_template('register.html')
+
+
 
 def login_required(view):
     @functools.wraps(view)
