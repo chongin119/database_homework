@@ -2,20 +2,14 @@ import functools
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for
 )
-from dbfunc import connect_db,match_user_pwd,disconnect_db,get_domain,insert_user_pwd
+from dbfunc import connect_db,match_user_pwd,disconnect_db,get_domain,insert_user_pwd,get_id
 from dbfunc import databasePATH
 from sliderbaritem import patientItems
 bp = Blueprint('appointment', __name__)
 
 db = connect_db(databasePATH)
 APP_NUM = 20
-def get_id(db,user):
-    cur = db.cursor()
-    tt = cur.execute("select patient_id \
-                      from patient \
-                      where username = '%s'" %user)
-    for i in tt:
-        return i[0]
+
 
 @bp.route('/patient/?<string:username>/patient_appointments',methods=['GET','POST'])
 def patient_appointments(username):
@@ -26,8 +20,8 @@ def patient_appointments(username):
         LEFT JOIN department d ON d.department_id = a.department_id \
         WHERE patient_id=? ORDER BY date DESC", (patient_id,)
     ).fetchall()
-    print(patient_id)
-    print(appointments)
+    #print(patient_id)
+    #print(appointments)
     return render_template('patient_appointments.html', name = username,sidebarItems=patientItems,appointments=appointments,hav = len(appointments))
 
 @bp.route('/patient/?<string:username>/add_appointment',methods=['GET','POST'])
@@ -46,6 +40,7 @@ def patient_add_appointment(username):
                                 INNER JOIN employees e ON e_id = doc_id \
                                 INNER JOIN patient p ON a.patient_id = p.patient_id \
                                 WHERE e_id=? ORDER BY date DESC", (doc_id,)).fetchall()
+
         number = number[0][0]
         if number >= APP_NUM:
             error = "The doctor's appointments are full that day"
@@ -57,7 +52,27 @@ def patient_add_appointment(username):
         db.commit()
         return redirect(url_for('appointment.patient_appointments'))
 
-    return render_template('patient_add_appointment.html', name = username,sidebarItems=patientItems)
+    appointments = db.execute('''
+                                SELECT date,name,specialty
+                                FROM appointment a 
+                                INNER JOIN employees e ON e_id = doc_id
+                            ''').fetchall()
+    print(appointments)
+    dic={}
+    for cnt in range(len(appointments)):
+        i,j,k = appointments[cnt][0],appointments[cnt][1],appointments[cnt][2]
+        #print(i,j,k)
+        if dic.get(i+','+k) == None:
+            dic[i+','+k] = [[j,1]]
+        else:
+            for z in dic[i+','+k]:
+                if z[0] == j:
+                    z[1] = z[1] + 1
+            if z[0] != j:
+                dic[i+','+k].append([j,1])
+
+    #print(dic)
+    return render_template('patient_add_appointment.html', name = username,sidebarItems = patientItems,appointments = dic,sum = APP_NUM)
 
 
 

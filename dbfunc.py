@@ -53,6 +53,14 @@ def get_domain(db,user):
     for i in tt:
         return i[0]
 
+def get_id(db,user):
+    cur = db.cursor()
+    tt = cur.execute("select patient_id \
+                      from patient \
+                      where username = '%s'" %user)
+    for i in tt:
+        return i[0]
+
 if __name__ == '__main__':
     db = connect_db(DB_path)
     #abc = insert_user_pwd(db,'ro3ot','root')
