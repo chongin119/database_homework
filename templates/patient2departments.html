@@ -1,0 +1,144 @@
+{% set title = 'Dashboard' %}
+{% set filename = 'patient2departments.html' %}
+
+{% extends 'layouts/master.html' %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='vendors/iconly/bold.css') }}">
+{% endblock %}
+
+{% block headscripts %}
+    <script>
+        dfdobj = {{ dfd | safe }}
+        docobj = {{ docdic | safe }}
+
+        function myclick(obj){
+            nname = obj.text
+            document.getElementById("dropdownMenuButton1").innerHTML = nname
+            contt = ""
+
+            for(let i =0;i<dfdobj[obj.id].length;i++){
+                tempid = dfdobj[obj.id][i]
+                contt +=`
+                            <a class="dropdown-item" value="%s" id="%s" onclick=myclick2(this) >%s</a>
+                        `.format(docobj[tempid][0],tempid,docobj[tempid][0])
+
+            }
+
+            document.getElementById("droptext").innerHTML = contt
+
+
+
+        }
+
+        function myclick2(obj){
+            nname = obj.text
+            document.getElementById("dropdownMenuButton2").innerHTML = nname
+
+            document.getElementById("docinf").innerHTML = `
+                                                            <div class="alert alert-light">
+                                                                <h4 class="alert-heading">姓名</h4>
+                                                                <p>%s</p>
+                                                            </div>
+                                                            <div class="alert alert-light">
+                                                                <h4 class="alert-heading">电话</h4>
+                                                                <p>%s</p>
+                                                            </div>
+                                                            <div class="alert alert-light">
+                                                                <h4 class="alert-heading">电邮</h4>
+                                                                <p>%s</p>
+                                                            </div>
+                                                            <div class="alert alert-light">
+                                                                <h4 class="alert-heading">毕业学校</h4>
+                                                                <p>%s</p>
+                                                            </div>
+                                                            <div class="alert alert-light">
+                                                                <h4 class="alert-heading">最高学歴</h4>
+                                                                <p>%s</p>
+                                                            </div>
+                                                            <div class="alert alert-light">
+                                                                <h4 class="alert-heading">技术题目</h4>
+                                                                <p>%s</p>
+                                                            </div>
+                                                            <div class="alert alert-light">
+                                                                <h4 class="alert-heading">专业</h4>
+                                                                <p>%s</p>
+                                                            </div>
+                                                          `.format(docobj[obj.id][0],docobj[obj.id][1],docobj[obj.id][2],docobj[obj.id][3],docobj[obj.id][4],docobj[obj.id][5],docobj[obj.id][6])
+        }
+    </script>
+{% endblock %}
+
+{% block content %}
+<div>
+    <div class="page-heading" style="float: left;width: 90%;">
+        <h3>Hello! patient {{name}}!</h3>
+    </div>
+    <div class="page-heading" style="float: left; width: 10%;">
+        <button class="btn btn-primary btn-block"><a href="{{ url_for('auth.logout',username = name) }}" class="btn btn-primary btn-block">Logout</a></button>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6 col-sm-12">
+        <div class="card">
+            <div class="card-content">
+                <div class="card-body">
+                    <h4 class="card-title">选择科室和医生进行查看</h4>
+                    <div style="margin-left: 10%;margin-top: 50px;margin-bottom: 30px" class="btn-group mb-1">
+                        <div class="dropdown">
+                            <button class="btn btn-primary dropdown-toggle me-1" type="button"
+                                id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-haspopup="true"
+                                aria-expanded="false" value="">
+                                请选择科室
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                {% for department in alldepartments %}
+                                    <a class="dropdown-item" value={{ alldepartments[department] }} id="{{ department }}" onclick=myclick(this) >{{ alldepartments[department] }}</a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display:block;margin-left: 10%;margin-top: 80px;" class="btn-group mb-1">
+                        <div class="dropdown">
+                            <button class="btn btn-primary dropdown-toggle me-1" type="button"
+                                id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-haspopup="true"
+                                aria-expanded="false" value="">
+                                请选择科室
+                            </button>
+                            <div id="droptext" class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <a class="dropdown-item" value=other id="other"  >请先选择科室</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-sm-12">
+        <div class="card">
+            <div class="card-content">
+                <div class="card-body">
+                    <h4 class="card-title">医生资料</h4>
+                    <p class="card-text" id="docinf">
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+{% block js %}
+<script src="{{ url_for('static', filename='vendors/apexcharts/apexcharts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/pages/dashboard.js') }}"></script>
+<script>
+    String.prototype.format = function (){
+            let args = Array.prototype.slice.call(arguments);
+            let count=0;
+            return this.replace(/%s/g, function (s,i){
+                return args[count++];
+            });
+        }
+</script>
+{% endblock %}

@@ -28,7 +28,36 @@ def patient(username):
 @bp.route('/patient/?<string:username>/departments')
 def departments(username):
     departments = db.execute("SELECT * FROM department").fetchall()
-    return render_template('patient_departments.html', departments=departments)
+    dicdep = {}
+    for cnt in range(len(departments)):
+        i,j = departments[cnt][0],departments[cnt][1]
+        dicdep[i] = j
+    #print(dicdep)
+
+    doctorfromdepartments = db.execute('''
+                                            SELECT doc_id,d.department_id
+                                            FROM doctor d INNER JOIN department e ON d.department_id == e.department_id 
+                                        ''').fetchall()
+    dfddic={}
+    for cnt in range(len(doctorfromdepartments)):
+        i,j = doctorfromdepartments[cnt][0],doctorfromdepartments[cnt][1]
+        if dfddic.get(j) == None:
+            dfddic[j] = [i]
+        else:
+            dfddic[j].append(i)
+
+    alldoc = db.execute('''
+                            SELECT e_id,name,phone,email,graduate_school,degree,technical_title,specialty
+                            FROM employees
+                        ''').fetchall()
+
+    docdic = {}
+    for cnt in range(len(alldoc)):
+        i, j,k,l,m,n,o,p = alldoc[cnt][0], alldoc[cnt][1],alldoc[cnt][2],alldoc[cnt][3],alldoc[cnt][4],alldoc[cnt][5],alldoc[cnt][6],alldoc[cnt][7]
+        if docdic.get(i) == None:
+            docdic[i] = [j,k,l,m,n,o,p]
+
+    return render_template('patient2departments.html', name = username,sidebarItems=patientItems,alldepartments = dicdep,dfd = dfddic,docdic = docdic)
 
 @bp.route('/patient/?<string:username>/department/<id>')
 def department(username,id):
