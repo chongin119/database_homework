@@ -33,10 +33,8 @@ def patient_add_appointment(username):
         patient_id = get_id(db,username)
 
         app_date = request.form['date']
-        #department_name = request.form['de_name']
-        department_id = 0 #我只能回传名字 要手动搜一下
-        #doc_name = request.form['doc_name']
-        doc_id = 1#同上
+        department_name = request.form['de_id']
+        doc_name = request.form['doc_id']
 
         survey = None
         error = None
