@@ -72,7 +72,7 @@ def change_inf(username):
                 "UPDATE employees SET phone=?,email=?,username=?,password=?,graduate_school=?\
                 , degree=?, technical_title=?,specialty=?\
                  WHERE e_id=?",
-                (phone, email, user, pwd, graduate_school, degree, technical_title, specialty))
+                (phone, email, user, pwd, graduate_school, degree, technical_title, specialty,doc_id))
             db.commit()
         else:
             db.execute('''UPDATE login_inf 
@@ -82,7 +82,7 @@ def change_inf(username):
                 "UPDATE employees SET phone=?,email=?,username=?,graduate_school=?\
                 , degree=?, technical_title=?,specialty=?\
                  WHERE e_id=?",
-                (phone, email, user, graduate_school, degree, technical_title, specialty))
+                (phone, email, user, graduate_school, degree, technical_title, specialty,doc_id))
             db.commit()
         flash('Successfully modified information')
         return redirect(url_for('doctor.doctor', username=user))
@@ -108,6 +108,13 @@ def diagnosis(username):
                                     INNER JOIN employees e ON e_id = doc_id \
                                     INNER JOIN patient p ON a.patient_id = p.patient_id \
                                     WHERE e_id=? and date = ? ORDER BY date DESC", (doc_id,datetime.date.today())).fetchall()
+    total_app_num = len(appointments)
+    done_app_num = db.execute("SELECT COUNT(a.app_id) FROM appointment a \
+                                    INNER JOIN employees e ON e_id = a.doc_id \
+                                    INNER JOIN patient p ON a.patient_id = p.patient_id \
+                                    INNER JOIN medical_record r ON r.app_id = a.app_id\
+                                    WHERE e_id=? and a.date = ?", (doc_id,datetime.date.today())).fetchone()[0]
+    undo_app_num = total_app_num - done_app_num
     return render_template('doctor_diagnosis.html',name=username, sidebarItems=doctorItems,appointments=appointments)
 
 @bp.route('/doctor/?<string:username>/diagnosis/<id>',methods=['GET', 'POST'])
@@ -143,7 +150,7 @@ def add_diagnosis(username, id):
                             ,diagnosis_assessment,app_id)
                            VALUES(?,?,?,?,?,?,?,?,?,?,?,?)''',
                            (patient_id, doc_id, datetime.date.today(), temperature, chief_complaint,
-                            present_illness_history,past_history,allergic_history,onset_date,
+                            present_illness_history,past_history,allergic_history,onset_date,current_treatment,
                             diagnosis_assessment,app_id)).lastrowid
         db.commit()
         return redirect(url_for('doctor.diagnosis', username=username))
