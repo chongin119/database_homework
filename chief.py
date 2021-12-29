@@ -28,7 +28,7 @@ def chief(username):
         chief_id = get_id(db, username)
         doctor = db.execute("SELECT * FROM employees WHERE username=?", (username,)).fetchall()
         department_id, department_name = get_dept(db, chief_id)
-        return render_template('doctor.html', name=username, sidebarItems=chiefItems,doctor=doctor,
+        return render_template('chief.html', name=username, sidebarItems=chiefItems,doctor=doctor,
                                department_name=department_name)
     return redirect(url_for('auth.login'))
 
@@ -87,7 +87,7 @@ def change_inf(username):
                 (phone, email, user, graduate_school, degree, technical_title, specialty))
             db.commit()
         flash('Successfully modified information')
-        return redirect(url_for('doctor.doctor', username=user))
+        return redirect(url_for('chief.chief', username=user))
 
 
     allinf = db.execute('''
@@ -148,8 +148,112 @@ def add_diagnosis(username, id):
                             present_illness_history,past_history,allergic_history,onset_date,
                             diagnosis_assessment,app_id)).lastrowid
         db.commit()
-        return redirect(url_for('doctor.diagnosis', username=username))
+        return redirect(url_for('chief.diagnosis', username=username))
 
 
 
     return render_template('add_diagnosis.html', name=username)
+
+@bp.route('/chief/?<string:username>/update_department',methods=['GET', 'POST'])
+def update_department(username):
+    chief_id = get_id(db, username)
+    department_id, department_name = get_dept(db, chief_id)
+    if request.method == "POST":
+
+        # department目前只有一个属性
+        department_new_name = request.form['dept_name']
+        db.execute('''UPDATE department 
+                    SET department_name = ?
+                    WHERE department_id = ?''', (department_new_name, department_id))
+        flash('Successfully modified information')
+        return redirect(url_for('chief.chief', username=username))
+    return render_template('update_department.html',name=username, sidebarItems=chiefItems,department_name= department_name)
+
+
+# 查看下属的病历和处方
+@bp.route('/chief/?<string:username>/subordinate_record',methods=['GET','POST'])
+def subordinate(username):
+    chief_id = get_id(db, username)
+    department_id, department_name = get_dept(db, chief_id)
+    # 找出该部门的全部医生的病历和处方
+    # 格式为(病人姓名，医生名字，日期，药品名字，药品用量,体温，主诉，现病史，既往史，过敏史，发病时间，治疗情况，评估诊断)
+    prescriptions_records = db.execute('''SELECT pat.name, e.name, p.date,med_name,med_quantity,temperature,chief_complaint,
+    present_illness_history,past_history, allergic_history, onset_date,current_treatment, diagnostic_assessment
+    FROM prescription p INNER JOIN patient pat ON pat.patient_id = p.patient_id
+    INNER JOIN employees e ON e.e_id = p.doc_id 
+    INNER JOIN medicine m ON m.med_id = p.med_id 
+    LEFT JOIN medical_record r ON p.app_id = r.app_id
+    WHERE p.doc_id IN (SELECT doc_id FROM doctor WHERE department_id=?)
+    AND p.date<=? ORDER BY p.date DESC''', (department_id,  datetime.date.today())).fetchall()
+
+    return render_template('xxx.html')
+
+# 查看科室看过病的病人的病历和处方
+@bp.route('/chief/?<string:username>/patient_record',methods=['GET','POST'])
+def patient_record(username):
+    chief_id = get_id(db, username)
+    department_id, department_name = get_dept(db, chief_id)
+    # 找出该部门的全部病人的病历和处方
+    # 格式为(病人姓名，医生名字，日期，药品名字，药品用量,体温，主诉，现病史，既往史，过敏史，发病时间，治疗情况，评估诊断)
+    prescriptions_records = db.execute('''SELECT pat.name, e.name, p.date,med_name,med_quantity,r.temperature,chief_complaint,
+    present_illness_history,past_history, allergic_history, onset_date,current_treatment, diagnostic_assessment
+    FROM prescription p INNER JOIN patient pat ON pat.patient_id = p.patient_id
+    INNER JOIN appointment a ON a.app_id = p.app_id
+    INNER JOIN employees e ON e.e_id = p.doc_id 
+    INNER JOIN medicine m ON m.med_id = p.med_id 
+    LEFT JOIN medical_record r ON p.app_id = r.app_id
+    WHERE a.department_id = ?
+    AND p.date<=? ORDER BY p.date DESC''', (department_id,  datetime.date.today())).fetchall()
+
+    return render_template('xxx.html')
+
+
+# 查看下属医生
+@bp.route('/chief/?<string:username>/doctors',methods=['GET','POST'])
+def doctors(username):
+    chief_id = get_id(db, username)
+    department_id, department_name = get_dept(db, chief_id)
+    # 找出该部门全部医生
+    # 格式为(医生id,医生姓名，电话，邮箱)
+    doctors = db.execute('''
+                                    SELECT e_id,e.name,e.phone,e.email 
+                                    FROM employees e 
+                                    INNER JOIN doctor d ON d.doc_id = e_id 
+                                    WHERE d.department_id=?
+                                ''', (department_id,)).fetchall()
+
+
+    return render_template('chief_doctors.html',name=username,  sidebarItems=chiefItems, doctors=doctors)
+
+
+@bp.route('/chief/?<string:username>/doctors',methods=['GET','POST'])
+def doctors(username):
+    chief_id = get_id(db, username)
+    department_id, department_name = get_dept(db, chief_id)
+    # 找出该部门全部医生
+    # 格式为(医生id,医生姓名，电话，邮箱...)
+    doctors = db.execute('''
+                                    SELECT e_id,e.name,e.phone,e.email,graduate_school,degree,technical_title,specialty
+                                    FROM employees e 
+                                    INNER JOIN doctor d ON d.doc_id = e_id 
+                                    WHERE d.department_id=?
+                                ''', (department_id,)).fetchall()
+
+
+    return render_template('chief_doctors.html',name=username,  sidebarItems=chiefItems, doctors=doctors)
+
+@bp.route('/chief/?<string:username>/add_doctor',methods=['GET','POST'])
+def add_doctor(username):
+    chief_id = get_id(db, username)
+    department_id, department_name = get_dept(db, chief_id)
+    # 找出该部门全部医生
+    # 格式为(医生id,医生姓名，电话，邮箱...)
+    doctors = db.execute('''
+                                    SELECT e_id,e.name,e.phone,e.email,graduate_school,degree,technical_title,specialty
+                                    FROM employees e 
+                                    INNER JOIN doctor d ON d.doc_id = e_id 
+                                    WHERE d.department_id=?
+                                ''', (department_id,)).fetchall()
+
+
+
