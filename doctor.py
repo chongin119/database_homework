@@ -102,8 +102,8 @@ def diagnosis(username):
     appointments = db.execute("SELECT date , p.name, p.phone FROM appointment a \
                                     INNER JOIN employees e ON e_id = doc_id \
                                     INNER JOIN patient p ON a.patient_id = p.patient_id \
-                                    WHERE e_id=? AND date = ? ORDER BY date DESC", (doc_id,datetime.date.today())).fetchall()
-    return render_template('diagnosis.html',appointments=appointments)
+                                    WHERE e_id=? and date = ? ORDER BY date DESC", (doc_id,datetime.date.today())).fetchall()
+    return render_template('doctor_diagnosis.html',name=username, sidebarItems=doctorItems,appointments=appointments)
 
 @bp.route('/doctor/?<string:username>/diagnosis/<id>',methods=['GET', 'POST'])
 def add_diagnosis(username, id):
