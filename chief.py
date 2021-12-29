@@ -176,8 +176,8 @@ def subordinate(username):
     chief_id = get_id(db, username)
     department_id, department_name = get_dept(db, chief_id)
     # 找出该部门的全部医生的病历和处方
-    # 格式为(病人姓名，医生名字，日期，药品名字，药品用量,体温，主诉，现病史，既往史，过敏史，发病时间，治疗情况，评估诊断)
-    prescriptions_records = db.execute('''SELECT pat.name, e.name, p.date,med_name,med_quantity,temperature,chief_complaint,
+    # 格式为(病历对应预约id，病人姓名，医生名字，日期，药品名字，药品用量,体温，主诉，现病史，既往史，过敏史，发病时间，治疗情况，评估诊断)
+    prescriptions_records = db.execute('''SELECT p.app_id,pat.name, e.name, p.date,med_name,med_quantity,temperature,chief_complaint,
     present_illness_history,past_history, allergic_history, onset_date,current_treatment, diagnostic_assessment
     FROM prescription p INNER JOIN patient pat ON pat.patient_id = p.patient_id
     INNER JOIN employees e ON e.e_id = p.doc_id 
@@ -187,6 +187,54 @@ def subordinate(username):
     AND p.date<=? ORDER BY p.date DESC''', (department_id,  datetime.date.today())).fetchall()
 
     return render_template('xxx.html')
+
+@bp.route('/chief/?<string:username>/update_record/<id>',methods=['GET','POST'])
+def update_record(username, id):
+    chief_id = get_id(db, username)
+    app_id = id
+    department_id, department_name = get_dept(db, chief_id)
+
+    # 给出该病历和处方的信息
+    prescription_record = db.execute('''SELECT p.app_id,pat.name, e.name, p.date,med_name,med_quantity,temperature,chief_complaint,
+    present_illness_history,past_history, allergic_history, onset_date,current_treatment, diagnostic_assessment
+    FROM prescription p INNER JOIN patient pat ON pat.patient_id = p.patient_id
+    INNER JOIN employees e ON e.e_id = p.doc_id 
+    INNER JOIN medicine m ON m.med_id = p.med_id 
+    LEFT JOIN medical_record r ON p.app_id = r.app_id
+    WHERE p.app_id = ?
+    AND p.date<=? ORDER BY p.date DESC''', (app_id,  datetime.date.today())).fetchone()
+
+    if request.method == "POST":
+        medicine_inf = db.execute("SELECT  * FROM medicine").fetchall()
+
+        temperature = request.form['temperature']
+        chief_complaint = request.form['chc']
+        present_illness_history = request.form['pih']
+        past_history = request.form['phistory']
+        allergic_history = request.form['ahistory']
+        onset_date = request.form['ondate']
+        current_treatment = request.form['ctreat']
+        diagnosis_assessment = request.form['assess']
+        med_id = request.form['medid']
+        med_quantity = request.form['quantity']
+
+        db.execute(
+            "UPDATE medical_record SET temperature=?,chief_complaint=?,present_illness_history=?,past_history=?\
+            ,allergic_history=?,onset_date=?,current_treatment=?,diagnosis_assessment\
+            , degree=?, technical_title=?,specialty=?\
+             WHERE app_id=?",
+            (temperature, chief_complaint, present_illness_history, past_history, allergic_history,
+             onset_date, current_treatment, diagnosis_assessment, app_id))
+        db.execute('''UPDATE prescription SET med_id = ?,med_quantity=?
+                    WHERE app_id=?'''
+                   ,(med_id,med_quantity,app_id))
+        db.commit()
+
+        return redirect(url_for('chief.subordinate'))
+
+    return render_template('chief_update_record.html',prescription_record=prescription_record,name=username)
+
+
 
 # 查看科室看过病的病人的病历和处方
 @bp.route('/chief/?<string:username>/patient_record',methods=['GET','POST'])
@@ -226,21 +274,7 @@ def doctors(username):
     return render_template('chief_doctors.html',name=username,  sidebarItems=chiefItems, doctors=doctors)
 
 
-@bp.route('/chief/?<string:username>/doctors',methods=['GET','POST'])
-def doctors(username):
-    chief_id = get_id(db, username)
-    department_id, department_name = get_dept(db, chief_id)
-    # 找出该部门全部医生
-    # 格式为(医生id,医生姓名，电话，邮箱...)
-    doctors = db.execute('''
-                                    SELECT e_id,e.name,e.phone,e.email,graduate_school,degree,technical_title,specialty
-                                    FROM employees e 
-                                    INNER JOIN doctor d ON d.doc_id = e_id 
-                                    WHERE d.department_id=?
-                                ''', (department_id,)).fetchall()
 
-
-    return render_template('chief_doctors.html',name=username,  sidebarItems=chiefItems, doctors=doctors)
 
 @bp.route('/chief/?<string:username>/add_doctor',methods=['GET','POST'])
 def add_doctor(username):
