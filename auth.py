@@ -74,11 +74,12 @@ def register():
         db = connect_db(databasePATH)
         judge = insert_user_pwd(db, username, password, 2)
 
-        disconnect_db(db)
+
 
         if judge == True:
             flash('Register Success!')
             patient_id = insert_patient_inf(db,pat_name, pat_date, pat_passport, pat_gender, pat_phone, pat_email, username,password)
+            disconnect_db(db)
             return redirect(url_for('auth.login'))
         else:
             flash('something wrong')

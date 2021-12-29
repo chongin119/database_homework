@@ -59,6 +59,46 @@ def departments(username):
 
     return render_template('patient2departments.html', name = username,sidebarItems=patientItems,alldepartments = dicdep,dfd = dfddic,docdic = docdic)
 
+@bp.route('/patient/?<string:username>/change_inf/',methods=['GET','POST'])
+def change_inf(username):
+    if request.method == "POST":
+        name = request.form['name']
+        DOB = request.form['DOB']
+        passport = request.form['passport']
+        uuser = request.form['username']
+        gender = request.form['gender']
+        phone = request.form['phone']
+        email = request.form['email']
+        pwd = request.form['pwd']
+        repwd = request.form['repwd']
+
+        if pwd == "NULL" and pwd == repwd:
+            #判断pwd有没有修改，因为不会在界面show给用户，null为用户没有输入即没有修改
+            #还要判断username修改后在数据库是不是唯一，我记得dbfunc有写过你看一下跟register差不多
+            #有错就redirect到这个页面并且flash一个信息
+            pass
+        else:
+            pass
+
+        #写一个修改个人资料到db
+
+        return redirect(url_for('patient.patient', username=username))
+
+
+    allinf = db.execute('''
+                                SELECT patient_id,name,DOB,passport,gender,phone,email,username
+                                FROM patient
+                                WHERE username =?   
+                            ''',(username,)).fetchall()
+
+    #print(allinf[0])
+    i, j, k, l, m, n, o,p = allinf[0][0], allinf[0][1], allinf[0][2], allinf[0][3], allinf[0][4], allinf[0][5],allinf[0][6],allinf[0][7]
+
+    infdic = [j, k, l, m, n, o,p]
+    #print(infdic)
+    return render_template('patient_change_inf.html', name = username,sidebarItems = patientItems,allinf = infdic)
+
+
 @bp.route('/patient/?<string:username>/department/<id>')
 def department(username,id):
     department = db.execute('SELECT * FROM department WHERE department_id=?', (id,)).fetchall()
