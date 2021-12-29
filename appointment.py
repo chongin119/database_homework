@@ -10,7 +10,7 @@ bp = Blueprint('appointment', __name__)
 db = connect_db(databasePATH)
 APP_NUM = 20
 
-def get_id(db,user):
+def get_eid(db,user):
     cur = db.cursor()
     tt = cur.execute("select e_id \
                       from employees \
@@ -18,9 +18,17 @@ def get_id(db,user):
     for i in tt:
         return i[0]
 
+def get_pid(db,user):
+    cur = db.cursor()
+    tt = cur.execute("select patient_id \
+                      from patient \
+                      where username = '%s'" %user)
+    for i in tt:
+        return i[0]
+
 @bp.route('/doctor/?<string:username>/doctor_appointments',methods=['GET', 'POST'])
 def doctor_appointments(username):
-    doc_id = get_id(db,username)
+    doc_id = get_eid(db,username)
 
     appointments = db.execute("SELECT date , p.name, p.phone FROM appointment a \
                                 INNER JOIN employees e ON e_id = doc_id \
@@ -31,7 +39,7 @@ def doctor_appointments(username):
 
 @bp.route('/patient/?<string:username>/patient_appointments',methods=['GET','POST'])
 def patient_appointments(username):
-    patient_id = get_id(db,username)
+    patient_id = get_pid(db,username)
     appointments = db.execute(
         "SELECT date, department_name, name\
         FROM appointment a LEFT JOIN employees e ON e_id = doc_id \
@@ -44,7 +52,7 @@ def patient_appointments(username):
 
 @bp.route('/patient/?<string:username>/add_appointment',methods=['GET','POST'])
 def patient_add_appointment(username):
-    patient_id = get_id(db,username)
+    patient_id = get_pid(db,username)
 
     if request.method == 'POST':
         """api to add the appointment in the database"""

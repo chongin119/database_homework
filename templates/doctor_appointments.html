@@ -138,4 +138,13 @@
 {% block js %}
 <script src="{{ url_for('static', filename='vendors/apexcharts/apexcharts.js') }}"></script>
 <script src="{{ url_for('static', filename='js/pages/dashboard.js') }}"></script>
+<script>
+    String.prototype.format = function (){
+            let args = Array.prototype.slice.call(arguments);
+            let count=0;
+            return this.replace(/%s/g, function (s,i){
+                return args[count++];
+            });
+        }
+</script>
 {% endblock %}

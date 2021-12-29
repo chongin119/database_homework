@@ -129,15 +129,69 @@ def doctor(username, id):
 def history(username):
     patient_id = get_id(db, username)
 
-    # 格式为(医生姓名，日期，药品名字，药品用量,体温，主诉，现病史，既往史，过敏史，发病时间，治疗情况，评估诊断)
-    prescriptions_records = db.execute('''SELECT e.name,p.date,med_name,med_quantity,temperature,chief_complaint,
-    present_illness_history,past_history, allergic_history， onset_date,current_treatment, diagnostic_assessment
+    # 格式为(id,医生姓名，日期，药品名字，药品用量,体温，主诉，现病史，既往史，过敏史，发病时间，治疗情况，评估诊断)
+    prescriptions_records = db.execute('''SELECT e.e_id,e.name,p.date,med_name,med_quantity,temperature,chief_complaint,
+    present_illness_history,past_history, allergic_history, onset_date,current_treatment, diagnostic_assessment
     FROM prescription p INNER JOIN employees e ON e.e_id = p.doc_id
     INNER JOIN medicine m ON m.med_id = p.med_id 
     LEFT JOIN medical_record r ON p.app_id = r.app_id
     WHERE p.patient_id=? AND p.date<=? ORDER BY p.date DESC''', (patient_id, datetime.date.today())).fetchall()
 
-    return render_template('xxx.html')
+    recordsfordoc = {}
+    for cnt in range(len(prescriptions_records)):
+        i1,i2,i3,i4,i5,i6,i7,i8,i9,i10,i11,i12,i13 = prescriptions_records[cnt][0],prescriptions_records[cnt][1],prescriptions_records[cnt][2],prescriptions_records[cnt][3], \
+                                                     prescriptions_records[cnt][4],prescriptions_records[cnt][5],prescriptions_records[cnt][6],prescriptions_records[cnt][7], \
+                                                     prescriptions_records[cnt][8],prescriptions_records[cnt][9],prescriptions_records[cnt][10],prescriptions_records[cnt][11], \
+                                                     prescriptions_records[cnt][12]
+        if recordsfordoc.get(i1) == None:
+            recordsfordoc[i1] = [[i2,i3,i4,i5,i6,i7,i8,i9,i10,i11,i12,i13]]
+        else:
+            recordsfordoc[i1].append([i2,i3,i4,i5,i6,i7,i8,i9,i10,i11,i12,i13])
+
+    #print(recordsfordoc)
+
+    records = {}
+    for cnt in range(len(prescriptions_records)):
+        i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13 = prescriptions_records[cnt][0], \
+                                                                 prescriptions_records[cnt][1], \
+                                                                 prescriptions_records[cnt][2], \
+                                                                 prescriptions_records[cnt][3], \
+                                                                 prescriptions_records[cnt][4], \
+                                                                 prescriptions_records[cnt][5], \
+                                                                 prescriptions_records[cnt][6], \
+                                                                 prescriptions_records[cnt][7], \
+                                                                 prescriptions_records[cnt][8], \
+                                                                 prescriptions_records[cnt][9], \
+                                                                 prescriptions_records[cnt][10], \
+                                                                 prescriptions_records[cnt][11], \
+                                                                 prescriptions_records[cnt][12]
+        if records.get(cnt) == None:
+            cntt = countfunc(records,i1)
+            records[cnt] = [i1,i2,i3,i4,i5,i6,i7,i8,i9,i10,i11,i12,i13,cntt]
+
+    #print(records)
+    alldoctor = db.execute('''
+                                    SELECT department_name,e_id
+                                    FROM appointment a 
+                                    INNER JOIN employees e ON e_id = doc_id
+                                    INNER JOIN department m ON a.department_id = m.department_id
+                                ''').fetchall()
+    dicdoctor = {}
+
+    for cnt in range(len(alldoctor)):
+        i, j = alldoctor[cnt][0], alldoctor[cnt][1]
+        if dicdoctor.get(j) == None:
+            dicdoctor[j] = i
+
+    return render_template('patient_history.html',name = username,sidebarItems = patientItems,alldoc = dicdoctor,records = records,rfordoc = recordsfordoc,hav = len(records))
+
+def countfunc(dicc,iid):
+    count = 0
+
+    for i in dicc:
+        if dicc[i][0] == iid:
+            count = count + 1
+    return count
 
 
 
