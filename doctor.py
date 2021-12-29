@@ -104,7 +104,7 @@ def change_inf(username):
 @bp.route('/doctor/?<string:username>/diagnosis',methods=['GET', 'POST'])
 def diagnosis(username):
     doc_id = get_id(db, username)
-    appointments = db.execute("SELECT date , p.name, p.phone FROM appointment a \
+    appointments = db.execute("SELECT date , p.name, p.phone ,a.app_id FROM appointment a \
                                     INNER JOIN employees e ON e_id = doc_id \
                                     INNER JOIN patient p ON a.patient_id = p.patient_id \
                                     WHERE e_id=? and date = ? ORDER BY date DESC", (doc_id,datetime.date.today())).fetchall()
@@ -115,9 +115,40 @@ def diagnosis(username):
                                     INNER JOIN medical_record r ON r.app_id = a.app_id\
                                     WHERE e_id=? and a.date = ?", (doc_id,datetime.date.today())).fetchone()[0]
     undo_app_num = total_app_num - done_app_num
-    return render_template('doctor_diagnosis.html',name=username, sidebarItems=doctorItems,appointments=appointments)
+    #print(appointments)
 
-@bp.route('/doctor/?<string:username>/diagnosis/<id>',methods=['GET', 'POST'])
+    allmedrec = db.execute('''
+                            SELECT app_id 
+                            FROM medical_record
+                            ''').fetchall()
+
+    las = db.cursor().execute('''
+                                SELECT max(app_id) 
+                                FROM appointment
+                                ''').fetchall()
+
+
+    finishdic = {}
+    allmedrecc = []
+    for i in allmedrec:
+        allmedrecc.append(i[0])
+
+    #print(allmedrecc)
+    records = {}
+    for cnt in range(len(appointments)):
+        i,j,k,l = appointments[cnt][0],appointments[cnt][1],appointments[cnt][2],appointments[cnt][3]
+        records[cnt] = [i,j,k,l]
+
+    for cnt in range(1,las[0][0]+1):
+        if l in allmedrecc:
+            finishdic[cnt] = 'disabled'
+        else:
+            finishdic[cnt] = ""
+    #print(finishdic)
+
+    return render_template('doctor_diagnosis.html',name=username, sidebarItems=doctorItems,records=records,hav=len(appointments),finishdic = finishdic)
+
+@bp.route('/doctor/?<string:username>/add_diagnosis/<id>',methods=['GET', 'POST'])
 def add_diagnosis(username, id):
     doc_id = get_id(db, username)
     app_id = id
@@ -127,9 +158,11 @@ def add_diagnosis(username, id):
                                             WHERE app_id=?", (app_id,)).fetchone()
     patient_id = appointment_inf[0]
     app_date = appointment_inf[1]
+
+
     if request.method == 'POST':
         # 该信息给出所有药品，药品的格式为(med_id,med_name,med_price),选药品的时候可以加一个下拉框选择
-        medicine_inf = db.execute("SELECT  * FROM medicine").fetchall()
+        #medicine_inf = db.execute("SELECT  * FROM medicine").fetchall()
 
         temperature = request.form['temperature']
         chief_complaint = request.form['chc']
@@ -147,15 +180,21 @@ def add_diagnosis(username, id):
                            (patient_id, doc_id, datetime.date.today(), med_id, med_quantity, app_id)).lastrowid
         m_id = db.execute('''INSERT INTO medical_record(patient_id,doc_id,date,temperature,chief_complaint
                             ,present_illness_history,past_history,allergic_history,onset_date,current_treatment
-                            ,diagnosis_assessment,app_id)
+                            ,diagnostic_assessment,app_id)
                            VALUES(?,?,?,?,?,?,?,?,?,?,?,?)''',
                            (patient_id, doc_id, datetime.date.today(), temperature, chief_complaint,
                             present_illness_history,past_history,allergic_history,onset_date,current_treatment,
                             diagnosis_assessment,app_id)).lastrowid
-        db.commit()
-        return redirect(url_for('doctor.diagnosis', username=username))
+        #db.commit()
 
-    return render_template('add_diagnosis.html', name=username)
+        return render_template('doctor_diagnosis.html')
+
+    medicine_inf = db.execute("SELECT  * FROM medicine").fetchall()
+    meddic = {}
+
+    for i in medicine_inf:
+        meddic[i[0]] = i[1]
+    return render_template('doctor_diagnosis_working.html', name=username,appid = app_id,meddic = meddic)
 
 
 

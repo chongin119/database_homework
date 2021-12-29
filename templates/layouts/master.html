@@ -17,7 +17,7 @@
     {% block headscripts %}{% endblock %}
 </head>
 
-<body>
+<body {% block bodyattr %}{% endblock %}>
     <div id="app">
         <div id="sidebar" class="active">
             {% include "layouts/sidebar.html" %}

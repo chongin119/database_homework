@@ -7,6 +7,16 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='vendors/iconly/bold.css') }}">
 {% endblock %}
 
+{% block headscripts %}
+    <script>
+        function myclick(obj){
+            uurl = "/doctor/%3F"+obj.name+"/add_diagnosis/"+obj.id
+            window.open(uurl, '看診', config='height=1000,width=1000,location=no')
+        }
+
+    </script>
+{% endblock %}
+
 {% block content %}
 <div>
     <div class="page-heading" style="float: left;width: 90%;">
@@ -91,7 +101,7 @@
             <div class="row">
                 <div class="card">
                     <div class="card-header">
-                        <h4 style="float: left; width: 85%;">你的所有预约</h4>
+                        <h4 style="float: left; width: 85%;">今天看诊记录</h4>
                     </div>
 
                     <div class="card-body">
@@ -102,25 +112,25 @@
                                         <th>日期</th>
                                         <th>患者姓名</th>
                                         <th>患者电话</th>
+                                        <th></th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for appointment in appointments %}
+                                    {% for record in records %}
                                     {% if hav != 0 %}
                                         <tr>
-                                            <td class="col-3">
-                                                <div class="d-flex align-items-center">
-                                                    <div class="avatar avatar-md">
-                                                        <img src="{{ url_for('static', filename='images/faces/5.jpg') }}">
-                                                    </div>
-                                                    <p class="font-bold ms-3 mb-0">{{appointment[0]}}</p>
-                                                </div>
+                                            <td class="col-auto">
+                                                <p class="font-bold ms-3 mb-0">{{ records[record][0] }}</p>
                                             </td>
                                             <td class="col-auto">
-                                                <p class=" mb-0">{{appointment[1]}}</p>
+                                                <p class=" mb-0">{{ records[record][1] }}</p>
                                             </td>
                                             <td class="col-auto">
-                                                <p class=" mb-0">{{appointment[2]}}</p>
+                                                <p class=" mb-0">{{ records[record][2] }}</p>
+                                            </td>
+                                            <td class="col-auto">
+                                                <button href="#"  name= "{{ name }}" class="btn btn-primary btn-block" style="float: left; width: 50%;" id="{{ records[record][3] }}" onclick=myclick(this) {{ finishdic[records[record][3]] }}>{% if finishdic[records[record][3]] == 'disabled' %}已看诊
+                                                    {% else %}可看诊{% endif %}</button>
                                             </td>
                                         </tr>
                                     {% endif %}
