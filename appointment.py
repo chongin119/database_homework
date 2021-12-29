@@ -4,12 +4,30 @@ from flask import (
 )
 from dbfunc import connect_db,match_user_pwd,disconnect_db,get_domain,insert_user_pwd,get_id
 from dbfunc import databasePATH
-from sliderbaritem import patientItems
+from sliderbaritem import patientItems,doctorItems
 bp = Blueprint('appointment', __name__)
 
 db = connect_db(databasePATH)
 APP_NUM = 20
 
+def get_id(db,user):
+    cur = db.cursor()
+    tt = cur.execute("select e_id \
+                      from employees \
+                      where username = '%s'" %user)
+    for i in tt:
+        return i[0]
+
+@bp.route('/doctor/?<string:username>/doctor_appointments',methods=['GET', 'POST'])
+def doctor_appointments(username):
+    doc_id = get_id(db,username)
+
+    appointments = db.execute("SELECT date , p.name, p.phone FROM appointment a \
+                                INNER JOIN employees e ON e_id = doc_id \
+                                INNER JOIN patient p ON a.patient_id = p.patient_id \
+                                WHERE e_id=? ORDER BY date DESC", (doc_id,)).fetchall()
+
+    return render_template('doctor_appointments.html',name = username,sidebarItems=doctorItems,appointments=appointments,hav = len(appointments))
 
 @bp.route('/patient/?<string:username>/patient_appointments',methods=['GET','POST'])
 def patient_appointments(username):
