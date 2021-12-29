@@ -89,15 +89,15 @@ def change_inf(username):
 
 
     allinf = db.execute('''
-                                SELECT e_id,name,passport,gender,phone,email,username,graduate_school
+                                SELECT e_id,name,passport,gender,phone,email,username,graduate_school,degree,technical_title,specialty
                                 FROM employees
                                 WHERE username =?   
                             ''',(username,)).fetchall()
 
     #print(allinf[0])
-    i, j, k, l, m, n, o,p = allinf[0][0], allinf[0][1], allinf[0][2], allinf[0][3], allinf[0][4], allinf[0][5],allinf[0][6],allinf[0][7]
+    i, j, k, l, m, n, o,p,q,s,t = allinf[0][0], allinf[0][1], allinf[0][2], allinf[0][3], allinf[0][4], allinf[0][5],allinf[0][6],allinf[0][7],allinf[0][8],allinf[0][9],allinf[0][10]
 
-    infdic = [j, k, l, m, n, o,p]
+    infdic = [j, k, l, m, n, o,p,q,s,t]
     #print(infdic)
     return render_template('doctor_change_inf.html', name = username,sidebarItems = doctorItems,allinf = infdic)
 
