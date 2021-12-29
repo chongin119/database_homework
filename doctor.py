@@ -17,6 +17,11 @@ def get_id(db,user):
                       where username = '%s'" %user)
     for i in tt:
         return i[0]
+def get_dept(db, id):
+    department_id, department_name = db.execute("SELECT d.department_id, department_name \
+                                From doctor d INNER JOIN department de ON de.department_id = d.department_id \
+                                WHERE doc_id=?",(id,)).fetchone()
+    return department_id,department_name
 
 @bp.route('/doctor/?<string:username>', methods=['GET', 'POST'])
 def doctor(username):
