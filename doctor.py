@@ -31,9 +31,9 @@ def history(username):
     doc_id = get_id(db, username)
 
     # 格式为(病人姓名，日期，药品名字，药品用量,体温，主诉，现病史，既往史，过敏史，发病时间，治疗情况，评估诊断)
-    prescriptions_records = db.execute('''SELECT p.name,p.date,med_name,med_quantity,temperature,chief_complaint,
-    present_illness_history,past_history, allergic_history， onset_date,current_treatment, diagnostic_assessment
-    FROM prescription p INNER JOIN employees e ON e.e_id = p.doc_id
+    prescriptions_records = db.execute('''SELECT pat.name,p.date,med_name,med_quantity,temperature,chief_complaint,
+    present_illness_history,past_history, allergic_history, onset_date,current_treatment, diagnostic_assessment
+    FROM prescription p INNER JOIN patient pat ON pat.patient_id = p.patient_id
     INNER JOIN medicine m ON m.med_id = p.med_id 
     LEFT JOIN medical_record r ON p.app_id = r.app_id
     WHERE p.doc_id=? AND p.date<=? ORDER BY p.date DESC''', (doc_id, datetime.date.today())).fetchall()
