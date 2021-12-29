@@ -36,14 +36,66 @@ def history(username):
     doc_id = get_id(db, username)
 
     # 格式为(病人姓名，日期，药品名字，药品用量,体温，主诉，现病史，既往史，过敏史，发病时间，治疗情况，评估诊断)
-    prescriptions_records = db.execute('''SELECT pat.name,p.date,med_name,med_quantity,temperature,chief_complaint,
+    prescriptions_records = db.execute('''SELECT pat.patient_id,pat.name,p.date,med_name,med_quantity,temperature,chief_complaint,
     present_illness_history,past_history, allergic_history, onset_date,current_treatment, diagnostic_assessment
     FROM prescription p INNER JOIN patient pat ON pat.patient_id = p.patient_id
     INNER JOIN medicine m ON m.med_id = p.med_id 
     LEFT JOIN medical_record r ON p.app_id = r.app_id
     WHERE p.doc_id=? AND p.date<=? ORDER BY p.date DESC''', (doc_id, datetime.date.today())).fetchall()
 
-    return render_template('xxx.html')
+    recordsfordoc = {}
+    for cnt in range(len(prescriptions_records)):
+        i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13 = prescriptions_records[cnt][0], \
+                                                                 prescriptions_records[cnt][1], \
+                                                                 prescriptions_records[cnt][2], \
+                                                                 prescriptions_records[cnt][3], \
+                                                                 prescriptions_records[cnt][4], \
+                                                                 prescriptions_records[cnt][5], \
+                                                                 prescriptions_records[cnt][6], \
+                                                                 prescriptions_records[cnt][7], \
+                                                                 prescriptions_records[cnt][8], \
+                                                                 prescriptions_records[cnt][9], \
+                                                                 prescriptions_records[cnt][10], \
+                                                                 prescriptions_records[cnt][11], \
+                                                                 prescriptions_records[cnt][12]
+        if recordsfordoc.get(i1) == None:
+            recordsfordoc[i1] = [[i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13]]
+        else:
+            recordsfordoc[i1].append([i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13])
+
+    # print(recordsfordoc)
+
+    records = {}
+    for cnt in range(len(prescriptions_records)):
+        i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13 = prescriptions_records[cnt][0], \
+                                                                 prescriptions_records[cnt][1], \
+                                                                 prescriptions_records[cnt][2], \
+                                                                 prescriptions_records[cnt][3], \
+                                                                 prescriptions_records[cnt][4], \
+                                                                 prescriptions_records[cnt][5], \
+                                                                 prescriptions_records[cnt][6], \
+                                                                 prescriptions_records[cnt][7], \
+                                                                 prescriptions_records[cnt][8], \
+                                                                 prescriptions_records[cnt][9], \
+                                                                 prescriptions_records[cnt][10], \
+                                                                 prescriptions_records[cnt][11], \
+                                                                 prescriptions_records[cnt][12]
+        if records.get(cnt) == None:
+            cntt = countfunc(records, i1)
+            records[cnt] = [i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, cntt]
+
+    # print(records)
+    alldoctor = db.execute('''
+                                        SELECT name,patient_id
+                                        FROM patient 
+                                    ''').fetchall()
+    dicdoctor = {}
+
+    for cnt in range(len(alldoctor)):
+        i, j = alldoctor[cnt][0], alldoctor[cnt][1]
+        if dicdoctor.get(j) == None:
+            dicdoctor[j] = i
+    return render_template('doctor_history.html',name = username,sidebarItems = doctorItems,alldoc = dicdoctor,records = records,rfordoc = recordsfordoc,hav = len(records))
 
 @bp.route('/doctor/?<string:username>/change_inf/' , methods=['GET','POST'])
 def change_inf(username):
@@ -146,7 +198,14 @@ def diagnosis(username):
             finishdic[cnt] = ""
     #print(finishdic)
 
-    return render_template('doctor_diagnosis.html',name=username, sidebarItems=doctorItems,records=records,hav=len(appointments),finishdic = finishdic)
+    total_app_num = len(appointments)
+    done_app_num = db.execute("SELECT COUNT(a.app_id) FROM appointment a \
+                                        INNER JOIN employees e ON e_id = a.doc_id \
+                                        INNER JOIN patient p ON a.patient_id = p.patient_id \
+                                        INNER JOIN medical_record r ON r.app_id = a.app_id\
+                                        WHERE e_id=? and a.date = ?", (doc_id, datetime.date.today())).fetchone()[0]
+    undo_app_num = total_app_num - done_app_num
+    return render_template('doctor_diagnosis.html',name=username, sidebarItems=doctorItems,records=records,hav=len(appointments),finishdic = finishdic,total = total_app_num,undo = undo_app_num,done = done_app_num)
 
 @bp.route('/doctor/?<string:username>/add_diagnosis/<id>',methods=['GET', 'POST'])
 def add_diagnosis(username, id):
@@ -198,6 +257,13 @@ def add_diagnosis(username, id):
 
 
 
+def countfunc(dicc,iid):
+    count = 0
+
+    for i in dicc:
+        if dicc[i][0] == iid:
+            count = count + 1
+    return count
 
 
 

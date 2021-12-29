@@ -3,7 +3,7 @@ doctorItems = [
                 {"isTitle": True,"name":"功能"},
                 {"isTitle": False,"name":"查看所有预约","icon":"grid-fill","filename":"doctor_appointments.html","url":'appointment.doctor_appointments'},
                 {"isTitle": False,"name":"看诊","icon":"grid-fill","filename":"doctor_diagnosis.html","url":'doctor.diagnosis'},
-                {"isTitle": False,"name":"查看历史看诊","icon":"grid-fill","filename":"#","url":'doctor.doctor'},
+                {"isTitle": False,"name":"查看历史看诊","icon":"grid-fill","filename":"doctor_history.html","url":'doctor.history'},
                 {"isTitle": False,"name":"修改个人信息","icon":"grid-fill","filename":"doctor_change_inf.html","url":'doctor.change_inf'}
 
 ]

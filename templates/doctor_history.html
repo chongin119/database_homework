@@ -1,5 +1,5 @@
 {% set title = 'Dashboard' %}
-{% set filename = 'patient_history.html' %}
+{% set filename = 'doctor_history.html' %}
 
 {% extends 'layouts/master.html' %}
 
@@ -36,7 +36,7 @@
                     </div>
                     <div  class="card-body">
                         <div class="alert alert-light">
-                            <h4 class="alert-heading">医生姓名</h4>
+                            <h4 class="alert-heading">病人姓名</h4>
                             <p>%s</p>
                         </div>
                         <div class="alert alert-light">
@@ -94,7 +94,7 @@
 {% block content %}
 <div>
     <div id="top" class="page-heading" style="float: left;width: 90%;">
-        <h3>Hello! patient {{name}}!</h3>
+        <h3>Hello! doctor {{name}}!</h3>
     </div>
     <div class="page-heading" style="float: left; width: 10%;">
         <button class="btn btn-primary btn-block"><a href="{{ url_for('auth.logout',username = name) }}" class="btn btn-primary btn-block">Logout</a></button>
@@ -117,8 +117,7 @@
                                 <thead>
                                     <tr>
                                         <th>日期</th>
-                                        <th>科室</th>
-                                        <th>主诊医生</th>
+                                        <th>病人</th>
                                         <th></th>
                                     </tr>
                                 </thead>
@@ -136,9 +135,6 @@
                                             </td>
                                             <td class="col-auto">
                                                 <p class=" mb-0">{{alldoc[records[record][0]]}}</p>
-                                            </td>
-                                            <td class="col-auto">
-                                                <p class=" mb-0">{{records[record][1]}}</p>
                                             </td>
                                             <td class="col-auto">
                                                 <button href="#top" id={{ records[record][0] }}_{{ records[record][13] }} class="btn btn-primary btn-block" style="float: left; width: 50%;" onclick=myclick(this)>查看详请</button>
