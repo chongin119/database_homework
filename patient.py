@@ -11,6 +11,14 @@ bp = Blueprint('patient', __name__)
 
 db = connect_db(databasePATH)
 
+def get_name(db,user):
+    cur = db.cursor()
+    tt = cur.execute("select name \
+                          from patient \
+                          where username = '%s'" % user)
+    for i in tt:
+        return i[0]
+
 def get_id(db,user):
     cur = db.cursor()
     tt = cur.execute("select patient_id \
@@ -21,13 +29,15 @@ def get_id(db,user):
 
 @bp.route('/patient/?<string:username>',methods=['GET','POST'])
 def patient(username):
+    realname = get_name(db, username)
     if session.get(username) is not None:
         patient = db.execute("SELECT * FROM patient WHERE username=?", (username,)).fetchall()
-        return render_template('patient.html',name = username,sidebarItems=patientItems, patient=patient)
+        return render_template('patient.html',realname = realname,name = username,sidebarItems=patientItems, patient=patient)
     return redirect(url_for('auth.login'))
 
 @bp.route('/patient/?<string:username>/departments')
 def departments(username):
+    realname = get_name(db, username)
     departments = db.execute("SELECT * FROM department").fetchall()
     dicdep = {}
     for cnt in range(len(departments)):
@@ -58,10 +68,11 @@ def departments(username):
         if docdic.get(i) == None:
             docdic[i] = [j,k,l,m,n,o,p]
 
-    return render_template('patient2departments.html', name = username,sidebarItems=patientItems,alldepartments = dicdep,dfd = dfddic,docdic = docdic)
+    return render_template('patient2departments.html',realname = realname, name = username,sidebarItems=patientItems,alldepartments = dicdep,dfd = dfddic,docdic = docdic)
 
 @bp.route('/patient/?<string:username>/change_inf/',methods=['GET','POST'])
 def change_inf(username):
+    realname = get_name(db, username)
     patient_id = get_id(db,username)
     if request.method == "POST":
         DOB = request.form['DOB']
@@ -107,28 +118,12 @@ def change_inf(username):
 
     infdic = [j, k, l, m, n, o,p]
     #print(infdic)
-    return render_template('patient_change_inf.html', name = username,sidebarItems = patientItems,allinf = infdic)
-
-
-@bp.route('/patient/?<string:username>/department/<id>')
-def department(username,id):
-    department = db.execute('SELECT * FROM department WHERE department_id=?', (id,)).fetchall()
-    return render_template('patient_department.html', department=department)
-
-@bp.route('/patient/?<string:username>/doctors')
-def doctors(username):
-    doctors = db.execute("SELECT * FROM employees").fetchall()
-    return render_template('patient_doctors.html', doctors=doctors)
-
-@bp.route('/patient/?<string:username>/doctor/<id>')
-def doctor(username, id):
-    doctor = db.execute('SELECT * FROM employees WHERE e_id=?', (id,)).fetchall()
-    return render_template('patient_doctor.html', doctor=doctor)
+    return render_template('patient_change_inf.html', realname = realname,name = username,sidebarItems = patientItems,allinf = infdic)
 
 @bp.route('/patient/?<string:username>/history',methods=['GET','POST'])
 def history(username):
     patient_id = get_id(db, username)
-
+    realname = get_name(db, username)
     # 格式为(id,医生姓名，日期，药品名字，药品用量,体温，主诉，现病史，既往史，过敏史，发病时间，治疗情况，评估诊断)
     prescriptions_records = db.execute('''SELECT e.e_id,e.name,p.date,med_name,med_quantity,temperature,chief_complaint,
     present_illness_history,past_history, allergic_history, onset_date,current_treatment, diagnostic_assessment
@@ -183,7 +178,7 @@ def history(username):
         if dicdoctor.get(j) == None:
             dicdoctor[j] = i
 
-    return render_template('patient_history.html',name = username,sidebarItems = patientItems,alldoc = dicdoctor,records = records,rfordoc = recordsfordoc,hav = len(records))
+    return render_template('patient_history.html',realname = realname,name = username,sidebarItems = patientItems,alldoc = dicdoctor,records = records,rfordoc = recordsfordoc,hav = len(records))
 
 def countfunc(dicc,iid):
     count = 0

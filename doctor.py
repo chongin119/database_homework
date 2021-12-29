@@ -10,6 +10,14 @@ bp = Blueprint('doctor', __name__)
 
 db = connect_db(databasePATH)
 
+def get_name(db,user):
+    cur = db.cursor()
+    tt = cur.execute("select name \
+                          from employees \
+                          where username = '%s'" % user)
+    for i in tt:
+        return i[0]
+
 def get_id(db,user):
     cur = db.cursor()
     tt = cur.execute("select e_id \
@@ -25,15 +33,17 @@ def get_dept(db, id):
 
 @bp.route('/doctor/?<string:username>', methods=['GET', 'POST'])
 def doctor(username):
+    realname = get_name(db,username)
     if session.get(username) is not None:
         doctor = db.execute("SELECT * FROM employees WHERE username=?", (username,)).fetchall()
-        return render_template('doctor.html', name=username, sidebarItems=doctorItems,doctor=doctor)
+        return render_template('doctor.html', realname = realname,name=username, sidebarItems=doctorItems,doctor=doctor)
     return redirect(url_for('auth.login'))
 
 
 @bp.route('/doctor/?<string:username>/history',methods=['GET','POST'])
 def history(username):
     doc_id = get_id(db, username)
+    realname = get_name(db, username)
 
     # 格式为(病人姓名，日期，药品名字，药品用量,体温，主诉，现病史，既往史，过敏史，发病时间，治疗情况，评估诊断)
     prescriptions_records = db.execute('''SELECT pat.patient_id,pat.name,p.date,med_name,med_quantity,temperature,chief_complaint,
@@ -95,11 +105,12 @@ def history(username):
         i, j = alldoctor[cnt][0], alldoctor[cnt][1]
         if dicdoctor.get(j) == None:
             dicdoctor[j] = i
-    return render_template('doctor_history.html',name = username,sidebarItems = doctorItems,alldoc = dicdoctor,records = records,rfordoc = recordsfordoc,hav = len(records))
+    return render_template('doctor_history.html',realname = realname,name = username,sidebarItems = doctorItems,alldoc = dicdoctor,records = records,rfordoc = recordsfordoc,hav = len(records))
 
 @bp.route('/doctor/?<string:username>/change_inf/' , methods=['GET','POST'])
 def change_inf(username):
     doc_id = get_id(db,username)
+    realname = get_name(db, username)
     if request.method == "POST":
         user = request.form['username']
         phone = request.form['phone']
@@ -151,11 +162,12 @@ def change_inf(username):
 
     infdic = [j, k, l, m, n, o,p,q,s,t]
     #print(infdic)
-    return render_template('doctor_change_inf.html', name = username,sidebarItems = doctorItems,allinf = infdic)
+    return render_template('doctor_change_inf.html', realname = realname,name = username,sidebarItems = doctorItems,allinf = infdic)
 
 @bp.route('/doctor/?<string:username>/diagnosis',methods=['GET', 'POST'])
 def diagnosis(username):
     doc_id = get_id(db, username)
+    realname = get_name(db, username)
     appointments = db.execute("SELECT date , p.name, p.phone ,a.app_id FROM appointment a \
                                     INNER JOIN employees e ON e_id = doc_id \
                                     INNER JOIN patient p ON a.patient_id = p.patient_id \
@@ -205,7 +217,7 @@ def diagnosis(username):
                                         INNER JOIN medical_record r ON r.app_id = a.app_id\
                                         WHERE e_id=? and a.date = ?", (doc_id, datetime.date.today())).fetchone()[0]
     undo_app_num = total_app_num - done_app_num
-    return render_template('doctor_diagnosis.html',name=username, sidebarItems=doctorItems,records=records,hav=len(appointments),finishdic = finishdic,total = total_app_num,undo = undo_app_num,done = done_app_num)
+    return render_template('doctor_diagnosis.html',realname = realname,name=username, sidebarItems=doctorItems,records=records,hav=len(appointments),finishdic = finishdic,total = total_app_num,undo = undo_app_num,done = done_app_num)
 
 @bp.route('/doctor/?<string:username>/add_diagnosis/<id>',methods=['GET', 'POST'])
 def add_diagnosis(username, id):

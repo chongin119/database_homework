@@ -72,46 +72,45 @@
 {% block content %}
 <div>
     <div class="page-heading" style="float: left;width: 90%;">
-        <h3>Hello! patient {{name}}!</h3>
+        <h3>Hello! patient {{realname}}!</h3>
     </div>
     <div class="page-heading" style="float: left; width: 10%;">
         <button class="btn btn-primary btn-block"><a href="{{ url_for('auth.logout',username = name) }}" class="btn btn-primary btn-block">Logout</a></button>
     </div>
 </div>
 <div class="row">
-    <div class="col-md-6 col-sm-12">
-        <div class="card">
-            <div class="card-content">
-                <div class="card-body">
-                    <h4 class="card-title">选择科室和医生进行查看</h4>
-                    <div style="margin-left: 10%;margin-top: 50px;margin-bottom: 30px" class="btn-group mb-1">
-                        <div class="dropdown">
-                            <button class="btn btn-primary dropdown-toggle me-1" type="button"
-                                id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-haspopup="true"
-                                aria-expanded="false" value="">
-                                请选择科室
-                            </button>
-                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                {% for department in alldepartments %}
-                                    <a class="dropdown-item" value={{ alldepartments[department] }} id="{{ department }}" onclick=myclick(this) >{{ alldepartments[department] }}</a>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    </div>
-                    <div style="display:block;margin-left: 10%;margin-top: 80px;" class="btn-group mb-1">
-                        <div class="dropdown">
-                            <button class="btn btn-primary dropdown-toggle me-1" type="button"
-                                id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-haspopup="true"
-                                aria-expanded="false" value="">
-                                请选择科室
-                            </button>
-                            <div id="droptext" class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                <a class="dropdown-item" value=other id="other"  >请先选择科室</a>
-                            </div>
+    <div class="card">
+        <div class="card-header">
+            <h4 style="float: left; width: 85%;">选择科室和医生进行查看</h4>
+        </div>
+
+        <div class="card-body">
+                <div style="margin-left: 10%;" class="btn-group mb-1">
+                    <div class="dropdown">
+                        <button class="btn btn-primary dropdown-toggle me-1" type="button"
+                            id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-haspopup="true"
+                            aria-expanded="false" value="">
+                            请选择科室
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            {% for department in alldepartments %}
+                                <a class="dropdown-item" value={{ alldepartments[department] }} id="{{ department }}" onclick=myclick(this) >{{ alldepartments[department] }}</a>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
-            </div>
+                <div style="display:inline-block;margin-left: 10%;" class="btn-group mb-1">
+                    <div class="dropdown">
+                        <button class="btn btn-primary dropdown-toggle me-1" type="button"
+                            id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-haspopup="true"
+                            aria-expanded="false" value="">
+                            请先选择科室
+                        </button>
+                        <div id="droptext" class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <a class="dropdown-item" value=other id="other"  >请先选择科室</a>
+                        </div>
+                    </div>
+                </div>
         </div>
     </div>
     <div class="col-md-6 col-sm-12">
@@ -120,6 +119,17 @@
                 <div class="card-body">
                     <h4 class="card-title">医生资料</h4>
                     <p class="card-text" id="docinf">
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-sm-12">
+        <div class="card">
+            <div class="card-content">
+                <div class="card-body">
+                    <h4 class="card-title">科室资料</h4>
+                    <p class="card-text" id="depinf">
                     </p>
                 </div>
             </div>

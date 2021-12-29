@@ -10,6 +10,22 @@ bp = Blueprint('appointment', __name__)
 db = connect_db(databasePATH)
 APP_NUM = 20
 
+def get_pname(db,user):
+    cur = db.cursor()
+    tt = cur.execute("select name \
+                          from patient \
+                          where username = '%s'" % user)
+    for i in tt:
+        return i[0]
+
+def get_ename(db,user):
+    cur = db.cursor()
+    tt = cur.execute("select name \
+                          from employees \
+                          where username = '%s'" % user)
+    for i in tt:
+        return i[0]
+
 def get_eid(db,user):
     cur = db.cursor()
     tt = cur.execute("select e_id \
@@ -29,17 +45,18 @@ def get_pid(db,user):
 @bp.route('/doctor/?<string:username>/doctor_appointments',methods=['GET', 'POST'])
 def doctor_appointments(username):
     doc_id = get_eid(db,username)
-
+    realname = get_ename(db,username)
     appointments = db.execute("SELECT date , p.name, p.phone FROM appointment a \
                                 INNER JOIN employees e ON e_id = doc_id \
                                 INNER JOIN patient p ON a.patient_id = p.patient_id \
                                 WHERE e_id=? ORDER BY date DESC", (doc_id,)).fetchall()
 
-    return render_template('doctor_appointments.html',name = username,sidebarItems=doctorItems,appointments=appointments,hav = len(appointments))
+    return render_template('doctor_appointments.html',realname = realname,name = username,sidebarItems=doctorItems,appointments=appointments,hav = len(appointments))
 
 @bp.route('/patient/?<string:username>/patient_appointments',methods=['GET','POST'])
 def patient_appointments(username):
     patient_id = get_pid(db,username)
+    realname = get_pname(db, username)
     appointments = db.execute(
         "SELECT date, department_name, name\
         FROM appointment a LEFT JOIN employees e ON e_id = doc_id \
@@ -48,12 +65,12 @@ def patient_appointments(username):
     ).fetchall()
     #print(patient_id)
     #print(appointments)
-    return render_template('patient_appointments.html', name = username,sidebarItems=patientItems,appointments=appointments,hav = len(appointments))
+    return render_template('patient_appointments.html', realname = realname,name = username,sidebarItems=patientItems,appointments=appointments,hav = len(appointments))
 
 @bp.route('/patient/?<string:username>/add_appointment',methods=['GET','POST'])
 def patient_add_appointment(username):
     patient_id = get_pid(db,username)
-
+    realname = get_pname(db, username)
     if request.method == 'POST':
         """api to add the appointment in the database"""
         patient_id = get_id(db,username)
@@ -152,7 +169,7 @@ def patient_add_appointment(username):
     #print(dicdoctor)
     #print(dic)
     #print(npldic)
-    return render_template('patient_add_appointment.html', name = username,sidebarItems = patientItems,appointments = dic,sum = APP_NUM,alldepartments = dicdep,alldoctor = dicdoctor,npldic = npldic)
+    return render_template('patient_add_appointment.html', realname = realname,name = username,sidebarItems = patientItems,appointments = dic,sum = APP_NUM,alldepartments = dicdep,alldoctor = dicdoctor,npldic = npldic)
 
 
 
