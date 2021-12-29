@@ -2,7 +2,7 @@ import sqlite3
 from sqlite3.dbapi2 import connect
 
 DB_path = 'testing.db'
-databasePATH = "hospital.db"
+databasePATH = "hospital1.db"
 
 def connect_db(DB_path):
     db  = sqlite3.connect(DB_path,check_same_thread=False)
@@ -10,6 +10,14 @@ def connect_db(DB_path):
 
 def disconnect_db(db):
     db.close()
+def check_repeat(db,username):
+    username_list = db.execute('''SELECT username FROM login_inf''').fetchall()
+    flag = False
+    for name in username_list:
+        if username == name[0]:
+            flag = True
+            return flag
+    return flag
 
 def insert_user_pwd(db,user,pwd,domain):
     cur = db.cursor()

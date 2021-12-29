@@ -1,10 +1,11 @@
+import datetime
 import functools
 import sqlite3
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for
 )
 from dbfunc import connect_db,match_user_pwd,disconnect_db,get_domain,insert_user_pwd
-from dbfunc import databasePATH
+from dbfunc import databasePATH,check_repeat
 from sliderbaritem import patientItems
 bp = Blueprint('patient', __name__)
 
@@ -61,28 +62,38 @@ def departments(username):
 
 @bp.route('/patient/?<string:username>/change_inf/',methods=['GET','POST'])
 def change_inf(username):
+    patient_id = get_id(db,username)
     if request.method == "POST":
-        name = request.form['name']
         DOB = request.form['DOB']
-        passport = request.form['passport']
-        uuser = request.form['username']
-        gender = request.form['gender']
+        user = request.form['username']
         phone = request.form['phone']
         email = request.form['email']
         pwd = request.form['pwd']
         repwd = request.form['repwd']
-
-        if pwd == "NULL" and pwd == repwd:
-            #判断pwd有没有修改，因为不会在界面show给用户，null为用户没有输入即没有修改
-            #还要判断username修改后在数据库是不是唯一，我记得dbfunc有写过你看一下跟register差不多
-            #有错就redirect到这个页面并且flash一个信息
-            pass
+        if pwd != repwd:
+            flash('password is not equal to confirm_password!')
+            return redirect(url_for('patient.patient'))
+        if check_repeat(db, user):
+            flash('The username already exists')
+            return redirect(url_for('patient.patient'))
+        if pwd != "NULL":
+            db.execute('''UPDATE login_inf 
+            SET username = ?, password=?
+            WHERE username = ?''', (user, pwd, username))
+            db.execute(
+                "UPDATE patient SET DOB=?,phone=?,email=?,username=?,password=? WHERE patient_id=?",
+                (DOB, phone, email, user, pwd, patient_id))
+            db.commit()
         else:
-            pass
-
-        #写一个修改个人资料到db
-
-        return redirect(url_for('patient.patient', username=username))
+            db.execute('''UPDATE login_inf 
+                        SET username = ?
+                        WHERE username = ?''', (user, username))
+            db.execute(
+                "UPDATE patient SET DOB=?,phone=?,email=?,username=? WHERE patient_id=?",
+                (DOB, phone, email, user, patient_id))
+            db.commit()
+        flash('Successfully modified information')
+        return redirect(url_for('patient.patient', username=user))
 
 
     allinf = db.execute('''
@@ -113,5 +124,21 @@ def doctors(username):
 def doctor(username, id):
     doctor = db.execute('SELECT * FROM employees WHERE e_id=?', (id,)).fetchall()
     return render_template('patient_doctor.html', doctor=doctor)
+
+@bp.route('/patient/?<string:username>/history',methods=['GET','POST'])
+def history(username):
+    patient_id = get_id(db, username)
+
+    # 格式为(医生姓名，日期，药品名字，药品用量,体温，主诉，现病史，既往史，过敏史，发病时间，治疗情况，评估诊断)
+    prescriptions_records = db.execute('''SELECT e.name,p.date,med_name,med_quantity,temperature,chief_complaint,
+    present_illness_history,past_history, allergic_history， onset_date,current_treatment, diagnostic_assessment
+    FROM prescription p INNER JOIN employees e ON e.e_id = p.doc_id
+    INNER JOIN medicine m ON m.med_id = p.med_id 
+    LEFT JOIN medical_record r ON p.app_id = r.app_id
+    WHERE p.patient_id=? AND p.date<=? ORDER BY p.date DESC''', (patient_id, datetime.date.today())).fetchall()
+
+    return render_template('xxx.html')
+
+
 
 
