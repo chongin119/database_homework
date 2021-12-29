@@ -57,7 +57,7 @@ def update_patients(id):
         pat_username = request.form['pat_username']
         # pat_password = request.form['pat_password']
         db.execute(
-            "UPDATE patient SET name=?,DOB=?,passport=?,gender=?,phone=?,email=?,username=?, WHERE patient_id=?",
+            "UPDATE patient SET name=?,DOB=?,passport=?,gender=?,phone=?,email=?,username=?  WHERE patient_id=?",
             (pat_name, pat_date, pat_passport, pat_gender, pat_phone, pat_email, pat_username))
         db.commit()
         return redirect(url_for('patient.patients'))
