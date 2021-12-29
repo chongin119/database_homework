@@ -229,7 +229,7 @@ def update_record(username, id):
                     WHERE app_id=?'''
                    ,(med_id,med_quantity,app_id))
         db.commit()
-
+        flash('Successfully modified information')
         return redirect(url_for('chief.subordinate'))
 
     return render_template('chief_update_record.html',prescription_record=prescription_record,name=username)
