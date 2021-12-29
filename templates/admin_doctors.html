@@ -1,0 +1,99 @@
+{% set title = 'Dashboard' %}
+{% set filename = 'admin_doctors.html' %}
+
+{% extends 'layouts/master.html' %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='vendors/iconly/bold.css') }}">
+{% endblock %}
+
+{% block content %}
+<div>
+    <div class="page-heading" style="float: left;width: 90%;">
+        <h3>Hello! admin {{name}}!</h3>
+    </div>
+    <div class="page-heading" style="float: left; width: 10%;">
+        <button class="btn btn-primary btn-block"><a href="{{ url_for('auth.logout',username = name) }}" class="btn btn-primary btn-block">Logout</a></button>
+    </div>
+</div>
+<div class="page-content">
+        <div class="col-12">
+            <div class="row">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 style="float: left; width: 85%;">所有医生信息</h4>
+                        <button class="btn btn-primary" style="float: left; width: 15%;"><a href="{{ url_for('admin.admin',username = name) }}" class="btn btn-primary btn-block">修改医生信息</a></button>
+                    </div>
+                        
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-lg">
+                                <thead>
+                                    <tr>
+                                        <th>部门</th>
+                                        <th>姓名</th>
+                                        <th>身份证</th>
+                                        <th>性别</th>
+                                        <th>电话</th>
+                                        <th>账号</th>
+                                        <th>密码</th>
+                                        <th>毕业院校</th>
+                                        <th>学历</th>
+                                        <th>技术职称</th>
+                                        <th>专长</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for doctor in doctors %}
+                                    {% if hav != 0 %}
+                                        <tr>
+                                            <td class="col-auto">
+                                                <p class=" mb-0">{{doctor[0]}}</p>
+                                            </td>
+                                            <td class="col-auto">
+                                                <p class=" mb-0">{{doctor[1]}}</p>
+                                            </td>
+                                            <td class="col-auto">
+                                                <p class=" mb-0">{{doctor[2]}}</p>
+                                            </td>
+                                            <td class="col-auto">
+                                                <p class=" mb-0">{{doctor[3]}}</p>
+                                            </td>
+                                            <td class="col-auto">
+                                                <p class=" mb-0">{{doctor[4]}}</p>
+                                            </td>
+                                            <td class="col-auto">
+                                                <p class=" mb-0">{{doctor[5]}}</p>
+                                            </td>
+                                            <td class="col-auto">
+                                                <p class=" mb-0">{{doctor[6]}}</p>
+                                            </td>
+                                            <td class="col-auto">
+                                                <p class=" mb-0">{{doctor[7]}}</p>
+                                            </td>
+                                            <td class="col-auto">
+                                                <p class=" mb-0">{{doctor[8]}}</p>
+                                            </td>
+                                            <td class="col-auto">
+                                                <p class=" mb-0">{{doctor[9]}}</p>
+                                            </td>
+                                            <td class="col-auto">
+                                                <p class=" mb-0">{{doctor[10]}}</p>
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+</div>
+{% endblock %}
+{% block js %}
+<script src="{{ url_for('static', filename='vendors/apexcharts/apexcharts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/pages/dashboard.js') }}"></script>
+{% endblock %}

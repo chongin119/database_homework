@@ -1,0 +1,72 @@
+{% set title = 'Dashboard' %}
+{% set filename = 'admin_departments.html' %}
+
+{% extends 'layouts/master.html' %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='vendors/iconly/bold.css') }}">
+{% endblock %}
+
+{% block content %}
+<div>
+    <div class="page-heading" style="float: left;width: 90%;">
+        <h3>Hello! admin {{name}}!</h3>
+    </div>
+    <div class="page-heading" style="float: left; width: 10%;">
+        <button class="btn btn-primary btn-block"><a href="{{ url_for('auth.logout',username = name) }}" class="btn btn-primary btn-block">Logout</a></button>
+    </div>
+</div>
+<div class="page-content">
+        <div class="col-12">
+            <div class="row">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 style="float: left; width: 85%;">所有科室信息</h4>
+                    </div>
+                        
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-lg">
+                                <thead>
+                                    <tr>
+                                        <th>科室</th>
+                                        <th>主任</th>
+                                        <th>科室医生数量</th>
+                                        <th>修改</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for department in departments %}
+                                    {% if hav != 0 %}
+                                        <tr>
+                                            <td class="col-auto">
+                                                <p class=" mb-0">{{department[1]}}</p>
+                                            </td>
+                                            <td class="col-auto">
+                                                <p class=" mb-0">{{department[2]}}</p>
+                                            </td>
+                                            <td class="col-auto">
+                                                <p class=" mb-0">{{department[3]}}</p>
+                                            </td>
+                                            <td class="col-auto">
+                                                <a href="{{ url_for('admin.admin_update_department', username=name, d_id=department[0]) }}">
+                                                  Edit
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+</div>
+{% endblock %}
+{% block js %}
+<script src="{{ url_for('static', filename='vendors/apexcharts/apexcharts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/pages/dashboard.js') }}"></script>
+{% endblock %}

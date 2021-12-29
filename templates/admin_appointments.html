@@ -1,0 +1,92 @@
+{% set title = 'Dashboard' %}
+{% set filename = 'patient_appointments.html' %}
+
+{% extends 'layouts/master.html' %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='vendors/iconly/bold.css') }}">
+{% endblock %}
+
+{% block content %}
+<div>
+    <div class="page-heading" style="float: left;width: 90%;">
+        <h3>Hello! admin {{name}}!</h3>
+    </div>
+    <div class="page-heading" style="float: left; width: 10%;">
+        <button class="btn btn-primary btn-block"><a href="{{ url_for('auth.logout',username = name) }}" class="btn btn-primary btn-block">Logout</a></button>
+    </div>
+</div>
+<div class="page-content">
+        <div class="col-12">
+            <div class="row">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 style="float: left; width: 85%;">所有预约</h4>
+                    </div>
+                        
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-lg">
+                                <thead>
+                                    <tr>
+                                        <th>日期</th>
+                                        <th>患者编号</th>
+                                        <th>科室编号</th>
+                                        <th>医生编号</th>
+                                        <th>体温</th>
+                                        <th>症状</th>
+                                        <th>地址</th>
+                                        <th>有无风险</th>
+                                        <th>修改</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for appointment in appointments %}
+                                    {% if hav != 0 %}
+                                        <tr>
+                                            <td class="col-auto">
+                                                <p class=" mb-0">{{appointment[1]}}</p>
+                                            </td>
+                                            <td class="col-auto">
+                                                <p class=" mb-0">{{appointment[2]}}</p>
+                                            </td>
+                                            <td class="col-auto">
+                                                <p class=" mb-0">{{appointment[3]}}</p>
+                                            </td>
+                                            <td class="col-auto">
+                                                <p class=" mb-0">{{appointment[4]}}</p>
+                                            </td>
+                                            <td class="col-auto">
+                                                <p class=" mb-0">{{appointment[5]}}</p>
+                                            </td>
+                                            <td class="col-auto">
+                                                <p class=" mb-0">{{appointment[6]}}</p>
+                                            </td>
+                                            <td class="col-auto">
+                                                <p class=" mb-0">{{appointment[7]}}</p>
+                                            </td>
+                                            <td class="col-auto">
+                                                <p class=" mb-0">{{appointment[8]}}</p>
+                                            </td>
+                                            <td class="col-auto">
+                                                <a href="{{ url_for('admin.admin_update_appointment', username=name, app_id=appointment[0]) }}">
+                                                  Edit
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+</div>
+{% endblock %}
+{% block js %}
+<script src="{{ url_for('static', filename='vendors/apexcharts/apexcharts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/pages/dashboard.js') }}"></script>
+{% endblock %}

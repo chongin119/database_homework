@@ -1,0 +1,40 @@
+{% set title = 'Dashboard' %}
+{% set filename = 'admin_departments.html' %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% extends 'layouts/master.html' %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='vendors/iconly/bold.css') }}">
+{% endblock %}
+
+{% block content %}
+<div>
+    <div class="page-heading" style="float: left;width: 90%;">
+        <h3>Hello! admin {{name}}!</h3>
+    </div>
+    <div class="page-heading" style="float: left; width: 10%;">
+        <button class="btn btn-primary btn-block"><a href="{{ url_for('auth.logout',username = name) }}" class="btn btn-primary btn-block">Logout</a></button>
+    </div>
+</div>
+<div class="page-content">
+        <div class="col-12">
+            <div class="row">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 style="float: left; width: 85%;">所有科室信息</h4>
+                        <button class="btn btn-primary" style="float: left; width: 15%;"><a href="{{ url_for('admin.admin',username = name) }}" class="btn btn-primary btn-block">修改科室信息</a></button>
+                    </div>
+
+                    <div class="card-body">
+                            {{ wtf.quick_form(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+</div>
+{% endblock %}
+{% block js %}
+<script src="{{ url_for('static', filename='vendors/apexcharts/apexcharts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/pages/dashboard.js') }}"></script>
+{% endblock %}

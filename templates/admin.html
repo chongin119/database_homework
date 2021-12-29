@@ -1,0 +1,28 @@
+{% set title = 'Dashboard' %}
+{% set filename = 'admin.html' %}
+
+{% extends 'layouts/master.html' %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='vendors/iconly/bold.css') }}">
+{% endblock %}
+
+{% block content %}
+<div>
+    <div class="page-heading" style="float: left;width: 90%;">
+        <h3>Hello! admin {{name}}!</h3>
+    </div>
+    <div class="page-heading" style="float: left; width: 10%;">
+        <button class="btn btn-primary btn-block"><a href="{{ url_for('auth.logout',username = name) }}" class="btn btn-primary btn-block">Logout</a></button>
+    </div>
+</div>
+<div class="page-content">
+    <section class="row">
+
+    </section>
+</div>
+{% endblock %}
+{% block js %}
+<script src="{{ url_for('static', filename='vendors/apexcharts/apexcharts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/pages/dashboard.js') }}"></script>
+{% endblock %}

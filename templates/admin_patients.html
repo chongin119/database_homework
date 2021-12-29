@@ -1,0 +1,91 @@
+{% set title = 'Dashboard' %}
+{% set filename = 'admin_patients.html' %}
+
+{% extends 'layouts/master.html' %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='vendors/iconly/bold.css') }}">
+{% endblock %}
+
+{% block content %}
+<div>
+    <div class="page-heading" style="float: left;width: 90%;">
+        <h3>Hello! patient {{name}}!</h3>
+    </div>
+    <div class="page-heading" style="float: left; width: 10%;">
+        <button class="btn btn-primary btn-block"><a href="{{ url_for('auth.logout',username = name) }}" class="btn btn-primary btn-block">Logout</a></button>
+    </div>
+</div>
+<div class="page-content">
+        <div class="col-12">
+            <div class="row">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 style="float: left; width: 85%;">所有患者信息</h4>
+                        <button class="btn btn-primary" style="float: left; width: 15%;"><a href="{{ url_for('admin.admin',username = name) }}" class="btn btn-primary btn-block">修改患者信息</a></button>
+                    </div>
+                        
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-lg">
+                                <thead>
+                                    <tr>
+                                        <th>患者编号</th>
+                                        <th>姓名</th>
+                                        <th>出生日期</th>
+                                        <th>身份证</th>
+                                        <th>性别</th>
+                                        <th>电话</th>
+                                        <th>邮箱</th>
+                                        <th>账号</th>
+                                        <th>密码</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for patient in patients %}
+                                    {% if hav != 0 %}
+                                        <tr>
+                                            <td class="col-auto">
+                                                <p class=" mb-0">{{patient[0]}}</p>
+                                            </td>
+                                            <td class="col-auto">
+                                                <p class=" mb-0">{{patient[1]}}</p>
+                                            </td>
+                                            <td class="col-auto">
+                                                <p class=" mb-0">{{patient[2]}}</p>
+                                            </td>
+                                            <td class="col-auto">
+                                                <p class=" mb-0">{{patient[3]}}</p>
+                                            </td>
+                                            <td class="col-auto">
+                                                <p class=" mb-0">{{patient[4]}}</p>
+                                            </td>
+                                            <td class="col-auto">
+                                                <p class=" mb-0">{{patient[5]}}</p>
+                                            </td>
+                                            <td class="col-auto">
+                                                <p class=" mb-0">{{patient[6]}}</p>
+                                            </td>
+                                            <td class="col-auto">
+                                                <p class=" mb-0">{{patient[7]}}</p>
+                                            </td>
+                                            <td class="col-auto">
+                                                <p class=" mb-0">{{patient[8]}}</p>
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+</div>
+{% endblock %}
+{% block js %}
+<script src="{{ url_for('static', filename='vendors/apexcharts/apexcharts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/pages/dashboard.js') }}"></script>
+{% endblock %}
