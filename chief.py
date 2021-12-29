@@ -62,10 +62,10 @@ def change_inf(username):
         specialty = request.form['specialty']
         if pwd != repwd:
             flash('password is not equal to confirm_password!')
-            return redirect(url_for('doctor.doctor'))
+            return redirect(url_for('chief.chief'))
         if check_repeat(db, user):
             flash('The username already exists')
-            return redirect(url_for('doctor.doctor'))
+            return redirect(url_for('chief.chief'))
         if pwd != "NULL":
             db.execute('''UPDATE login_inf 
             SET username = ?, password=?
@@ -74,7 +74,7 @@ def change_inf(username):
                 "UPDATE employees SET phone=?,email=?,username=?,password=?,graduate_school=?\
                 , degree=?, technical_title=?,specialty=?\
                  WHERE e_id=?",
-                (phone, email, user, pwd, graduate_school, degree, technical_title, specialty))
+                (phone, email, user, pwd, graduate_school, degree, technical_title, specialty,doc_id))
             db.commit()
         else:
             db.execute('''UPDATE login_inf 
@@ -84,7 +84,7 @@ def change_inf(username):
                 "UPDATE employees SET phone=?,email=?,username=?,graduate_school=?\
                 , degree=?, technical_title=?,specialty=?\
                  WHERE e_id=?",
-                (phone, email, user, graduate_school, degree, technical_title, specialty))
+                (phone, email, user, graduate_school, degree, technical_title, specialty,doc_id))
             db.commit()
         flash('Successfully modified information')
         return redirect(url_for('chief.chief', username=user))
@@ -246,14 +246,101 @@ def doctors(username):
 def add_doctor(username):
     chief_id = get_id(db, username)
     department_id, department_name = get_dept(db, chief_id)
-    # 找出该部门全部医生
-    # 格式为(医生id,医生姓名，电话，邮箱...)
-    doctors = db.execute('''
-                                    SELECT e_id,e.name,e.phone,e.email,graduate_school,degree,technical_title,specialty
-                                    FROM employees e 
-                                    INNER JOIN doctor d ON d.doc_id = e_id 
-                                    WHERE d.department_id=?
-                                ''', (department_id,)).fetchall()
+    if request.method == "POST":
+        name = request.form['name']
+        passport = request.form['passport']
+        gender = request.form['gender']
+        phone = request.form['phone']
+        email = request.form['email']
+        user = request.form['username']
+        pwd = request.form['password']
+        graduate_school = request.form['school']
+        degree = request.form['degree']
+        technical_title = request.form['title']
+        specialty = request.form['specialty']
+
+        if check_repeat(db, user):
+            flash('The username already exists')
+            return redirect(url_for('chief.doctors'),username=username)
+        e_id = db.execute('''
+                    INSERT INTO employees(name,passport,gender,phone,email,username,password,
+                    graduate_school,degree,technical_title,specialty) VALUES(?,?,?,?,?,?,?,?,?,?,?)'''
+                   , (name,passport,gender,phone,email,user,pwd,graduate_school,degree,technical_title,specialty)).lastrowid
+        db.execute('''
+                            INSERT INTO doctor(doc_id,department_id) VALUES(?,?)'''
+                   , (e_id,department_id))
+        login_id = db.execute('''
+                    INSERT INTO login_inf(username,password) VALUES(?,?)'''
+                   , (user, pwd)).lastrowid
+        db.commit()
+
+        flash('Successfully modified information')
+        return redirect(url_for('chief.doctors', username=username))
+
+    return render_template('chief_add_doctor.html',name=username)
+
+
+@bp.route('/chief/?<string:username>/update_doctor/<id>', methods=['GET', 'POST'])
+def update_doctor(username, id):
+    chief_id = get_id(db, username)
+    doc_id = id
+    department_id, department_name = get_dept(db, chief_id)
+    if request.method == "POST":
+        name = request.form['name']
+        passport = request.form['passport']
+        gender = request.form['gender']
+        phone = request.form['phone']
+        email = request.form['email']
+        user = request.form['username']
+        pwd = request.form['password']
+        repwd = request.form['repwd']
+        graduate_school = request.form['school']
+        degree = request.form['degree']
+        technical_title = request.form['title']
+        specialty = request.form['specialty']
+
+        doctor_inf = db.execute('''SELECT username FROM employees WHERE e_id=?'''
+                                ,(doc_id,))
+        old_username = doctor_inf[0]
+        if pwd != repwd:
+            flash('password is not equal to confirm_password!')
+            return redirect(url_for('chief.doctors'),username=username)
+        if check_repeat(db, user):
+            flash('The username already exists')
+            return redirect(url_for('chief.doctors'))
+        if pwd != "NULL":
+            db.execute('''UPDATE login_inf 
+            SET username = ?, password=?
+            WHERE username = ?''', (user, pwd, old_username))
+            db.execute(
+                "UPDATE employees SET name=?,passport=?,gender=?,phone=?,email=?,username=?,password=?,graduate_school=?\
+                , degree=?, technical_title=?,specialty=?\
+                 WHERE e_id=?",
+                (name,passport,phone,gender, email, user, pwd, graduate_school, degree, technical_title, specialty,doc_id))
+            db.commit()
+        else:
+            db.execute('''UPDATE login_inf 
+                        SET username = ?
+                        WHERE username = ?''', (user, old_username))
+            db.execute(
+                "UPDATE employees SET phone=?,email=?,username=?,graduate_school=?\
+                , degree=?, technical_title=?,specialty=?\
+                 WHERE e_id=?",
+                (phone, email, user, graduate_school, degree, technical_title, specialty,doc_id))
+            db.commit()
+        flash('Successfully modified information')
+        return redirect(url_for('chief.doctors', username=username))
+
+    return render_template('chief_update_doctor.html', name=username)
+
+@bp.route('/chief/?<string:username>/delete_doctor/<id>', methods=['GET', 'POST'])
+def delete_doctor(username, id):
+    doc_id = id
+    db.execute("DELETE FROM login_inf WHERE username=(SELECT username from employees WHERE e_id=?)", (doc_id,))
+    db.execute("DELETE FROM doctor WHERE doc_id=?", (doc_id,))
+    db.execute("DELETE FROM employees WHERE e_id=?", (doc_id,))
+    db.commit()
+    return redirect(url_for('chief.doctors',username=username))
 
 
 
