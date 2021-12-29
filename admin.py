@@ -20,7 +20,6 @@ def patients():
 def add_patient():
     if request.method == 'POST':
         """api to add the patient in the database"""
-        request.form = request.get_json(force=True)
         pat_name = request.form['pat_name']
         pat_date = request.form['pat_date']
         pat_passport = request.form['passport']
@@ -34,6 +33,8 @@ def add_patient():
             request.form['pat_id'] = db.execute('''INSERT INTO patient(name,DOB,passport,gender,phone,email,username,password)
                         VALUES(?,?,?,?,?,?,?,?)''', (
             pat_name, pat_date, pat_passport, pat_gender, pat_phone,pat_email,pat_username,pat_password)).lastrowid
+            db.execute('''INSERT INTO login_inf(username, password, domain)
+                        VALUES(?,?,?)''',(pat_username,pat_password,2))
             db.commit()
         except:
             error = 'something got wrong'
@@ -59,6 +60,9 @@ def update_patients(id):
         db.execute(
             "UPDATE patient SET name=?,DOB=?,passport=?,gender=?,phone=?,email=?,username=?  WHERE patient_id=?",
             (pat_name, pat_date, pat_passport, pat_gender, pat_phone, pat_email, pat_username))
+        db.execute('''UPDATE login_inf 
+                    SET username = ?
+                    WHERE username = ?''', (pat_username,))
         db.commit()
         return redirect(url_for('patient.patients'))
     return render_template('update_patient.html',patient=patient)
