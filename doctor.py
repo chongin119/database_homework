@@ -34,9 +34,15 @@ def get_dept(db, id):
 @bp.route('/doctor/?<string:username>', methods=['GET', 'POST'])
 def doctor(username):
     realname = get_name(db,username)
+    e_id = get_id(db, username)
+    department_id, department_name = get_dept(db, e_id)
     if session.get(username) is not None:
         doctor = db.execute("SELECT * FROM employees WHERE username=?", (username,)).fetchall()
-        return render_template('doctor.html', realname = realname,name=username, sidebarItems=doctorItems,doctor=doctor)
+        chief = db.execute('''SELECT * FROM employees WHERE e_id = (SELECT chief_id FROM chief WHERE department_id
+            = ?)''', (department_id,)).fetchall()
+
+        return render_template('doctor.html', realname=realname, name=username, sidebarItems=doctorItems, doctor=doctor
+                               , department_name=department_name, chief=chief)
     return redirect(url_for('auth.login'))
 
 
@@ -123,10 +129,10 @@ def change_inf(username):
         specialty = request.form['specialty']
         if pwd != repwd:
             flash('password is not equal to confirm_password!')
-            return redirect(url_for('doctor.doctor'))
+            return redirect(url_for('doctor.change_inf', username=username))
         if check_repeat(db, user):
             flash('The username already exists')
-            return redirect(url_for('doctor.doctor'))
+            return redirect(url_for('doctor.change_inf', username=username))
         if pwd != "NULL":
             db.execute('''UPDATE login_inf 
             SET username = ?, password=?
@@ -190,6 +196,7 @@ def diagnosis(username):
                                 SELECT max(app_id) 
                                 FROM appointment
                                 ''').fetchall()
+
 
 
     finishdic = {}

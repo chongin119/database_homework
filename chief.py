@@ -113,6 +113,7 @@ def history(username):
 @bp.route('/chief/?<string:username>/change_inf/' , methods=['GET','POST'])
 def change_inf(username):
     doc_id = get_id(db,username)
+    realname = get_name(db,username)
     if request.method == "POST":
         user = request.form['username']
         phone = request.form['phone']
@@ -125,10 +126,10 @@ def change_inf(username):
         specialty = request.form['specialty']
         if pwd != repwd:
             flash('password is not equal to confirm_password!')
-            return redirect(url_for('chief.chief'))
+            return redirect(url_for('chief.change_inf', username=username))
         if check_repeat(db, user):
             flash('The username already exists')
-            return redirect(url_for('chief.chief'))
+            return redirect(url_for('chief.change_inf', username=username))
         if pwd != "NULL":
             db.execute('''UPDATE login_inf 
             SET username = ?, password=?
@@ -164,7 +165,7 @@ def change_inf(username):
 
     infdic = [j, k, l, m, n, o,p,q,s,t]
     #print(infdic)
-    return render_template('doctor_change_inf.html', name = username,sidebarItems = chiefItems,allinf = infdic)
+    return render_template('chief_change_inf.html', name = username,realname =realname,sidebarItems = chiefItems,allinf = infdic)
 
 @bp.route('/chief/?<string:username>/diagnosis',methods=['GET', 'POST'])
 def diagnosis(username):
@@ -263,6 +264,13 @@ def add_diagnosis(username, id):
 def update_department(username):
     chief_id = get_id(db, username)
     department_id, department_name = get_dept(db, chief_id)
+    realname = get_name(db,username)
+    des = db.execute('''
+                    SELECT description
+                    FROM department
+                    WHERE department_id = ?
+                    ''',(department_id,)).fetchall()
+    des = des[0][0]
     if request.method == "POST":
 
         # department目前只有两个属性
@@ -273,7 +281,7 @@ def update_department(username):
                     WHERE department_id = ?''', (department_new_name,description, department_id))
         flash('Successfully modified information')
         return redirect(url_for('chief.chief', username=username))
-    return render_template('update_department.html',name=username, sidebarItems=chiefItems,department_name= department_name)
+    return render_template('chief_change_depinf.html',realname = realname,name=username, sidebarItems=chiefItems,department_name= department_name,des=des)
 
 
 # 查看下属的病历和处方
@@ -281,10 +289,11 @@ def update_department(username):
 def subordinate(username):
     chief_id = get_id(db, username)
     department_id, department_name = get_dept(db, chief_id)
+    realname = get_name(db,username)
     # 找出该部门的全部医生的病历和处方
-    # 格式为(病历对应预约id，病人姓名，医生名字，日期，药品名字，药品用量,体温，主诉，现病史，既往史，过敏史，发病时间，治疗情况，评估诊断)
-    prescriptions_records = db.execute('''SELECT p.app_id,pat.name, e.name, p.date,med_name,med_quantity,temperature,chief_complaint,
-    present_illness_history,past_history, allergic_history, onset_date,current_treatment, diagnostic_assessment
+    # 格式为(医生id,病历对应预约id，病人姓名，日期，药品名字，药品用量,体温，主诉，现病史，既往史，过敏史，发病时间，治疗情况，评估诊断，医生名字)
+    prescriptions_records = db.execute('''SELECT e.e_id,p.app_id,pat.name,  p.date,med_name,med_quantity,temperature,chief_complaint,
+    present_illness_history,past_history, allergic_history, onset_date,current_treatment, diagnostic_assessment,e.name
     FROM prescription p INNER JOIN patient pat ON pat.patient_id = p.patient_id
     INNER JOIN employees e ON e.e_id = p.doc_id 
     INNER JOIN medicine m ON m.med_id = p.med_id 
@@ -292,7 +301,49 @@ def subordinate(username):
     WHERE p.doc_id IN (SELECT doc_id FROM doctor WHERE department_id=?)
     AND p.date<=? ORDER BY p.date DESC''', (department_id,  datetime.date.today())).fetchall()
 
-    return render_template('xxx.html')
+    recordsfordoc = {}
+    for cnt in range(len(prescriptions_records)):
+        i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15 = prescriptions_records[cnt][0], \
+                                                                 prescriptions_records[cnt][1], \
+                                                                 prescriptions_records[cnt][2], \
+                                                                 prescriptions_records[cnt][3], \
+                                                                 prescriptions_records[cnt][4], \
+                                                                 prescriptions_records[cnt][5], \
+                                                                 prescriptions_records[cnt][6], \
+                                                                 prescriptions_records[cnt][7], \
+                                                                 prescriptions_records[cnt][8], \
+                                                                 prescriptions_records[cnt][9], \
+                                                                 prescriptions_records[cnt][10], \
+                                                                 prescriptions_records[cnt][11], \
+                                                                 prescriptions_records[cnt][12], \
+                                                                 prescriptions_records[cnt][13], \
+                                                                 prescriptions_records[cnt][14]
+
+        temp = {}
+        if recordsfordoc.get(i1) == None:
+            temp[i2] = [i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13,i14,i15]
+            recordsfordoc[i1] = temp
+        else:
+            recordsfordoc[i1][i2] = [i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13,i14,i15]
+
+    alldoctor = db.execute('''
+                                            SELECT name,e_id
+                                            FROM employees inner join doctor on doc_id == e_id
+                                            WHERE department_id =?
+                                        ''',(department_id,)).fetchall()
+    dicdoctor = {}
+
+    for cnt in range(len(alldoctor)):
+        i, j = alldoctor[cnt][0], alldoctor[cnt][1]
+        if dicdoctor.get(j) == None:
+            dicdoctor[j] = i
+
+    #print()
+    '''for i in recordsfordoc:
+        print(i)
+        print(recordsfordoc[i])'''
+
+    return render_template('chief_subordinate_appo.html',realname = realname,name=username, sidebarItems=chiefItems,allrecords = recordsfordoc,alldoc = dicdoctor)
 
 @bp.route('/chief/?<string:username>/update_record/<id>',methods=['GET','POST'])
 def update_record(username, id):
@@ -301,8 +352,9 @@ def update_record(username, id):
     department_id, department_name = get_dept(db, chief_id)
 
     # 给出该病历和处方的信息
-    prescription_record = db.execute('''SELECT p.app_id,pat.name, e.name, p.date,med_name,med_quantity,temperature,chief_complaint,
-    present_illness_history,past_history, allergic_history, onset_date,current_treatment, diagnostic_assessment
+    # 格式为(医生id,病历对应预约id，病人姓名，日期，药品名字，药品用量,体温，主诉，现病史，既往史，过敏史，发病时间，治疗情况，评估诊断，医生名字)
+    prescription_record = db.execute('''SELECT e.e_id,p.app_id,pat.name, p.date,med_name,med_quantity,temperature,chief_complaint,
+    present_illness_history,past_history, allergic_history, onset_date,current_treatment, diagnostic_assessment, e.name
     FROM prescription p INNER JOIN patient pat ON pat.patient_id = p.patient_id
     INNER JOIN employees e ON e.e_id = p.doc_id 
     INNER JOIN medicine m ON m.med_id = p.med_id 
@@ -310,6 +362,7 @@ def update_record(username, id):
     WHERE p.app_id = ?
     AND p.date<=? ORDER BY p.date DESC''', (app_id,  datetime.date.today())).fetchone()
 
+    print(prescription_record)
     if request.method == "POST":
         medicine_inf = db.execute("SELECT  * FROM medicine").fetchall()
 
@@ -326,8 +379,7 @@ def update_record(username, id):
 
         db.execute(
             "UPDATE medical_record SET temperature=?,chief_complaint=?,present_illness_history=?,past_history=?\
-            ,allergic_history=?,onset_date=?,current_treatment=?,diagnosis_assessment\
-            , degree=?, technical_title=?,specialty=?\
+            ,allergic_history=?,onset_date=?,current_treatment=?,diagnostic_assessment = ?\
              WHERE app_id=?",
             (temperature, chief_complaint, present_illness_history, past_history, allergic_history,
              onset_date, current_treatment, diagnosis_assessment, app_id))
@@ -336,31 +388,9 @@ def update_record(username, id):
                    ,(med_id,med_quantity,app_id))
         db.commit()
         flash('Successfully modified information')
-        return redirect(url_for('chief.subordinate'))
+        return render_template('loading.html')
 
-    return render_template('chief_update_record.html',prescription_record=prescription_record,name=username)
-
-
-
-# 查看科室看过病的病人的病历和处方
-@bp.route('/chief/?<string:username>/patient_record',methods=['GET','POST'])
-def patient_record(username):
-    chief_id = get_id(db, username)
-    department_id, department_name = get_dept(db, chief_id)
-    # 找出该部门的全部病人的病历和处方
-    # 格式为(病人姓名，医生名字，日期，药品名字，药品用量,体温，主诉，现病史，既往史，过敏史，发病时间，治疗情况，评估诊断)
-    prescriptions_records = db.execute('''SELECT pat.name, e.name, p.date,med_name,med_quantity,r.temperature,chief_complaint,
-    present_illness_history,past_history, allergic_history, onset_date,current_treatment, diagnostic_assessment
-    FROM prescription p INNER JOIN patient pat ON pat.patient_id = p.patient_id
-    INNER JOIN appointment a ON a.app_id = p.app_id
-    INNER JOIN employees e ON e.e_id = p.doc_id 
-    INNER JOIN medicine m ON m.med_id = p.med_id 
-    LEFT JOIN medical_record r ON p.app_id = r.app_id
-    WHERE a.department_id = ?
-    AND p.date<=? ORDER BY p.date DESC''', (department_id,  datetime.date.today())).fetchall()
-
-    return render_template('xxx.html')
-
+    return render_template('chief_subordinate_working.html',inf=prescription_record,name=username,appid = app_id)
 
 # 查看下属医生
 @bp.route('/chief/?<string:username>/doctors',methods=['GET','POST'])
@@ -476,11 +506,16 @@ def update_doctor(username, id):
 @bp.route('/chief/?<string:username>/delete_doctor/<id>', methods=['GET', 'POST'])
 def delete_doctor(username, id):
     doc_id = id
+
+    db.execute("DELETE FROM prescription WHERE doc_id=?", (doc_id,))
+    db.execute("DELETE FROM medical_record WHERE doc_id=?", (doc_id,))
+    db.execute("DELETE FROM appointment WHERE doc_id=?", (doc_id,))
     db.execute("DELETE FROM login_inf WHERE username=(SELECT username from employees WHERE e_id=?)", (doc_id,))
     db.execute("DELETE FROM doctor WHERE doc_id=?", (doc_id,))
     db.execute("DELETE FROM employees WHERE e_id=?", (doc_id,))
+
     db.commit()
-    return redirect(url_for('chief.doctors',username=username))
+    return redirect(url_for('chief.doctors', username=username))
 
 
 def countfunc(dicc,iid):

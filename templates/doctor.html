@@ -12,6 +12,13 @@
     <div class="page-heading" style="float: left;width: 90%;">
         <h3>Hello! doctor {{realname}}!</h3>
     </div>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+                {% for message in messages %}
+                    <p class="auth-subtitle mb-1 " style="font-size: 15px; color: red;">{{ message }}</p>
+                {% endfor %}
+        {% endif %}
+    {% endwith %}
     <div class="page-heading" style="float: left; width: 10%;">
         <button class="btn btn-primary btn-block"><a href="{{ url_for('auth.logout',username = name) }}" class="btn btn-primary btn-block">Logout</a></button>
     </div>
@@ -66,6 +73,38 @@
                                 <h4 class="alert-heading">技术职称</h4>
                                 <p>{{ doctor[0][10] }}</p>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h4 style="float: left; width: 85%;">所属科室信息</h4>
+                </div>
+                 <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="alert alert-light">
+                                <h4 class="alert-heading">所属科室名字</h4>
+                                <p>{{ department_name }}</p>
+                            </div>
+                            <div class="alert alert-light">
+                                <h4 class="alert-heading">科长姓名</h4>
+                                <p>{{ doctor[0][1] }}</p>
+                            </div>
+
+
+                        </div>
+                        <div class="col-md-6">
+                            <div class="alert alert-light">
+                                <h4 class="alert-heading">科长电话</h4>
+                                <p>{{ doctor[0][4] }}</p>
+                            </div>
+                            <div class="alert alert-light">
+                                <h4 class="alert-heading">技术电邮</h4>
+                                <p>{{ doctor[0][5] }}</p>
+                            </div>
+
                         </div>
                     </div>
                 </div>

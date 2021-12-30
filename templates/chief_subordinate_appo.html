@@ -1,0 +1,211 @@
+{% set title = 'Dashboard' %}
+{% set filename = 'chief_subordinate_appo.html' %}
+
+{% extends 'layouts/master.html' %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='vendors/iconly/bold.css') }}">
+{% endblock %}
+
+{% block headscripts %}
+    <script>
+        function myclick(obj){
+            allreobj = {{ allrecords | safe}}
+            allreobj = allreobj[obj.id]
+            docobj = {{ alldoc | safe}}
+
+
+            cont = ""
+            for(let i in allreobj){
+
+                cont += `
+                        <tr>
+                            <td class="col-3">
+                                <div class="d-flex align-items-center">
+                                    <p class="font-bold ms-3 mb-0">%s</p>
+                                </div>
+                            </td>
+                            <td class="col-auto">
+                                <p class=" mb-0">%s</p>
+                            </td>
+                            <td class="col-auto">
+                                <button href="#top" id="%s" class="btn btn-primary btn-block" style="float: left; width: 50%;" onclick=myclick2(this)>查看详请</button>
+                            </td>
+                        </tr>
+                        `.format(allreobj[i][1],allreobj[i][0],obj.id+"_"+i)
+            }
+            document.getElementById("tbody").innerHTML = cont
+            document.getElementById("dropdownMenuButton").innerHTML = docobj[obj.id]
+        }
+
+        function myclick2(obj){
+            docid = obj.id.split("_")[0]
+            times = obj.id.split("_")[1]
+
+            rfordoc = {{ allrecords | safe }}
+
+            i1 = rfordoc[docid][times][0]
+            i2 = rfordoc[docid][times][1]
+            i3 = rfordoc[docid][times][2]
+            i4 = rfordoc[docid][times][3]
+            i5 = rfordoc[docid][times][4]
+            i6 = rfordoc[docid][times][5]
+            i7 = rfordoc[docid][times][6]
+            i8 = rfordoc[docid][times][7]
+            i9 = rfordoc[docid][times][8]
+            i10 = rfordoc[docid][times][9]
+            i11 = rfordoc[docid][times][10]
+            i12 = rfordoc[docid][times][11]
+            i13 = rfordoc[docid][times][12]
+
+            //格式为(医生姓名，日期，药品名字，药品用量,体温，主诉，现病史，既往史，过敏史，发病时间，治疗情况，评估诊断)
+            cont =`
+                    <div class="card-header">
+                        <h4 style="display:inline-block;width: 55%;">详细资料</h4>
+                        <button id="%s" name={{ name }} class="btn btn-primary btn-block" style="display: inline-block ;float:right;width: 30%;" onclick=myclick3(this)>修改此记录</button>
+                    </div>
+                    <div  class="card-body">
+                        <div class="alert alert-light">
+                            <h4 class="alert-heading">主治医生</h4>
+                            <p>%s</p>
+                        </div>
+                        <div class="alert alert-light">
+                            <h4 class="alert-heading">病人姓名</h4>
+                            <p>%s</p>
+                        </div>
+                        <div class="alert alert-light">
+                            <h4 class="alert-heading">日期</h4>
+                            <p>%s</p>
+                        </div>
+                        <div class="alert alert-light">
+                            <h4 class="alert-heading">药品名字</h4>
+                            <p>%s</p>
+                        </div>
+                        <div class="alert alert-light">
+                            <h4 class="alert-heading">药品用量</h4>
+                            <p>%s</p>
+                        </div>
+                        <div class="alert alert-light">
+                            <h4 class="alert-heading">体温</h4>
+                            <p>%s</p>
+                        </div>
+                        <div class="alert alert-light">
+                            <h4 class="alert-heading">主诉</h4>
+                            <p>%s</p>
+                        </div>
+                        <div class="alert alert-light">
+                            <h4 class="alert-heading">现病史</h4>
+                            <p>%s</p>
+                        </div>
+                        <div class="alert alert-light">
+                            <h4 class="alert-heading">既往史</h4>
+                            <p>%s</p>
+                        </div>
+                        <div class="alert alert-light">
+                            <h4 class="alert-heading">过敏史</h4>
+                            <p>%s</p>
+                        </div>
+                        <div class="alert alert-light">
+                            <h4 class="alert-heading">发病时间</h4>
+                            <p>%s</p>
+                        </div>
+                        <div class="alert alert-light">
+                            <h4 class="alert-heading">治疗情况</h4>
+                            <p>%s</p>
+                        </div>
+                        <div class="alert alert-light">
+                            <h4 class="alert-heading">评估诊断</h4>
+                            <p>%s</p>
+                        </div>
+                    </div>
+                    `.format(times,i13,i1,i2,i3,i4,i5,i6,i7,i8,i9,i10,i11,i12)
+            document.getElementById("context").innerHTML = cont
+        }
+
+        function myclick3(obj){
+            docid = obj.name
+            times = obj.id
+
+            uurl = "/chief/%3F"+docid+"/update_record/"+times
+            window.open(uurl, '修改资料', config='height=1000,width=1000,location=no')
+        }
+    </script>
+{% endblock %}
+
+{% block content %}
+<div>
+    <div id="top" class="page-heading" style="float: left;width: 90%;">
+
+        <h3>Hello! chief {{realname}}!</h3>
+    </div>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+                {% for message in messages %}
+                    <p  style="font-size: 15px; color: red;">{{ message }}</p>
+                {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <div class="page-heading" style="float: left; width: 10%;">
+        <button class="btn btn-primary btn-block"><a href="{{ url_for('auth.logout',username = name) }}" class="btn btn-primary btn-block">Logout</a></button>
+    </div>
+</div>
+<div class="page-content">
+        <div class="col-12  ">
+            <div class="row">
+                <div id="context" class="card">
+
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h4 style="float: left; width: 85%;">你的属下就诊记录</h4>
+                    </div>
+
+                    <div class="card-body">
+                        <div style="" class="btn-group mb-1">
+                            <div class="dropdown">
+                                <button class="btn btn-primary dropdown-toggle me-1" type="button"
+                                    id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true"
+                                    aria-expanded="false" value="">
+                                    请选择属下医生
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    {% for doc in alldoc %}
+                                        <a class="dropdown-item"  id={{ doc }} onclick=myclick(this)>{{ alldoc[doc] }}</a>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover table-lg">
+                                <thead>
+                                    <tr>
+                                        <th>日期</th>
+                                        <th>病人</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody">
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+</div>
+{% endblock %}
+{% block js %}
+<script src="{{ url_for('static', filename='vendors/apexcharts/apexcharts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/pages/dashboard.js') }}"></script>
+<script>
+    String.prototype.format = function (){
+            let args = Array.prototype.slice.call(arguments);
+            let count=0;
+            return this.replace(/%s/g, function (s,i){
+                return args[count++];
+            });
+        }
+</script>
+{% endblock %}
