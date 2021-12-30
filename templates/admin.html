@@ -1,0 +1,91 @@
+{% set title = 'Dashboard' %}
+{% set filename = 'admin.html' %}
+
+{% extends 'layouts/master.html' %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='vendors/iconly/bold.css') }}">
+{% endblock %}
+
+{% block content %}
+<div>
+    <div class="page-heading" style="float: left;width: 90%;">
+        <h3>Hello! chief {{realname}}!</h3>
+    </div>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+                {% for message in messages %}
+                    <p class="auth-subtitle mb-1 " style="font-size: 15px; color: red;">{{ message }}</p>
+                {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <div class="page-heading" style="float: left; width: 10%;">
+        <button class="btn btn-primary btn-block"><a href="{{ url_for('auth.logout',username = name) }}" class="btn btn-primary btn-block">Logout</a></button>
+    </div>
+</div>
+<div class="page-content">
+    <div class="col-12  ">
+        <div class="row">
+            <div class="card">
+                <div class="card-header">
+                    <h4 style="float: left; width: 85%;">個人基本信息</h4>
+                </div>
+                 <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="alert alert-light">
+                                <h4 class="alert-heading">姓名</h4>
+                                <p>{{ chief[0][1] }}</p>
+                            </div>
+                            <div class="alert alert-light">
+                                <h4 class="alert-heading">身份证号</h4>
+                                <p>{{ chief[0][2] }}</p>
+                            </div>
+                            <div class="alert alert-light">
+                                <h4 class="alert-heading">毕业院校</h4>
+                                <p>{{ chief[0][8] }}</p>
+                            </div>
+                            <div class="alert alert-light">
+                                <h4 class="alert-heading">学位</h4>
+                                <p>{{ chief[0][9] }}</p>
+                            </div>
+                            <div class="alert alert-light">
+                                <h4 class="alert-heading">专业特长</h4>
+                                <p>{{ chief[0][11] }}</p>
+                            </div>
+
+                        </div>
+                        <div class="col-md-6">
+
+                            <div class="alert alert-light">
+                                <h4 class="alert-heading">性别</h4>
+                                <p>{{ chief[0][3]}}</p>
+                            </div>
+                            <div class="alert alert-light">
+                                <h4 class="alert-heading">电话</h4>
+                                <p>{{ chief[0][4] }}</p>
+                            </div>
+                            <div class="alert alert-light">
+                                <h4 class="alert-heading">电邮</h4>
+                                <p>{{ chief[0][5] }}</p>
+                            </div>
+                            <div class="alert alert-light">
+                                <h4 class="alert-heading">技术职称</h4>
+                                <p>{{ chief[0][10] }}</p>
+                            </div>
+                            <div class="alert alert-light">
+                                <h4 class="alert-heading">管理部门</h4>
+                                <p>{{ department_name }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block js %}
+<script src="{{ url_for('static', filename='vendors/apexcharts/apexcharts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/pages/dashboard.js') }}"></script>
+{% endblock %}

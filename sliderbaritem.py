@@ -32,4 +32,6 @@ chiefItems = [
 
 ]
 
-adminItems = []
+adminItems = [
+                {"isTitle": False,"name":"主頁","icon":"grid-fill","filename":"admin.html","url":'admin.admin'},
+]
