@@ -265,11 +265,12 @@ def update_department(username):
     department_id, department_name = get_dept(db, chief_id)
     if request.method == "POST":
 
-        # department目前只有一个属性
+        # department目前只有两个属性
         department_new_name = request.form['dept_name']
+        description = request.form['description']
         db.execute('''UPDATE department 
-                    SET department_name = ?
-                    WHERE department_id = ?''', (department_new_name, department_id))
+                    SET department_name = ?, description=?
+                    WHERE department_id = ?''', (department_new_name,description, department_id))
         flash('Successfully modified information')
         return redirect(url_for('chief.chief', username=username))
     return render_template('update_department.html',name=username, sidebarItems=chiefItems,department_name= department_name)
