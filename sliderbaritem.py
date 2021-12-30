@@ -33,3 +33,4 @@ chiefItems = [
 ]
 
 adminItems = []
+fever_doctorItems = []
