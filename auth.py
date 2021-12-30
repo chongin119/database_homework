@@ -30,7 +30,7 @@ def login():
             disconnect_db(db)
 
             if domain == 0:
-                return redirect(url_for('doctor.doctor', username=username))
+                return redirect(url_for('admin.admin', username=username))
             elif domain == 1:
                 return redirect(url_for('doctor.doctor', username=username))
             elif domain == 2:
