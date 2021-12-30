@@ -556,7 +556,7 @@ def delete_doctor(username, id):
     db.execute("DELETE FROM doctor WHERE doc_id=?", (doc_id,))
     db.execute("DELETE FROM employees WHERE e_id=?", (doc_id,))
 
-    #db.commit()
+    db.commit()
     return render_template('loading.html')
 
 
