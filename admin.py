@@ -124,7 +124,7 @@ def delete_patient(username, id):
     db.commit()
     return render_template('loading.html')
 
-
+################################分隔线
 @bp.route('/admin/?<string:username>/doctors',methods=['GET','POST'])
 def doctors(username):
     # 找出全部医生，不包括科长
