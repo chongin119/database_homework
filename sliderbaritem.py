@@ -31,3 +31,5 @@ chiefItems = [
                 {"isTitle": False, "name": "修改下属医生信息", "icon": "grid-fill", "filename": "chief_doctors.html", "url": 'chief.doctors'},
 
 ]
+
+adminItems = []
