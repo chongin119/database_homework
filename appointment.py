@@ -51,6 +51,17 @@ def doctor_appointments(username):
                                 INNER JOIN patient p ON a.patient_id = p.patient_id \
                                 WHERE e_id=? ORDER BY date DESC", (doc_id,)).fetchall()
 
+    return render_template('chief_appointments.html',realname = realname,name = username,sidebarItems=doctorItems,appointments=appointments,hav = len(appointments))
+
+@bp.route('/chief/?<string:username>/chief_appointments',methods=['GET', 'POST'])
+def chief_appointments(username):
+    doc_id = get_eid(db,username)
+    realname = get_ename(db,username)
+    appointments = db.execute("SELECT date , p.name, p.phone FROM appointment a \
+                                INNER JOIN employees e ON e_id = doc_id \
+                                INNER JOIN patient p ON a.patient_id = p.patient_id \
+                                WHERE e_id=? ORDER BY date DESC", (doc_id,)).fetchall()
+
     return render_template('doctor_appointments.html',realname = realname,name = username,sidebarItems=doctorItems,appointments=appointments,hav = len(appointments))
 
 @bp.route('/patient/?<string:username>/patient_appointments',methods=['GET','POST'])
