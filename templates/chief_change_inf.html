@@ -1,0 +1,96 @@
+{% set title = 'Dashboard' %}
+{% set filename = 'chief_change_inf.html' %}
+
+{% extends 'layouts/master.html' %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='vendors/iconly/bold.css') }}">
+{% endblock %}
+
+{% block content %}
+<div>
+    <div class="page-heading" style="float: left;width: 90%;">
+        <h3>Hello! chief {{realname}}!</h3>
+    </div>
+    <div class="page-heading" style="float: left; width: 10%;">
+        <button class="btn btn-primary btn-block"><a href="{{ url_for('auth.logout',username = name) }}" class="btn btn-primary btn-block">Logout</a></button>
+    </div>
+</div>
+<div class="page-content">
+        <div class="col-12  ">
+            <div class="row">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 style="float: left; width: 85%;">修改个人资料</h4>
+                        {% with messages = get_flashed_messages() %}
+                            {% if messages %}
+                                    {% for message in messages %}
+                                        <p class="auth-subtitle mb-1 " style="font-size: 15px; color: red;">{{ message }}</p>
+                                    {% endfor %}
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+                    <form method="post">
+                     <div class="card-body">
+                        <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="school">毕业学校</label>
+                                        <small class="text-muted">eg.<i>北京大学</i></small>
+                                        <input type="text" class="form-control" id="school" name="school" value={{ allinf[6] }}>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="title">技术职称</label>
+                                        <small class="text-muted">eg.<i>外科</i></small>
+                                        <input type="text" class="form-control" id="title" name="title" value={{ allinf[8] }}>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="specialty">专业特长</label>
+                                        <small class="text-muted">eg.<i>手术</i></small>
+                                        <input type="text" class="form-control" id="specialty" name="specialty" value={{ allinf[9] }}>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="degree">学位</label>
+                                        <small class="text-muted">eg.<i>硕士</i></small>
+                                        <input type="text" class="form-control" id="degree" name="degree" value={{ allinf[7] }}>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="username">用户名</label>
+                                        <input type="text" id="username" class="form-control" name="username" value={{ allinf[5] }}>
+                                    </div>
+                                    <button type = "submit" style="width: 50%" class="btn btn-primary btn-block btn-lg shadow-lg mt-5">修改</button>
+                                </div>
+                                <div class="col-md-6">
+
+                                    <div class="form-group">
+                                        <label for="phone">电话</label>
+                                        <input type="text" class="form-control" id="phone" name="phone" value={{ allinf[3] }}>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="email">电邮</label>
+                                        <input type="text" class="form-control" id="email" name="email" value={{ allinf[4] }}>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="pwd">密码</label>
+                                        <input type="text" id="pwd" class="form-control" name="pwd" placeholder="不输入代表不修改">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="userText">重覆密码</label>
+                                        <input type="text" id="repwd" class="form-control" name="repwd" placeholder="不输入代表不修改">
+                                    </div>
+                                </div>
+                        </div>
+                    </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+</div>
+{% endblock %}
+{% block js %}
+<script src="{{ url_for('static', filename='vendors/apexcharts/apexcharts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/pages/dashboard.js') }}"></script>
+{% endblock %}

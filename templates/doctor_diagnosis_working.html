@@ -14,11 +14,6 @@
             document.getElementById("dropdownMenuButton").innerHTML = meddic[obj.id]
             document.getElementById("medid").value = obj.id
         }
-
-        function myclick2(obj){
-            window.opener.location.reload()
-            window.close()
-        }
     </script>
 {% endblock %}
 
@@ -92,7 +87,7 @@
                                 <small class="text-muted">eg.<i>5</i></small>
                                 <input type="text" class="form-control" id="quantity" name="quantity" >
                             </div>
-                            <button type = "submit" onclick=myclick2(this) style="width: 50%" class="btn btn-primary btn-block btn-lg shadow-lg mt-5">提交</button>
+                            <button type = "submit" style="width: 50%" class="btn btn-primary btn-block btn-lg shadow-lg mt-5">提交</button>
                         </div>
                     </form>
                 </div>

@@ -35,6 +35,8 @@ def login():
                 return redirect(url_for('doctor.doctor', username=username))
             elif domain == 2:
                 return redirect(url_for('patient.patient', username=username))
+            elif domain == 3:
+                return redirect(url_for('chief.chief', username=username))
         else:
             flash('login failed!')
             return redirect(url_for('auth.login'))

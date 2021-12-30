@@ -197,6 +197,7 @@ def diagnosis(username):
     for i in allmedrec:
         allmedrecc.append(i[0])
 
+
     #print(allmedrecc)
     records = {}
     for cnt in range(len(appointments)):
@@ -204,19 +205,12 @@ def diagnosis(username):
         records[cnt] = [i,j,k,l]
 
     for cnt in range(1,las[0][0]+1):
-        if l in allmedrecc:
+        if cnt in allmedrecc:
             finishdic[cnt] = 'disabled'
         else:
             finishdic[cnt] = ""
     #print(finishdic)
 
-    total_app_num = len(appointments)
-    done_app_num = db.execute("SELECT COUNT(a.app_id) FROM appointment a \
-                                        INNER JOIN employees e ON e_id = a.doc_id \
-                                        INNER JOIN patient p ON a.patient_id = p.patient_id \
-                                        INNER JOIN medical_record r ON r.app_id = a.app_id\
-                                        WHERE e_id=? and a.date = ?", (doc_id, datetime.date.today())).fetchone()[0]
-    undo_app_num = total_app_num - done_app_num
     return render_template('doctor_diagnosis.html',realname = realname,name=username, sidebarItems=doctorItems,records=records,hav=len(appointments),finishdic = finishdic,total = total_app_num,undo = undo_app_num,done = done_app_num)
 
 @bp.route('/doctor/?<string:username>/add_diagnosis/<id>',methods=['GET', 'POST'])
@@ -256,9 +250,9 @@ def add_diagnosis(username, id):
                            (patient_id, doc_id, datetime.date.today(), temperature, chief_complaint,
                             present_illness_history,past_history,allergic_history,onset_date,current_treatment,
                             diagnosis_assessment,app_id)).lastrowid
-        #db.commit()
+        db.commit()
 
-        return render_template('doctor_diagnosis.html')
+        return render_template('loading.html')
 
     medicine_inf = db.execute("SELECT  * FROM medicine").fetchall()
     meddic = {}

@@ -16,6 +16,15 @@ def get_id(db,user):
                       where username = '%s'" %user)
     for i in tt:
         return i[0]
+
+def get_name(db,user):
+    cur = db.cursor()
+    tt = cur.execute("select name \
+                          from employees \
+                          where username = '%s'" % user)
+    for i in tt:
+        return i[0]
+
 def get_dept(db, id):
     department_id, department_name = db.execute("SELECT c.department_id, department_name \
                                 From chief c INNER JOIN department de ON de.department_id = c.department_id \
@@ -28,7 +37,8 @@ def chief(username):
         chief_id = get_id(db, username)
         doctor = db.execute("SELECT * FROM employees WHERE username=?", (username,)).fetchall()
         department_id, department_name = get_dept(db, chief_id)
-        return render_template('chief.html', name=username, sidebarItems=chiefItems,doctor=doctor,
+        realname = get_name(db,username)
+        return render_template('chief.html', realname = realname,name=username, sidebarItems=chiefItems,chief=doctor,
                                department_name=department_name)
     return redirect(url_for('auth.login'))
 
@@ -36,16 +46,69 @@ def chief(username):
 @bp.route('/chief/?<string:username>/history',methods=['GET','POST'])
 def history(username):
     doc_id = get_id(db, username)
-
+    realname = get_name(db, username)
     # 格式为(病人姓名，日期，药品名字，药品用量,体温，主诉，现病史，既往史，过敏史，发病时间，治疗情况，评估诊断)
-    prescriptions_records = db.execute('''SELECT pat.name,p.date,med_name,med_quantity,temperature,chief_complaint,
+    prescriptions_records = db.execute('''SELECT pat.patient_id,pat.name,p.date,med_name,med_quantity,temperature,chief_complaint,
     present_illness_history,past_history, allergic_history, onset_date,current_treatment, diagnostic_assessment
     FROM prescription p INNER JOIN patient pat ON pat.patient_id = p.patient_id
     INNER JOIN medicine m ON m.med_id = p.med_id 
     LEFT JOIN medical_record r ON p.app_id = r.app_id
     WHERE p.doc_id=? AND p.date<=? ORDER BY p.date DESC''', (doc_id, datetime.date.today())).fetchall()
 
-    return render_template('xxx.html')
+    recordsfordoc = {}
+    for cnt in range(len(prescriptions_records)):
+        i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13 = prescriptions_records[cnt][0], \
+                                                                 prescriptions_records[cnt][1], \
+                                                                 prescriptions_records[cnt][2], \
+                                                                 prescriptions_records[cnt][3], \
+                                                                 prescriptions_records[cnt][4], \
+                                                                 prescriptions_records[cnt][5], \
+                                                                 prescriptions_records[cnt][6], \
+                                                                 prescriptions_records[cnt][7], \
+                                                                 prescriptions_records[cnt][8], \
+                                                                 prescriptions_records[cnt][9], \
+                                                                 prescriptions_records[cnt][10], \
+                                                                 prescriptions_records[cnt][11], \
+                                                                 prescriptions_records[cnt][12]
+        if recordsfordoc.get(i1) == None:
+            recordsfordoc[i1] = [[i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13]]
+        else:
+            recordsfordoc[i1].append([i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13])
+
+    # print(recordsfordoc)
+
+    records = {}
+    for cnt in range(len(prescriptions_records)):
+        i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13 = prescriptions_records[cnt][0], \
+                                                                 prescriptions_records[cnt][1], \
+                                                                 prescriptions_records[cnt][2], \
+                                                                 prescriptions_records[cnt][3], \
+                                                                 prescriptions_records[cnt][4], \
+                                                                 prescriptions_records[cnt][5], \
+                                                                 prescriptions_records[cnt][6], \
+                                                                 prescriptions_records[cnt][7], \
+                                                                 prescriptions_records[cnt][8], \
+                                                                 prescriptions_records[cnt][9], \
+                                                                 prescriptions_records[cnt][10], \
+                                                                 prescriptions_records[cnt][11], \
+                                                                 prescriptions_records[cnt][12]
+        if records.get(cnt) == None:
+            cntt = countfunc(records, i1)
+            records[cnt] = [i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, cntt]
+
+    # print(records)
+    alldoctor = db.execute('''
+                                            SELECT name,patient_id
+                                            FROM patient 
+                                        ''').fetchall()
+    dicdoctor = {}
+
+    for cnt in range(len(alldoctor)):
+        i, j = alldoctor[cnt][0], alldoctor[cnt][1]
+        if dicdoctor.get(j) == None:
+            dicdoctor[j] = i
+
+    return render_template('chief_history.html',realname = realname,name = username,sidebarItems = chiefItems,alldoc = dicdoctor,records = records,rfordoc = recordsfordoc,hav = len(records))
 
 @bp.route('/chief/?<string:username>/change_inf/' , methods=['GET','POST'])
 def change_inf(username):
@@ -91,28 +154,66 @@ def change_inf(username):
 
 
     allinf = db.execute('''
-                                SELECT e_id,name,passport,gender,phone,email,username,graduate_school
+                                SELECT e_id,name,passport,gender,phone,email,username,graduate_school,degree,technical_title,specialty
                                 FROM employees
                                 WHERE username =?   
                             ''',(username,)).fetchall()
 
     #print(allinf[0])
-    i, j, k, l, m, n, o,p = allinf[0][0], allinf[0][1], allinf[0][2], allinf[0][3], allinf[0][4], allinf[0][5],allinf[0][6],allinf[0][7]
+    i, j, k, l, m, n, o,p,q,s,t = allinf[0][0], allinf[0][1], allinf[0][2], allinf[0][3], allinf[0][4], allinf[0][5],allinf[0][6],allinf[0][7],allinf[0][8],allinf[0][9],allinf[0][10]
 
-    infdic = [j, k, l, m, n, o,p]
+    infdic = [j, k, l, m, n, o,p,q,s,t]
     #print(infdic)
     return render_template('doctor_change_inf.html', name = username,sidebarItems = chiefItems,allinf = infdic)
 
 @bp.route('/chief/?<string:username>/diagnosis',methods=['GET', 'POST'])
 def diagnosis(username):
     doc_id = get_id(db, username)
-    appointments = db.execute("SELECT date , p.name, p.phone FROM appointment a \
+    realname = get_name(db, username)
+    appointments = db.execute("SELECT date , p.name, p.phone,a.app_id FROM appointment a \
                                     INNER JOIN employees e ON e_id = doc_id \
                                     INNER JOIN patient p ON a.patient_id = p.patient_id \
                                     WHERE e_id=? and date = ? ORDER BY date DESC", (doc_id,datetime.date.today())).fetchall()
-    return render_template('doctor_diagnosis.html',name=username, sidebarItems=chiefItems,appointments=appointments)
+    total_app_num = len(appointments)
+    done_app_num = db.execute("SELECT COUNT(a.app_id) FROM appointment a \
+                                        INNER JOIN employees e ON e_id = a.doc_id \
+                                        INNER JOIN patient p ON a.patient_id = p.patient_id \
+                                        INNER JOIN medical_record r ON r.app_id = a.app_id\
+                                        WHERE e_id=? and a.date = ?", (doc_id, datetime.date.today())).fetchone()[0]
+    undo_app_num = total_app_num - done_app_num
+    # print(appointments)
 
-@bp.route('/chief/?<string:username>/diagnosis/<id>',methods=['GET', 'POST'])
+    allmedrec = db.execute('''
+                                SELECT app_id 
+                                FROM medical_record
+                                ''').fetchall()
+
+    las = db.cursor().execute('''
+                                    SELECT max(app_id) 
+                                    FROM appointment
+                                    ''').fetchall()
+
+    finishdic = {}
+    allmedrecc = []
+    for i in allmedrec:
+        allmedrecc.append(i[0])
+
+
+    # print(allmedrecc)
+    records = {}
+    for cnt in range(len(appointments)):
+        i, j, k, l = appointments[cnt][0], appointments[cnt][1], appointments[cnt][2], appointments[cnt][3]
+        records[cnt] = [i, j, k, l]
+
+    for cnt in range(1, las[0][0] + 1):
+        if cnt in allmedrecc:
+            finishdic[cnt] = 'disabled'
+        else:
+            finishdic[cnt] = ""
+    #print(finishdic)
+    return render_template('chief_diagnosis.html',realname = realname,name=username, sidebarItems=chiefItems,records=records,hav=len(appointments),finishdic = finishdic,total = total_app_num,undo = undo_app_num,done = done_app_num)
+
+@bp.route('/chief/?<string:username>/add_diagnosis/<id>',methods=['GET', 'POST'])
 def add_diagnosis(username, id):
     doc_id = get_id(db, username)
     app_id = id
@@ -142,17 +243,21 @@ def add_diagnosis(username, id):
                            (patient_id, doc_id, datetime.date.today(), med_id, med_quantity, app_id)).lastrowid
         m_id = db.execute('''INSERT INTO medical_record(patient_id,doc_id,date,temperature,chief_complaint
                             ,present_illness_history,past_history,allergic_history,onset_date,current_treatment
-                            ,diagnosis_assessment,app_id)
+                            ,diagnostic_assessment,app_id)
                            VALUES(?,?,?,?,?,?,?,?,?,?,?,?)''',
                            (patient_id, doc_id, datetime.date.today(), temperature, chief_complaint,
-                            present_illness_history,past_history,allergic_history,onset_date,
+                            present_illness_history,past_history,allergic_history,onset_date,current_treatment,
                             diagnosis_assessment,app_id)).lastrowid
         db.commit()
-        return redirect(url_for('chief.diagnosis', username=username))
+        return render_template('loading.html')
 
+    medicine_inf = db.execute("SELECT  * FROM medicine").fetchall()
+    meddic = {}
 
+    for i in medicine_inf:
+        meddic[i[0]] = i[1]
 
-    return render_template('add_diagnosis.html', name=username)
+    return render_template('chief_diagnosis_working.html', name=username,appid = app_id,meddic = meddic)
 
 @bp.route('/chief/?<string:username>/update_department',methods=['GET', 'POST'])
 def update_department(username):
@@ -377,4 +482,11 @@ def delete_doctor(username, id):
     return redirect(url_for('chief.doctors',username=username))
 
 
+def countfunc(dicc,iid):
+    count = 0
+
+    for i in dicc:
+        if dicc[i][0] == iid:
+            count = count + 1
+    return count
 
