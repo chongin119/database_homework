@@ -25,6 +25,22 @@ def get_name(db,user):
     for i in tt:
         return i[0]
 
+def get_id2name(db,id):
+    cur = db.cursor()
+    tt = cur.execute("select name \
+                              from employees \
+                              where e_id = '%s'" % id)
+    for i in tt:
+        return i[0]
+
+def get_id2user(db,id):
+    cur = db.cursor()
+    tt = cur.execute("select username \
+                              from employees \
+                              where e_id = '%s'" % id)
+    for i in tt:
+        return i[0]
+
 def get_dept(db, id):
     department_id, department_name = db.execute("SELECT c.department_id, department_name \
                                 From chief c INNER JOIN department de ON de.department_id = c.department_id \
@@ -320,6 +336,8 @@ def subordinate(username):
                                                                  prescriptions_records[cnt][14]
 
         temp = {}
+        if i1 == chief_id:
+            continue
         if recordsfordoc.get(i1) == None:
             temp[i2] = [i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13,i14,i15]
             recordsfordoc[i1] = temp
@@ -335,6 +353,8 @@ def subordinate(username):
 
     for cnt in range(len(alldoctor)):
         i, j = alldoctor[cnt][0], alldoctor[cnt][1]
+        if j == chief_id:
+            continue
         if dicdoctor.get(j) == None:
             dicdoctor[j] = i
 
@@ -397,17 +417,24 @@ def update_record(username, id):
 def doctors(username):
     chief_id = get_id(db, username)
     department_id, department_name = get_dept(db, chief_id)
+    realname = get_name(db,username)
     # 找出该部门全部医生
     # 格式为(医生id,医生姓名，电话，邮箱)
     doctors = db.execute('''
-                                    SELECT e_id,e.name,e.phone,e.email 
+                                    SELECT e_id,e.name,e.phone,e.email,e.username 
                                     FROM employees e 
                                     INNER JOIN doctor d ON d.doc_id = e_id 
                                     WHERE d.department_id=?
                                 ''', (department_id,)).fetchall()
 
+    docdic = {}
+    for i in doctors:
+        if i[0] == chief_id:
+            continue
+        if docdic.get(i[0]) == None:
+            docdic[i[0]] = [i[1],i[2],i[3],i[4]]
 
-    return render_template('chief_doctors.html',name=username,  sidebarItems=chiefItems, doctors=doctors)
+    return render_template('chief_doctors.html',realname = realname,name=username,  sidebarItems=chiefItems, doctors=docdic)
 
 
 
@@ -423,7 +450,7 @@ def add_doctor(username):
         phone = request.form['phone']
         email = request.form['email']
         user = request.form['username']
-        pwd = request.form['password']
+        pwd = request.form['pwd']
         graduate_school = request.form['school']
         degree = request.form['degree']
         technical_title = request.form['title']
@@ -444,16 +471,19 @@ def add_doctor(username):
                    , (user, pwd)).lastrowid
         db.commit()
 
-        flash('Successfully modified information')
-        return redirect(url_for('chief.doctors', username=username))
+        flash('Successfully added information')
+        return render_template('loading.html')
 
-    return render_template('chief_add_doctor.html',name=username)
+    return render_template('chief_doctors_add_working.html',name=username)
 
 
 @bp.route('/chief/?<string:username>/update_doctor/<id>', methods=['GET', 'POST'])
 def update_doctor(username, id):
     chief_id = get_id(db, username)
     doc_id = id
+
+    docname = get_id2name(db, doc_id)
+    docuser = get_id2user(db, doc_id)
     department_id, department_name = get_dept(db, chief_id)
     if request.method == "POST":
         name = request.form['name']
@@ -462,7 +492,7 @@ def update_doctor(username, id):
         phone = request.form['phone']
         email = request.form['email']
         user = request.form['username']
-        pwd = request.form['password']
+        pwd = request.form['pwd']
         repwd = request.form['repwd']
         graduate_school = request.form['school']
         degree = request.form['degree']
@@ -470,14 +500,14 @@ def update_doctor(username, id):
         specialty = request.form['specialty']
 
         doctor_inf = db.execute('''SELECT username FROM employees WHERE e_id=?'''
-                                ,(doc_id,))
+                                ,(doc_id,)).fetchone()
         old_username = doctor_inf[0]
         if pwd != repwd:
             flash('password is not equal to confirm_password!')
-            return redirect(url_for('chief.doctors'),username=username)
-        if check_repeat(db, user):
+            return render_template('loading.html')
+        if check_repeat(db, user) and docuser != user:
             flash('The username already exists')
-            return redirect(url_for('chief.doctors'))
+            return render_template('loading.html')
         if pwd != "NULL":
             db.execute('''UPDATE login_inf 
             SET username = ?, password=?
@@ -499,9 +529,21 @@ def update_doctor(username, id):
                 (phone, email, user, graduate_school, degree, technical_title, specialty,doc_id))
             db.commit()
         flash('Successfully modified information')
-        return redirect(url_for('chief.doctors', username=username))
+        return render_template('loading.html')
 
-    return render_template('chief_update_doctor.html', name=username)
+    allinf = db.execute('''
+                                    SELECT e_id,name,passport,gender,phone,email,username,graduate_school,degree,technical_title,specialty
+                                    FROM employees
+                                    WHERE username =?   
+                                ''', (docuser,)).fetchall()
+
+    # print(allinf[0])
+    i, j, k, l, m, n, o, p, q, s, t = allinf[0][0], allinf[0][1], allinf[0][2], allinf[0][3], allinf[0][4], allinf[0][
+        5], allinf[0][6], allinf[0][7], allinf[0][8], allinf[0][9], allinf[0][10]
+
+    infdic = [j, k, l, m, n, o, p, q, s, t]
+
+    return render_template('chief_doctors_change_working.html', name=username,docname = docname,allinf = infdic)
 
 @bp.route('/chief/?<string:username>/delete_doctor/<id>', methods=['GET', 'POST'])
 def delete_doctor(username, id):
@@ -514,8 +556,8 @@ def delete_doctor(username, id):
     db.execute("DELETE FROM doctor WHERE doc_id=?", (doc_id,))
     db.execute("DELETE FROM employees WHERE e_id=?", (doc_id,))
 
-    db.commit()
-    return redirect(url_for('chief.doctors', username=username))
+    #db.commit()
+    return render_template('loading.html')
 
 
 def countfunc(dicc,iid):
