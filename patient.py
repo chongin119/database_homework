@@ -41,8 +41,8 @@ def departments(username):
     departments = db.execute("SELECT * FROM department").fetchall()
     dicdep = {}
     for cnt in range(len(departments)):
-        i,j = departments[cnt][0],departments[cnt][1]
-        dicdep[i] = j
+        i,j,k = departments[cnt][0],departments[cnt][1],departments[cnt][2]
+        dicdep[i] = [j,k]
     #print(dicdep)
 
     doctorfromdepartments = db.execute('''
@@ -83,10 +83,10 @@ def change_inf(username):
         repwd = request.form['repwd']
         if pwd != repwd:
             flash('password is not equal to confirm_password!')
-            return redirect(url_for('patient.patient'))
+            return redirect(url_for('patient.change_inf', username=username))
         if check_repeat(db, user):
             flash('The username already exists')
-            return redirect(url_for('patient.patient'))
+            return redirect(url_for('patient.change_inf', username=username))
         if pwd != "NULL":
             db.execute('''UPDATE login_inf 
             SET username = ?, password=?

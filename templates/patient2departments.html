@@ -11,12 +11,14 @@
     <script>
         dfdobj = {{ dfd | safe }}
         docobj = {{ docdic | safe }}
+        depobj = {{ alldepartments | safe }}
+        let department_id = 0
 
         function myclick(obj){
             nname = obj.text
             document.getElementById("dropdownMenuButton1").innerHTML = nname
             contt = ""
-
+            department_id = obj.id
             for(let i =0;i<dfdobj[obj.id].length;i++){
                 tempid = dfdobj[obj.id][i]
                 contt +=`
@@ -65,6 +67,17 @@
                                                                 <p>%s</p>
                                                             </div>
                                                           `.format(docobj[obj.id][0],docobj[obj.id][1],docobj[obj.id][2],docobj[obj.id][3],docobj[obj.id][4],docobj[obj.id][5],docobj[obj.id][6])
+
+            document.getElementById("depinf").innerHTML = `
+                                                            <div class="alert alert-light">
+                                                                <h4 class="alert-heading">科室名字</h4>
+                                                                <p>%s</p>
+                                                            </div>
+                                                            <div class="alert alert-light">
+                                                                <h4 class="alert-heading">科室描述</h4>
+                                                                <p>%s</p>
+                                                            </div>
+                                                          `.format(depobj[department_id][0],depobj[department_id][1])
         }
     </script>
 {% endblock %}
@@ -94,7 +107,7 @@
                         </button>
                         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                             {% for department in alldepartments %}
-                                <a class="dropdown-item" value={{ alldepartments[department] }} id="{{ department }}" onclick=myclick(this) >{{ alldepartments[department] }}</a>
+                                <a class="dropdown-item" value={{ alldepartments[department][0] }} id="{{ department }}" onclick=myclick(this) >{{ alldepartments[department][0] }}</a>
                             {% endfor %}
                         </div>
                     </div>

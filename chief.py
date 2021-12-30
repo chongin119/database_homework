@@ -113,6 +113,7 @@ def history(username):
 @bp.route('/chief/?<string:username>/change_inf/' , methods=['GET','POST'])
 def change_inf(username):
     doc_id = get_id(db,username)
+    realname = get_name(db,username)
     if request.method == "POST":
         user = request.form['username']
         phone = request.form['phone']
@@ -125,10 +126,10 @@ def change_inf(username):
         specialty = request.form['specialty']
         if pwd != repwd:
             flash('password is not equal to confirm_password!')
-            return redirect(url_for('chief.chief'))
+            return redirect(url_for('chief.change_inf', username=username))
         if check_repeat(db, user):
             flash('The username already exists')
-            return redirect(url_for('chief.chief'))
+            return redirect(url_for('chief.change_inf', username=username))
         if pwd != "NULL":
             db.execute('''UPDATE login_inf 
             SET username = ?, password=?
@@ -164,7 +165,7 @@ def change_inf(username):
 
     infdic = [j, k, l, m, n, o,p,q,s,t]
     #print(infdic)
-    return render_template('doctor_change_inf.html', name = username,sidebarItems = chiefItems,allinf = infdic)
+    return render_template('chief_change_inf.html', name = username,realname =realname,sidebarItems = chiefItems,allinf = infdic)
 
 @bp.route('/chief/?<string:username>/diagnosis',methods=['GET', 'POST'])
 def diagnosis(username):
@@ -263,6 +264,12 @@ def add_diagnosis(username, id):
 def update_department(username):
     chief_id = get_id(db, username)
     department_id, department_name = get_dept(db, chief_id)
+    des = db.execute('''
+                    SELECT description
+                    FROM department
+                    WHERE department_id = ?
+                    ''',(department_id,)).fetchall()
+    des = des[0][0]
     if request.method == "POST":
 
         # department目前只有两个属性
@@ -273,7 +280,7 @@ def update_department(username):
                     WHERE department_id = ?''', (department_new_name,description, department_id))
         flash('Successfully modified information')
         return redirect(url_for('chief.chief', username=username))
-    return render_template('update_department.html',name=username, sidebarItems=chiefItems,department_name= department_name)
+    return render_template('chief_change_depinf.html',name=username, sidebarItems=chiefItems,department_name= department_name,des=des)
 
 
 # 查看下属的病历和处方
@@ -476,11 +483,16 @@ def update_doctor(username, id):
 @bp.route('/chief/?<string:username>/delete_doctor/<id>', methods=['GET', 'POST'])
 def delete_doctor(username, id):
     doc_id = id
+
+    db.execute("DELETE FROM prescription WHERE doc_id=?", (doc_id,))
+    db.execute("DELETE FROM medical_record WHERE doc_id=?", (doc_id,))
+    db.execute("DELETE FROM appointment WHERE doc_id=?", (doc_id,))
     db.execute("DELETE FROM login_inf WHERE username=(SELECT username from employees WHERE e_id=?)", (doc_id,))
     db.execute("DELETE FROM doctor WHERE doc_id=?", (doc_id,))
     db.execute("DELETE FROM employees WHERE e_id=?", (doc_id,))
+
     db.commit()
-    return redirect(url_for('chief.doctors',username=username))
+    return redirect(url_for('chief.doctors', username=username))
 
 
 def countfunc(dicc,iid):

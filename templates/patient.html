@@ -12,6 +12,13 @@
     <div class="page-heading" style="float: left;width: 90%;">
         <h3>Hello! patient {{realname}}!</h3>
     </div>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+                {% for message in messages %}
+                    <p class="auth-subtitle mb-1 " style="font-size: 15px; color: red;">{{ message }}</p>
+                {% endfor %}
+        {% endif %}
+    {% endwith %}
     <div class="page-heading" style="float: left; width: 10%;">
         <button class="btn btn-primary btn-block"><a href="{{ url_for('auth.logout',username = name) }}" class="btn btn-primary btn-block">Logout</a></button>
     </div>
