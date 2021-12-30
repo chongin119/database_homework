@@ -4,7 +4,7 @@ from flask import (
 )
 from dbfunc import connect_db,match_user_pwd,disconnect_db,get_domain,insert_user_pwd,get_id
 from dbfunc import databasePATH
-from sliderbaritem import patientItems,doctorItems,chiefItems
+from sliderbaritem import patientItems,doctorItems,chiefItems,adminItems
 bp = Blueprint('appointment', __name__)
 
 db = connect_db(databasePATH)
@@ -185,6 +185,110 @@ def patient_add_appointment(username):
 
 
 
+@bp.route('/admin/?<string:username>/appointments',methods=['GET', 'POST'])
+def admin_appointments(username):
+    # 格式(app_id,日期，病人姓名，病人id，医生姓名，医生id，体温，症状，地址，是否到高风险地区)
+    appointments = db.execute("SELECT app_id,date , p.name, a.patient_id, e.name,e_id, a.temperature,symptom,address,risk \
+                                FROM appointment a \
+                                INNER JOIN employees e ON e_id = doc_id \
+                                INNER JOIN patient p ON a.patient_id = p.patient_id", ).fetchall()
 
+    return render_template('admin_appointments.html',name = username,sidebarItems=adminItems,appointments=appointments,hav = len(appointments))
+
+
+@bp.route('/admin/?<string:username>/add_appointment',methods=['GET', 'POST'])
+def admin_add_appointment(username):
+    # 给出病人列表
+    patient_list = db.execute('''SELECT patient_id,name FROM patient''')
+    # 给出部门列表
+    all_departments = db.execute('''
+                                        SELECT department_name,department_id
+                                        FROM department
+                                    ''').fetchall()
+    # 给出医生列表
+    all_doctors = db.execute('''
+                                SELECT name,department_name,e_id
+                                FROM appointment a 
+                                INNER JOIN employees e ON e_id = doc_id
+                                INNER JOIN department m ON a.department_id = m.department_id
+                            ''').fetchall()
+
+    if request.method == 'POST':
+        """api to add the appointment in the database"""
+
+        patient_id = request.form['patient']
+        app_date = request.form['date']
+        department_id = request.form['de_id']
+        doc_id = request.form['doc_id']
+        temperature = request.form['temperature']
+        province = '北京'  # 未完成 先设为这个
+        city = '市辖区'  # 未完成 先设为这个
+        district = '海淀区'  # 未完成 先设为这个
+        symptom = request.form['rm']  # 返回为有症状或无症状
+        risk = request.form['r14']  # 返回为曾到或未曾到
+
+        address = f'省：{province}；\n城市：{city}；\n区：{district}；'
+
+        app_id = db.execute('''INSERT INTO appointment(date,patient_id,department_id,doc_id,temperature,address,symptom,risk)
+                           VALUES(?,?,?,?,?,?,?,?)''',
+                           (app_date, patient_id, department_id, doc_id, temperature,address,symptom,risk)).lastrowid
+        db.commit()
+
+        return redirect(url_for('appointment.admin_appointments',username=username))
+
+    return render_template('patient_add_appointment.html', name = username,sidebarItems = adminItems,patient_list=patient_list,all_doctors=all_doctors,all_departments=all_departments)
+
+
+@bp.route('/admin/?<string:username>/update_appointment/<id>', methods=['GET', 'POST'])
+def admin_update_appointment(username,id):
+    app_id = id
+    # 给出部门列表
+    all_departments = db.execute('''
+                                        SELECT department_name,department_id
+                                        FROM department
+                                    ''').fetchall()
+    # 给出医生列表
+    all_doctors = db.execute('''
+                                SELECT name,department_name,e_id
+                                FROM appointment a 
+                                INNER JOIN employees e ON e_id = doc_id
+                                INNER JOIN department m ON a.department_id = m.department_id
+                            ''').fetchall()
+
+    if request.method == 'POST':
+        """api to add the appointment in the database"""
+
+        app_date = request.form['date']
+        department_id = request.form['de_id']
+        doc_id = request.form['doc_id']
+        temperature = request.form['temperature']
+        province = '北京'  # 未完成 先设为这个
+        city = '市辖区'  # 未完成 先设为这个
+        district = '海淀区'  # 未完成 先设为这个
+        symptom = request.form['rm']  # 返回为有症状或无症状
+        risk = request.form['r14']  # 返回为曾到或未曾到
+
+        address = f'省：{province}；\n城市：{city}；\n区：{district}；'
+        db.execute('''UPDATE appointment SET date=?,department_id=?,doc_id=?,temperature=?,address=?,symptom=?,risk=?
+                    WHERE app_id=? '''
+                   , (app_date, department_id, doc_id, temperature, address, symptom, risk,app_id))
+        db.commit()
+
+        return redirect(url_for('appointment.admin_appointments', username=username))
+
+    return render_template('patient_add_appointment.html', name=username, sidebarItems=adminItems
+                           , all_doctors=all_doctors, all_departments=all_departments)
+
+@bp.route('/admin/?<string:username>/delete_appointment/<id>', methods=['GET', 'POST'])
+def admin_delete_appointment(username):
+    app_id = id
+
+    db.execute("DELETE FROM appointment WHERE app_id=?", (app_id,))
+    db.execute("DELETE FROM prescription WHERE app_id=?", (app_id,))
+    db.execute("DELETE FROM medical_record WHERE app_id=?", (app_id,))
+
+    db.commit()
+
+    return redirect(url_for('appointment.admin_appointments', username=username))
 
 
