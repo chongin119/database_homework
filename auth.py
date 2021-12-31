@@ -38,6 +38,8 @@ def login():
                 return redirect(url_for('patient.patient', username=username))
             elif domain == 3:
                 return redirect(url_for('chief.chief', username=username))
+            elif domain == 4:
+                return redirect(url_for('fever_doctor.doctor', username=username))
         else:
             flash('login failed!')
             return redirect(url_for('auth.login'))

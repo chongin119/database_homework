@@ -4,7 +4,7 @@ from flask.templating import render_template
 from flask_bootstrap import Bootstrap
 from flask import g
 from datetime import timedelta
-import auth,doctor,patient,appointment,chief,admin
+import auth,doctor,patient,appointment,chief,admin,fever_doctor
 
 
 from werkzeug.utils import redirect
@@ -24,6 +24,7 @@ app.register_blueprint(patient.bp)
 app.register_blueprint(appointment.bp)
 app.register_blueprint(chief.bp)
 app.register_blueprint(admin.bp)
+app.register_blueprint(fever_doctor.bp)
 
 
 

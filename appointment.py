@@ -301,7 +301,7 @@ def patient_add_fever_appointment(username):
         app_date = request.form['date']
 
         # 发热门诊预约只能选择发热门诊
-        department_id = 7
+        department_id = 5
         doc_id = request.form['doc_id']
 
         temperature = request.form['temperature']
@@ -334,7 +334,7 @@ def patient_add_fever_appointment(username):
                                 FROM appointment a 
                                 INNER JOIN employees e ON e_id = doc_id
                                 INNER JOIN department m ON a.department_id = m.department_id
-                                WHERE m.department_id=7
+                                WHERE m.department_id=5
                             ''').fetchall()
     dicdoctor = {}
 
@@ -355,7 +355,7 @@ def patient_add_fever_appointment(username):
                                 FROM appointment a 
                                 INNER JOIN employees e ON e_id = doc_id
                                 INNER JOIN department m ON a.department_id = m.department_id
-                                WHERE m.department_id=7
+                                WHERE m.department_id=5
                             ''').fetchall()
     # print(appointments)
     dic = {}
@@ -388,6 +388,6 @@ def fever_appointments(username):
                                 INNER JOIN patient p ON a.patient_id = p.patient_id \
                                 WHERE e_id=? ORDER BY date DESC", (doc_id,)).fetchall()
 
-    return render_template('fever_appointments.html',realname = realname,name = username,sidebarItems=fever_doctorItems,appointments=appointments,hav = len(appointments))
+    return render_template('fever_doctor_appointments.html',realname = realname,name = username,sidebarItems=fever_doctorItems,appointments=appointments,hav = len(appointments))
 
 
