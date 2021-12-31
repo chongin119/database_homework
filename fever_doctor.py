@@ -4,7 +4,7 @@ from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for
 )
 from dbfunc import connect_db,match_user_pwd,disconnect_db,get_domain,insert_user_pwd
-from dbfunc import databasePATH,check_repeat
+from dbfunc import databasePATH,check_repeat,log_write
 from sliderbaritem import fever_doctorItems
 bp = Blueprint('fever_doctor', __name__)
 
@@ -38,7 +38,7 @@ def doctor(username):
     department_id, department_name = get_dept(db, e_id)
     if session.get(username) is not None:
         doctor = db.execute("SELECT * FROM employees WHERE username=?", (username,)).fetchall()
-
+        log_write(user=username, action='visit', dist='employees')
         return render_template('fever_doctor.html', realname=realname, name=username, sidebarItems=fever_doctorItems, doctor=doctor
                                , department_name=department_name)
     return redirect(url_for('auth.login'))
@@ -56,7 +56,8 @@ def history(username):
     INNER JOIN medicine m ON m.med_id = p.med_id 
     LEFT JOIN medical_record r ON p.app_id = r.app_id
     WHERE p.doc_id=? AND p.date<=? ORDER BY p.date DESC''', (doc_id, datetime.date.today())).fetchall()
-
+    log_write(user=username, action='visit', dist='prescription')
+    log_write(user=username, action='visit', dist='records')
     recordsfordoc = {}
     for cnt in range(len(prescriptions_records)):
         i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13 = prescriptions_records[cnt][0], \
@@ -151,6 +152,7 @@ def change_inf(username):
                  WHERE e_id=?",
                 (phone, email, user, graduate_school, degree, technical_title, specialty,doc_id))
             db.commit()
+        log_write(user=username, action='edit', dist='employees')
         flash('Successfully modified information')
         return redirect(url_for('fever_doctor.doctor', username=user))
 
@@ -184,6 +186,7 @@ def diagnosis(username):
                                         INNER JOIN medical_record r ON r.app_id = a.app_id\
                                         WHERE e_id=? and a.date = ?", (doc_id, datetime.date.today())).fetchone()[0]
     undo_app_num = total_app_num - done_app_num
+    log_write(user=username, action='visit', dist='appointment')
     # print(appointments)
 
     allmedrec = db.execute('''
@@ -265,10 +268,15 @@ def add_diagnosis(username, id):
                            (patient_id, doc_id, datetime.date.today(), temperature, chief_complaint,
                             present_illness_history,past_history,allergic_history,onset_date,current_treatment,
                             diagnosis_assessment,app_id)).lastrowid
+        log_write(user=username, action='add', dist='prescription')
+        log_write(user=username, action='add', dist='records')
+
         med_price = db.execute('''SELECT med_price FROM medicine m INNER JOIN prescription r 
                                                 ON m.med_id = r.med_id WHERE m.med_id = ?''', (med_id,)).fetchone()[0]
         bill_id = db.execute('''INSERT INTO bill(patient_id, app_id, cost) VALUES(?,?,?)'''
                              , (patient_id, app_id, med_price * med_quantity)).lastrowid
+
+        log_write(user=username, action='add', dist='bill')
         db.commit()
 
         return render_template('loading.html')
@@ -329,7 +337,7 @@ def trans_diagnosis(username, id):
         doc_id = request.form['docid']
         db.execute('''UPDATE appointment SET department_id=?,doc_id = ?
         WHERE app_id = ?''',(department_id, doc_id, app_id))
-
+        log_write(user=username, action='edit', dist='appointment')
         db.commit()
 
         return render_template('loading.html')
