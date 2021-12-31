@@ -196,11 +196,13 @@ def bill(username):
     FROM bill b INNER JOIN appointment a ON b.app_id = a.app_id
     INNER JOIN prescription p ON p.app_id = b.app_id
     INNER JOIN employees e ON e.e_id = a.doc_id
-    INNER JOIN employees medicine m ON m.med_id = p.med_id  
+    INNER JOIN medicine m ON m.med_id = p.med_id  
     WHERE b.patient_id=? ORDER BY p.date DESC''', (patient_id, )).fetchall()
     log_write(user=username, action='visit', dist='bill')
     billdic = {}
 
+    for i in bills:
+        billdic[i[0]] = [i[1],i[2],i[3],i[4],i[5],i[6]]
 
     return render_template('patient_bill.html',realname = realname,name = username,sidebarItems = patientItems,hav = len(bills),billdic=billdic)
 

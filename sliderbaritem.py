@@ -16,6 +16,7 @@ patientItems = [
                 {"isTitle": False,"name":"查看历史就诊记录","icon":"grid-fill","filename":"patient_history.html","url":'patient.history'},
                 {"isTitle": False,"name":"医生与科室信息","icon":"grid-fill","filename":"patient2departments","url":'patient.departments'},
                 {"isTitle": False,"name":"修改个人信息","icon":"grid-fill","filename":"patient_change_inf.html","url":'patient.change_inf'},
+                {"isTitle": False,"name":"缴费","icon":"grid-fill","filename":"patient_bill.html","url":'patient.bill'},
                 {"isTitle": False,"name":"发热门诊预约","icon":"grid-fill","filename":"patient_add_fever_appointment.html","url":'appointment.patient_add_fever_appointment'}
 ]
 

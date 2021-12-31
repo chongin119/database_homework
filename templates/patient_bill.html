@@ -1,0 +1,93 @@
+{% set title = 'Dashboard' %}
+{% set filename = 'patient_bill.html' %}
+
+{% extends 'layouts/master.html' %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='vendors/iconly/bold.css') }}">
+{% endblock %}
+
+{% block headscripts %}
+    <script>
+        function myclick(obj){
+            uurl = "/doctor/%3F"+obj.name+"/add_diagnosis/"+obj.id
+            window.open(uurl, '看診', config='height=1000,width=1000,location=no')
+        }
+    </script>
+{% endblock %}
+{% block content %}
+<div>
+    <div class="page-heading" style="float: left;width: 90%;">
+        <h3>Hello! patient {{realname}}!</h3>
+    </div>
+    <div class="page-heading" style="float: left; width: 10%;">
+        <button class="btn btn-primary btn-block"><a href="{{ url_for('auth.logout',username = name) }}" class="btn btn-primary btn-block">Logout</a></button>
+    </div>
+</div>
+<div class="page-content">
+        <div class="col-12  ">
+            <div class="row">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 style="float: left; width: 85%;">所有帐单</h4>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-lg">
+                                <thead>
+                                    <tr>
+                                        <th>日期</th>
+                                        <th>科室</th>
+                                        <th>医生</th>
+                                        <th>总价</th>
+                                        <th><th>
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for bill in billdic %}
+                                    {% if hav != 0 %}
+                                        <tr>
+                                            <td class="col-auto">
+                                                <p class="font-bold ms-3 mb-0">{{ bills[bill][1] }}</p>
+                                            </td>
+                                            <td class="col-auto">
+                                                <p class=" mb-0">{{ bills[bill][3] }}</p>
+                                            </td>
+
+                                            <td class="col-auto">
+                                                <p class=" mb-0">{{ bills[bill][2] }}</p>
+                                            </td>
+                                            <td class="col-auto">
+                                                <p class=" mb-0">{{ bills[bill][0] }}</p>
+                                            </td>
+                                            <td class="col-auto">
+                                                <button href="#"  name= "{{ name }}" class="btn btn-primary btn-block" style="float: left; width: 50%;" id="{{ bill }}" onclick=myclick(this) >{% if true %}已付费
+                                                    {% else %}未付费{% endif %}</button>
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+</div>
+{% endblock %}
+{% block js %}
+<script src="{{ url_for('static', filename='vendors/apexcharts/apexcharts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/pages/dashboard.js') }}"></script>
+<script>
+    String.prototype.format = function (){
+            let args = Array.prototype.slice.call(arguments);
+            let count=0;
+            return this.replace(/%s/g, function (s,i){
+                return args[count++];
+            });
+        }
+</script>
+{% endblock %}
