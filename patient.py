@@ -180,6 +180,33 @@ def history(username):
 
     return render_template('patient_history.html',realname = realname,name = username,sidebarItems = patientItems,alldoc = dicdoctor,records = records,rfordoc = recordsfordoc,hav = len(records))
 
+@bp.route('/patient/?<string:username>/bill',methods=['GET','POST'])
+def bill(username):
+    patient_id = get_id(db, username)
+    realname = get_name(db, username)
+    # 格式为(价格,日期,医生,科室,药名,单价)
+    bills = db.execute('''SELECT bill_id, cost, p.date, e.name, department_name, p.med_name, med_price
+    FROM bill b INNER JOIN appointment a ON b.app_id = a.app_id
+    INNER JOIN prescription p ON p.app_id = b.app_id
+    INNER JOIN employees e ON e.e_id = a.doc_id
+    INNER JOIN employees medicine m ON m.med_id = p.med_id  
+    WHERE b.patient_id=? ORDER BY p.date DESC''', (patient_id, )).fetchall()
+
+    billdic = {}
+
+
+    return render_template('patient_bill.html',realname = realname,name = username,sidebarItems = patientItems,hav = len(bills),billdic=billdic)
+
+@bp.route('/patient/?<string:username>/pay/<id>',methods=['GET','POST'])
+def pay(username, id):
+    patient_id = get_id(db, username)
+    realname = get_name(db, username)
+    # 格式为(价格,日期,医生,科室,药名,单价)
+    bill_id = id
+    db.execute('''DELETE FROM bill WHERE bill_id=?''',(bill_id))
+    db.commit()
+    return render_template('loading.html')
+
 def countfunc(dicc,iid):
     count = 0
 

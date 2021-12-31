@@ -255,6 +255,10 @@ def add_diagnosis(username, id):
                            (patient_id, doc_id, datetime.date.today(), temperature, chief_complaint,
                             present_illness_history,past_history,allergic_history,onset_date,current_treatment,
                             diagnosis_assessment,app_id)).lastrowid
+        med_price = db.execute('''SELECT med_price FROM medicine m INNER JOIN prescription r 
+                                                ON m.med_id = r.med_id WHERE m.med_id = ?''', (med_id,)).fetchone()[0]
+        bill_id = db.execute('''INSERT INTO bill(patient_id, app_id, cost) VALUES(?,?,?)'''
+                             , (patient_id, app_id, med_price * med_quantity)).lastrowid
         db.commit()
 
         return render_template('loading.html')
