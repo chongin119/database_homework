@@ -216,7 +216,7 @@ def diagnosis(username):
             finishdic[cnt] = ""
     #print(finishdic)
 
-    return render_template('doctor_diagnosis.html',realname = realname,name=username, sidebarItems=fever_doctorItems,records=records,hav=len(appointments),finishdic = finishdic,total = total_app_num,undo = undo_app_num,done = done_app_num)
+    return render_template('fever_doctor_diagnosis.html',realname = realname,name=username, sidebarItems=fever_doctorItems,records=records,hav=len(appointments),finishdic = finishdic,total = total_app_num,undo = undo_app_num,done = done_app_num)
 
 @bp.route('/fever_doctor/?<string:username>/add_diagnosis/<id>',methods=['GET', 'POST'])
 def add_diagnosis(username, id):
@@ -283,18 +283,36 @@ def trans_diagnosis(username, id):
                                             FROM department
                                             WHERE department_id != 5
                                         ''').fetchall()
+
+    depdic = {}
+    for i in all_departments:
+        depdic[i[1]] = i[0]
+
     # 给出医生列表
     all_doctors = db.execute('''
-                                    SELECT name,department_name,e_id
+                                    SELECT name,a.department_id,e_id
                                     FROM appointment a 
                                     INNER JOIN employees e ON e_id = doc_id
                                     INNER JOIN department m ON a.department_id = m.department_id
                                     WHERE a.department_id != 5
                                 ''').fetchall()
+
+
+    docdic = {}
+    for i in all_doctors:
+        if docdic.get(i[1]) == None:
+            tempdic = {}
+            tempdic[i[2]] = i[0]
+            docdic[i[1]] = tempdic
+        elif docdic[i[1]].get(i[2]) == None:
+            docdic[i[1]][i[2]] = i[0]
+
+    #print(docdic)
+
     if request.method == 'POST':
 
-        department_id = request.form['department']
-        doc_id = request.form['doctor']
+        department_id = request.form['depid']
+        doc_id = request.form['docid']
         db.execute('''UPDATE appointment SET department_id=?,doc_id = ?
         WHERE app_id = ?''',(department_id, doc_id, app_id))
 
@@ -302,7 +320,7 @@ def trans_diagnosis(username, id):
 
         return render_template('loading.html')
 
-    return render_template('fever_doctor_trans_diagnosis.html', name=username,appid = app_id)
+    return render_template('fever_doctor_transdiagnosis_working.html', name=username,appid = app_id,alldoc = docdic, alldep = depdic)
 
 def countfunc(dicc,iid):
     count = 0

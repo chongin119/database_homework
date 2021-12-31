@@ -42,8 +42,7 @@ fever_doctorItems = [
                 {"isTitle": False,"name":"主頁","icon":"grid-fill","filename":"fever_doctor.html","url":'fever_doctor.doctor'},
                 {"isTitle": True,"name":"功能"},
                 {"isTitle": False,"name":"查看所有预约","icon":"grid-fill","filename":"fever_doctor_appointments.html","url":'appointment.fever_appointments'},
-                {"isTitle": False,"name":"看诊","icon":"grid-fill","filename":"doctor_diagnosis.html","url":'fever_doctor.doctor'},
-                {"isTitle": False,"name":"转诊","icon":"grid-fill","filename":"doctor_diagnosis.html","url":'fever_doctor.doctor'},
-                {"isTitle": False,"name":"查看历史看诊","icon":"grid-fill","filename":"doctor_history.html","url":'fever_doctor.doctor'},
+                {"isTitle": False,"name":"看诊","icon":"grid-fill","filename":"fever_doctor_diagnosis.html","url":'fever_doctor.diagnosis'},
+                {"isTitle": False,"name":"查看历史看诊","icon":"grid-fill","filename":"fever_doctor_history.html","url":'fever_doctor.history'},
                 {"isTitle": False,"name":"修改个人信息","icon":"grid-fill","filename":"fever_doctor_change_inf.html","url":'fever_doctor.change_inf'}
 ]
