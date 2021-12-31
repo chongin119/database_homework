@@ -1,0 +1,329 @@
+{% set title = 'Dashboard' %}
+{% set filename = 'patient_add_fever_appointment.html' %}
+
+{% extends 'layouts/master.html' %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='vendors/iconly/bold.css') }}">
+{% endblock %}
+
+{% block headscripts %}
+    <script>
+        first = ""
+        second = ""
+
+        function myclick3(obj){
+            address = {{ addressdic | safe }}
+            document.getElementById("ddrop1").innerHTML = obj.text
+            document.getElementById("drop2").innerHTML = `
+            <span style="display: block">曾到市</span>
+                                <div class="btn-group mb-1">
+
+                                    <div class="dropdown">
+                                        <button class="btn btn-primary dropdown-toggle me-1" type="button"
+                                            id="ddrop2" data-bs-toggle="dropdown" aria-haspopup="true"
+                                            aria-expanded="false" value="">
+                                            请选择市
+                                        </button>
+                                        <div id="drop2context" class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+
+                                        </div>
+                                    </div>
+                                </div>
+            `
+            contt = ""
+            first = obj.text
+            for(secondi in address[obj.text]){
+
+                contt += `
+                    <a class="dropdown-item" value=""  id="address" onclick=myclick4(this)>%s</a>
+                `.format(secondi)
+            }
+            document.getElementById("drop2context").innerHTML = contt
+        }
+
+        function myclick4(obj){
+            address = {{ addressdic | safe }}
+            document.getElementById("ddrop2").innerHTML = obj.text
+            document.getElementById("drop3").innerHTML = `
+            <span style="display: block">曾到区</span>
+                                <div class="btn-group mb-1">
+
+                                    <div class="dropdown">
+                                        <button class="btn btn-primary dropdown-toggle me-1" type="button"
+                                            id="ddrop3" data-bs-toggle="dropdown" aria-haspopup="true"
+                                            aria-expanded="false" value="">
+                                            请选择区
+                                        </button>
+                                        <div id="drop3context" class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+
+                                        </div>
+                                    </div>
+                                </div>
+            `
+
+
+
+            contt = ""
+            second = obj.text
+            for(thirdi=0; thirdi<address[first][obj.text].length;thirdi++){
+
+                contt += `
+                    <a class="dropdown-item" value=""  id="address" onclick=myclick5(this)>%s</a>
+                `.format(address[first][obj.text][thirdi])
+            }
+            document.getElementById("drop3context").innerHTML = contt
+        }
+        function myclick5(obj){
+            document.getElementById("ddrop3").innerHTML = obj.text
+            document.getElementById("province").value = first
+            document.getElementById("city").value = second
+            document.getElementById("district").value = obj.text
+        }
+    </script>
+    <script>
+        function myclick2(obj){
+            let npl = {{ npldic | safe }}
+
+            let nplname = npl['name']
+            let nplpassport = npl['passport']
+            let nplphone = npl['phone']
+
+            let doc_id = obj.id.split("_")[1]
+            let ddate = obj.id.split("_")[2]
+            let department_id = obj.id.split("_")[0]
+            document.getElementById("card2").innerHTML =
+                `<div class="card-header">
+                    <h4>流行病调查登记表</h4>
+                </div>
+                 <div class="card-body">
+                    <form method="post">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 style="display: block"><b>基本信息</b></h6>
+                                <div class="form-group">
+                                    <label for="basicInput">姓名</label>
+                                    <input type="text" class="form-control" id="basicInput" placeholder="%s" disabled>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="helpInputTop">身份证</label>
+                                    <input type="text" class="form-control" id="helpInputTop" placeholder="%s" disabled>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="helperText">电话</label>
+                                    <input type="text" id="helperText" class="form-control" placeholder="%s" disabled>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 style="display: block"><b>临床表现</b></h6>
+                                <div class="form-group">
+                                    <label for="temperature ">温度（摄氏度）</label>
+                                    <input type="text" class="form-control" id="temperature" name="temperature" value="36.5">
+                                </div>
+                                <div class="form-group">
+                                    <span style="display: block">是否存在以下症状（发热，咳嗽，腹泻）</span>
+                                    <div style="display: inline-block;margin-right: 50px">
+                                        <input class="form-check-input" type="radio" name="rm" id="rm_1" value="有症状">
+                                        <label class="form-check-label" for="rm_1">
+                                            是
+                                        </label>
+                                    </div>
+                                    <div style="display: inline-block;margin: 5px">
+                                        <input class="form-check-input" type="radio" name="rm" id="rm_2" value="无症状" checked>
+                                        <label class="form-check-label" for="rm_2">
+                                            否
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <span style="display: block">14天内是否曾到中高风险地区</span>
+                                    <div style="display: inline-block;margin-right: 50px">
+                                        <input class="form-check-input" type="radio" name="r14" value="曾到" id="r14_1">
+                                        <label class="form-check-label" for="r14_1">
+                                            是
+                                        </label>
+                                    </div>
+                                    <div style="display: inline-block;margin: 5px">
+                                        <input class="form-check-input" type="radio" name="r14" value="未曾到" id="r14_2" checked>
+                                        <label class="form-check-label" for="r14_2">
+                                            否
+                                        </label>
+                                    </div>
+                                </div>
+                                <span style="display: block">曾到省</span>
+                                <div class="btn-group mb-1">
+
+                                    <div class="dropdown">
+                                        <button class="btn btn-primary dropdown-toggle me-1" type="button"
+                                            id="ddrop1" data-bs-toggle="dropdown" aria-haspopup="true"
+                                            aria-expanded="false" value="">
+                                            请选择省
+                                        </button>
+                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                            {% for address in addressdic.keys() %}
+                                                <a class="dropdown-item" value={{ address }} name = {{ address }} id="address" onclick=myclick3(this)>{{ address }}</a>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="drop2">
+
+                                </div>
+                                <div id="drop3">
+                                </div>
+                            </div>
+                        </div>
+                    <input type="hidden" id="province" name="province" value="其他">
+                    <input type="hidden" id="city" name="city" value="其他">
+                    <input type="hidden" id="district" name="district" value="其他">
+                    <input type="hidden" name="de_id" value="%s">
+                    <input type="hidden" name="doc_id" value="%s">
+                    <input type="hidden" name="date" value="%s">
+                    <button class="btn btn-primary btn-block btn-lg shadow-lg mt-5">提交并预约</button>
+                    </form>
+                </div>
+                `.format(nplname,nplpassport,nplphone,department_id,doc_id,ddate)
+        }
+    </script>
+
+
+{% endblock %}
+
+{% block content %}
+<div>
+    <div class="page-heading" style="float: left;width: 90%;">
+        <h3>Hello! patient {{realname}}!</h3>
+    </div>
+    <div class="page-heading" style="float: left; width: 10%;">
+        <button class="btn btn-primary btn-block"><a href="{{ url_for('auth.logout',username = name) }}" class="btn btn-primary btn-block">Logout</a></button>
+    </div>
+</div>
+<div class="page-content">
+    <div class="row">
+        <div class="card">
+            <div class="card-header">
+                <h4>新增预约</h4>
+            </div>
+            <div id="cardbody" class="card-body">
+                <input class="alert alert-secondary" style=";margin-left: 2%; height: 35px;width: 300px" id="date" type="date" value="">
+
+                <div id="context" class="table-responsive">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="page-content">
+    <div class="row">
+        <div id = "card2" class="card">
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block js %}
+    <script src="{{ url_for('static', filename='vendors/apexcharts/apexcharts.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/pages/dashboard.js') }}"></script>
+    <script>
+
+        String.prototype.format = function (){
+            let args = Array.prototype.slice.call(arguments);
+            let count=0;
+            return this.replace(/%s/g, function (s,i){
+                return args[count++];
+            });
+        }
+
+        document.getElementById("date").addEventListener("input", myFunction);
+        function myFunction(){
+            document.getElementById("card2").innerHTML = ""
+            ddate = document.getElementById("date").value
+            //console.log(ddate)
+            //console.log(val)
+            showcontext()
+        }
+
+        function showcontext(){
+            ddate = document.getElementById("date").value
+            sspecialty = '发热科'
+            appo = {{ appointments | safe}}
+            ssum = {{ sum }}
+            temp = ddate + ',' + sspecialty
+
+            alldoc = {{ alldoctor | safe }}
+
+            let ddicdep = {{ alldepartments | safe }}
+            document.getElementById("context").innerHTML =
+                `<table class="table table-hover table-lg">
+                    <thead>
+                        <tr>
+                            <th>日期</th>
+                            <th>医生</th>
+                            <th>剩余预约名额</th>
+                            <th>按此预约</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ttbody">
+                    </tbody>
+                </table>`
+            let contt = ""
+
+
+            let tempappoobj = {}
+
+            if(appo[temp] == undefined){
+                tempappoobj = {}
+            }else{
+                for(let i = 0;i<appo[temp].length;i++){
+                    tempappoobj[appo[temp][i][2]] = {}
+                    tempappoobj[appo[temp][i][2]]['name'] = appo[temp][i][0]
+                    tempappoobj[appo[temp][i][2]]['times'] = appo[temp][i][1]
+                }
+            }
+
+            for(let i=0;i<alldoc[sspecialty].length;i++){
+                let tempcota = ssum
+                if(tempappoobj[alldoc[sspecialty][i][0]] != undefined){
+                    tempcota = ssum - tempappoobj[alldoc[sspecialty][i][0]]['times']
+                }
+                //console.log(test[temp][i][0],test[temp][i][1])
+                contt +=
+                    `<tr>
+                        <td class="col-3">
+                            <div class="d-flex align-items-center">
+                                <div class="avatar avatar-md">
+                                    <img src="{{ url_for('static', filename='images/faces/5.jpg') }}">
+                                </div>
+                                <p class="font-bold ms-3 mb-0">%s</p>
+                            </div>
+                        </td>
+                        <td class="col-auto">
+                            <p class=" mb-0">%s</p>
+                        </td>
+                        <td class="col-auto">
+                            <p class=" mb-0">%s</p>
+                        </td>
+                        <td class="col-auto">
+                            <p class=" mb-0">
+                                <button id = "%s" onclick=myclick2(this) style="float: left; width: 50%;" class="btn btn-primary btn-block">按此预约</button>
+                            </p>
+                        </td>
+                    </tr>`.format(ddate,alldoc[sspecialty][i][1],tempcota,ddicdep[sspecialty]+'_'+alldoc[sspecialty][i][0]+'_'+ddate)
+
+            }
+            //console.log(ddicdep)
+            document.getElementById('ttbody').innerHTML = contt
+            for(let i=0;i<alldoc[sspecialty].length;i++) {
+                if(tempappoobj[alldoc[sspecialty][i][0]] != undefined){
+                    if(tempappoobj[alldoc[sspecialty][i][0]]['times'] == ssum){
+                        document.getElementById(ddicdep[sspecialty]+'_'+alldoc[sspecialty][i][0]+'_'+ddate).disabled = true
+                        document.getElementById(ddicdep[sspecialty]+'_'+alldoc[sspecialty][i][0]+'_'+ddate).innerHTML = '约满'
+                    }
+                }
+            }
+        }
+    </script>
+{% endblock %}
