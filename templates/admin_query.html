@@ -1,0 +1,375 @@
+{% set title = 'Dashboard' %}
+{% set filename = 'admin_query.html' %}
+
+{% extends 'layouts/master.html' %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='vendors/iconly/bold.css') }}">
+{% endblock %}
+
+{% block headscripts %}
+    <script>
+        function myclick1(obj) {
+            visit_pats = {{ visit_pats|safe }}
+            cont = `
+                    <div class="card-header">
+                        <h4 style="float: left; width: 85%;">就诊次数最多患者</h4>
+                    </div>
+                    <div class="table-responsive">
+                            <table class="table table-hover table-lg">
+                                <thead>
+                                    <tr>
+                                        <th>病人姓名</th>
+                                        <th>就诊次数</th>
+
+                                    </tr>
+                                </thead>
+                            <tbody>
+                    `.format()
+            for(var key in visit_pats) {
+                conttemp = `
+                            <tr>
+                                <td class="col-auto">
+                                    <p class="mb-0">%s</p>
+                                </td>
+                                <td class="col-auto">
+                                    <p class="mb-0">%s</p>
+                                </td>
+
+                            </tr>
+                `.format(key, visit_pats[key])
+                cont += conttemp
+            }
+            contend = `
+                        </tbody>
+                            </table>
+                        </div>
+            `.format()
+            cont += contend
+            document.getElementById("context").innerHTML = cont
+        }
+
+        function myclick2(obj){
+            top_doc = {{ top_doc|safe }}
+            cont = `
+                    <div class="card-header">
+                        <h4 style="float: left; width: 85%;">开具病历处方最多医生</h4>
+                    </div>
+                    <div class="table-responsive">
+                            <table class="table table-hover table-lg">
+                                <thead>
+                                    <tr>
+                                        <th>医生姓名</th>
+                                        <th>所属科室</th>
+                                        <th>病历数</th>
+                                        <th>处方数</th>
+
+                                    </tr>
+                                </thead>
+                            <tbody>
+                    `.format()
+            for(var key in top_doc) {
+                conttemp = `
+                            <tr>
+                                <td class="col-auto">
+                                    <p class="mb-0">%s</p>
+                                </td>
+                                <td class="col-auto">
+                                    <p class="mb-0">%s</p>
+                                </td>
+                                <td class="col-auto">
+                                    <p class="mb-0">%s</p>
+                                </td>
+                                <td class="col-auto">
+                                    <p class="mb-0">%s</p>
+                                </td>
+                            </tr>
+                `.format(key, top_doc[key][0], top_doc[key][1], top_doc[key][2])
+                cont += conttemp
+            }
+            contend = `
+                        </tbody>
+                            </table>
+                        </div>
+            `.format()
+            cont += contend
+            document.getElementById("context").innerHTML = cont
+        }
+
+        function myclick3(obj){
+            docs = {{ docs|safe }}
+            cont = `
+                    <div class="card-header">
+                        <h4 style="float: left; width: 85%;">30天内接诊病人数量少于全医院医生平均接诊数量的医生</h4>
+                    </div>
+                    <div class="table-responsive">
+                            <table class="table table-hover table-lg">
+                                <thead>
+                                    <tr>
+                                        <th>医生姓名</th>
+                                        <th>所属科室</th>
+
+                                    </tr>
+                                </thead>
+                            <tbody>
+                    `.format()
+            for(var key in docs) {
+                conttemp = `
+                            <tr>
+                                <td class="col-auto">
+                                    <p class="mb-0">%s</p>
+                                </td>
+                                <td class="col-auto">
+                                    <p class="mb-0">%s</p>
+                                </td>
+
+                            </tr>
+                `.format(key, docs[key])
+                cont += conttemp
+            }
+            contend = `
+                        </tbody>
+                            </table>
+                        </div>
+            `.format()
+            cont += contend
+            document.getElementById("context").innerHTML = cont
+        }
+
+        function myclick4(obj){
+            departs = {{ departs|safe }}
+            cont = `
+                    <div class="card-header">
+                        <h4 style="float: left; width: 85%;">14天内接诊过体温高于37.3度的病人的科室</h4>
+                    </div>
+                    <div class="table-responsive">
+                            <table class="table table-hover table-lg">
+                                <thead>
+                                    <tr>
+                                        <th>科室名称</th>
+
+                                    </tr>
+                                </thead>
+                            <tbody>
+                    `.format()
+            for(var key in departs) {
+                conttemp = `
+                            <tr>
+                                <td class="col-auto">
+                                    <p class="mb-0">%s</p>
+                                </td>
+
+                            </tr>
+                `.format(key)
+                cont += conttemp
+            }
+            contend = `
+                        </tbody>
+                            </table>
+                        </div>
+            `.format()
+            cont += contend
+            document.getElementById("context").innerHTML = cont
+        }
+        function myclick5(obj){
+            meds = {{ meds|safe }}
+            cont = `
+                    <div class="card-header">
+                        <h4 style="float: left; width: 85%;">7天内所有医生开具的处方中，开具数量总数最少的药物名称</h4>
+                    </div>
+                    <div class="table-responsive">
+                            <table class="table table-hover table-lg">
+                                <thead>
+                                    <tr>
+                                        <th>药物名称</th>
+
+                                    </tr>
+                                </thead>
+                            <tbody>
+                    `.format()
+            for(var key in meds) {
+                conttemp = `
+                            <tr>
+                                <td class="col-auto">
+                                    <p class="mb-0">%s</p>
+                                </td>
+
+                            </tr>
+                `.format(key)
+                cont += conttemp
+            }
+            contend = `
+                        </tbody>
+                            </table>
+                        </div>
+            `.format()
+            cont += contend
+            document.getElementById("context").innerHTML = cont
+        }
+        function myclick6(obj){
+            missed_pats = {{ missed_pats|safe }}
+            cont = `
+                    <div class="card-header">
+                        <h4 style="float: left; width: 85%;">30天内爽约次数超过2次的患者</h4>
+                    </div>
+                    <div class="table-responsive">
+                            <table class="table table-hover table-lg">
+                                <thead>
+                                    <tr>
+                                        <th>患者姓名</th>
+                                        <th>身份证</th>
+                                    </tr>
+                                </thead>
+                            <tbody>
+                    `.format()
+            for(var key in missed_pats) {
+                conttemp = `
+                            <tr>
+                                <td class="col-auto">
+                                    <p class="mb-0">%s</p>
+                                </td>
+                                <td class="col-auto">
+                                    <p class="mb-0">%s</p>
+                                </td>
+                            </tr>
+                `.format(key, missed_pats[key])
+                cont += conttemp
+            }
+            contend = `
+                        </tbody>
+                            </table>
+                        </div>
+            `.format()
+            cont += contend
+            document.getElementById("context").innerHTML = cont
+        }
+
+    </script>
+{% endblock %}
+
+{% block content %}
+<div>
+    <div id="top" class="page-heading" style="float: left;width: 90%;">
+        <h3>伟大的管理员</h3>
+    </div>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+                {% for message in messages %}
+                    <p class="auth-subtitle mb-1 " style="font-size: 15px; color: red;">{{ message }}</p>
+                {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <div class="page-heading" style="float: left; width: 10%;">
+        <button class="btn btn-primary btn-block"><a href="{{ url_for('auth.logout',username = name) }}" class="btn btn-primary btn-block">Logout</a></button>
+    </div>
+</div>
+<div class="page-content">
+        <div class="col-12  ">
+            <div class="row">
+                <div id="context" class="card">
+
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h4 style="float: left; width: 85%;">所有病人</h4>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-lg">
+                                <thead>
+                                    <tr>
+                                        <th>查询内容</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                            <tr>
+
+                                                <td class="col-auto">
+                                                    <p class="mb-0">2021年之后就诊次数前十的患者</p>
+                                                </td>
+                                                <td class="col-auto">
+                                                    <button href="#top" class="btn btn-primary btn-block" style="float: left; width: 50%;" onclick=myclick1(this)>查询</button>
+                                                </td>
+
+                                            </tr>
+                                            <tr>
+
+                                                <td class="col-auto">
+                                                    <p class="mb-0">开具病历和处方数量最多的医生</p>
+                                                </td>
+                                                <td class="col-auto">
+                                                    <button href="#top"  class="btn btn-primary btn-block" style="float: left; width: 50%;" onclick=myclick2(this)>查询</button>
+                                                </td>
+
+                                            </tr>
+                                            <tr>
+
+                                                <td class="col-auto">
+                                                    <p class="mb-0">30天接诊病人数量少于全院平均的医生</p>
+                                                </td>
+                                                <td class="col-auto">
+                                                    <button href="#top"  class="btn btn-primary btn-block" style="float: left; width: 50%;" onclick=myclick3(this)>查询</button>
+                                                </td>
+
+                                            </tr>
+                                            <tr>
+
+                                                <td class="col-auto">
+                                                    <p class="mb-0">在14天内接诊过体温高于37.3度的病人的科室</p>
+                                                </td>
+                                                <td class="col-auto">
+                                                    <button href="#top"  class="btn btn-primary btn-block" style="float: left; width: 50%;" onclick=myclick4(this)>查询</button>
+                                                </td>
+
+                                            </tr>
+                                            <tr>
+
+                                                <td class="col-auto">
+                                                    <p class="mb-0">7天开具总数最少的药物</p>
+                                                </td>
+                                                <td class="col-auto">
+                                                    <button href="#top" class="btn btn-primary btn-block" style="float: left; width: 50%;" onclick=myclick5(this)>查询</button>
+                                                </td>
+
+                                            </tr>
+                                            <tr>
+
+                                                <td class="col-auto">
+                                                    <p class="mb-0">30天内爽约超2次的患者</p>
+                                                </td>
+                                                <td class="col-auto">
+                                                    <button href="#top" class="btn btn-primary btn-block" style="float: left; width: 50%;" onclick=myclick6(this)>查询</button>
+                                                </td>
+
+                                            </tr>
+
+
+
+
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+</div>
+{% endblock %}
+{% block js %}
+<script src="{{ url_for('static', filename='vendors/apexcharts/apexcharts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/pages/dashboard.js') }}"></script>
+<script>
+    String.prototype.format = function (){
+            let args = Array.prototype.slice.call(arguments);
+            let count=0;
+            return this.replace(/%s/g, function (s,i){
+                return args[count++];
+            });
+        }
+</script>
+{% endblock %}

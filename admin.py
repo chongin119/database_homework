@@ -6,6 +6,7 @@ from dbfunc import connect_db,match_user_pwd,disconnect_db,get_domain,insert_use
 from dbfunc import databasePATH,check_repeat
 from sliderbaritem import adminItems
 import datetime
+import required_search as rs
 bp = Blueprint('admin', __name__)
 
 db = connect_db(databasePATH)
@@ -496,4 +497,14 @@ def delete_record(username, id):
 
     return redirect(url_for('admin.records', username=username))
 
+@bp.route('/admin/?<string:username>/query',methods=['GET','POST'])
+def query(username):
+    meds = rs.MinMedIn7days()
+    departs = rs.HighTempDepartIn14days()
+    docs = rs.LowerAvgDocIn30days()
+    missed_pats = rs.MissedAppoIn30days()
+    top_doc = rs.RecPreRankTop()
+    visit_pats = rs.PatRankTop()
 
+    return render_template('admin_query.html', meds=meds, departs=departs, docs=docs, missed_pats=missed_pats,
+                           top_doc=top_doc, visit_pats=visit_pats, name=username, sidebarItems=adminItems)
