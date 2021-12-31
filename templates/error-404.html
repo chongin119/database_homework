@@ -1,0 +1,49 @@
+{% set title = '404' %}
+{% extends 'layouts/error.html' %}
+
+{% block headscripts %}
+    <script>
+        function delay(n){
+            return new Promise(function(resolve){
+                setTimeout(resolve,n*1000);
+            });
+        }
+
+        async function myAsyncFunction(){
+
+            //console.log("Before the delay")
+
+            await delay(2);
+
+            //console.log("After the delay")
+            myclick()
+
+        }
+        function myclick(){
+            if(window.opener == null){
+
+                window.history.back()
+            }else{
+                window.close()
+            }
+        }
+    </script>
+{% endblock %}
+
+{% block bodyattr %}
+    onload= myAsyncFunction()
+{% endblock %}
+
+{% block content %}
+
+<div class="error-page container">
+    <div class="col-md-8 col-12 offset-md-2">
+        <img class="img-error" src="{{ url_for('static', filename='images/samples/error-404.png') }}" alt="Not Found">
+        <div class="text-center">
+            <h1 class="error-title">NOT FOUND</h1>
+            <p class='fs-5 text-gray-600'>出错！！两秒后将返回或关闭</p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

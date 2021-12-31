@@ -3,6 +3,8 @@
 **运行方法**
 
 ```shell
+git clone https://github.com/chongin119/database_homework.git
+cd database_homework
 python app.py
 ```
 
