@@ -24,6 +24,14 @@ def get_id2pname(db,id):
     for i in tt:
         return i[0]
 
+def get_eid2name(db, id):
+    cur = db.cursor()
+    tt = cur.execute("select name \
+                                  from employee \
+                                  where e_id = '%s'" % id)
+    for i in tt:
+        return i[0]
+
 @bp.route('/admin/?<string:username>',methods=['GET','POST'])
 def admin(username):
     if session.get(username) is not None:
@@ -130,14 +138,19 @@ def doctors(username):
     # 找出全部医生，不包括科长
     # 格式为(医生id,医生姓名，电话，邮箱，科室)
     doctors = db.execute('''
-                                    SELECT e_id,e.name,e.phone,e.email, department_name
+                                    SELECT e_id,e.name,e.phone,e.email, department_name, graduate_school, degree
+                                    , technical_title, specialty
                                     FROM employees e 
                                     INNER JOIN doctor d ON d.doc_id = e_id
                                     INNER JOIN department de ON d.department_id = de.department_id
                                     WHERE e_id NOT IN (SELECT chief_id FROM chief)  
                                 ''', ).fetchall()
 
-    return render_template('admin_doctors.html',name=username,  sidebarItems=adminItems, doctors=doctors)
+    patdic = {}
+    for i in doctors:
+        patdic[i[0]] = [i[1], i[2], i[3], i[4], i[5], i[6], i[7], i[8]]
+    return render_template('admin_doctors.html', patients=patdic, name=username, sidebarItems=adminItems,
+                           hav=len(doctors))
 
 
 
@@ -145,9 +158,11 @@ def doctors(username):
 def add_doctor(username):
     # 给出科室信息，用于选择医生所属科室
     departments = db.execute("SELECT * FROM department").fetchall()
-
+    deptdic = {}
+    for i in departments:
+        deptdic[i[0]] = i[1]
     if request.method == "POST":
-        name = request.form['name']
+        name = request.form['realname']
         passport = request.form['passport']
         gender = request.form['gender']
         phone = request.form['phone']
@@ -158,10 +173,8 @@ def add_doctor(username):
         degree = request.form['degree']
         technical_title = request.form['title']
         specialty = request.form['specialty']
-        department = request.form['department']
+        department_id = request.form['department']
 
-        department_id = db.execute('''SELECT department_id FROM department WHERE department_name = ?''',
-                                   (department,)).fetchone()[0]
         if check_repeat(db, user):
             flash('The username already exists')
             return redirect(url_for('chief.doctors', username=username))
@@ -181,7 +194,7 @@ def add_doctor(username):
         flash('Successfully add doctor')
         return redirect(url_for('admin.doctors', username=username))
 
-    return render_template('chief_add_doctor.html',name=username,departments=departments)
+    return render_template('admin_add_doctor.html',name=username,deptdic=deptdic)
 
 
 @bp.route('/admin/?<string:username>/update_doctor/<id>', methods=['GET', 'POST'])
@@ -192,7 +205,10 @@ def update_doctor(username, id):
                             , (doc_id,)).fetchone()
     # 给出科室列表，用于修改科室
     departments = db.execute('''SELECT department_id,department_name FROM department'''
-                            , (doc_id,)).fetchall()
+                            ).fetchall()
+    deptdic = {}
+    for i in departments:
+        deptdic[i[0]] = i[1]
     if request.method == "POST":
         name = request.form['name']
         passport = request.form['passport']
@@ -201,7 +217,6 @@ def update_doctor(username, id):
         email = request.form['email']
         user = request.form['username']
         pwd = request.form['password']
-        repwd = request.form['repwd']
         graduate_school = request.form['school']
         degree = request.form['degree']
         technical_title = request.form['title']
@@ -209,9 +224,6 @@ def update_doctor(username, id):
         department_id = request.form['department']
 
         old_username = doctor_inf[6]
-        if pwd != repwd:
-            flash('password is not equal to confirm_password!')
-            return redirect(url_for('admin.doctors',username=username))
         if check_repeat(db, user):
             flash('The username already exists')
             return redirect(url_for('admin.doctors'))
@@ -241,7 +253,7 @@ def update_doctor(username, id):
         flash('Successfully modified information')
         return redirect(url_for('admin.doctors', username=username))
 
-    return render_template('admin_update_doctor.html', name=username,doctor_inf=doctor_inf,departments=departments)
+    return render_template('admin_update_doctor.html', name=username,allinf=doctor_inf ,deptdic=deptdic,department_name=department_name)
 
 @bp.route('/admin/?<string:username>/delete_doctor/<id>', methods=['GET', 'POST'])
 def delete_doctor(username, id):
@@ -304,7 +316,7 @@ def add_department(username):
         flash('Successfully add department')
         return redirect(url_for('admin.departments', username=username))
 
-    return render_template('chief_add_department.html',name=username,candidate_chief=candidate_chief)
+    return render_template('admin_add_department.html',name=username,candidate_chief=candidate_chief)
 
 
 @bp.route('/admin/?<string:username>/update_department/<id>', methods=['GET', 'POST'])

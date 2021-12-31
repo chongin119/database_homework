@@ -1,0 +1,122 @@
+{% set title = 'Dashboard' %}
+{% set filename = 'admin_add_doctor.html' %}
+
+{% extends 'layouts/masterforworking.html' %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='vendors/iconly/bold.css') }}">
+{% endblock %}
+
+{% block headscripts %}
+    <script>
+        function myclick(obj){
+            deptdic = {{ deptdic | safe }}
+            document.getElementById("dropdownMenuButton").innerHTML = deptdic[obj.id]
+            document.getElementById("deptid").value = obj.id
+        }
+    </script>
+{% endblock %}
+
+{% block content %}
+<div>
+    <div class="page-heading" >
+        <h3>正在处理</h3>
+    </div>
+</div>
+<div class="page-content">
+        <div class="col-12  ">
+            <div class="row">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 style="float: left; width: 85%;">新增医生</h4>
+                    </div>
+                    <form method="post">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="realname">姓名</label>
+                                        <input type="text" class="form-control" id="realname" name="realname">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="passport">身份证号</label>
+                                        <input type="text" class="form-control" id="passport" name="passport">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="gender">姓别</label>
+                                        <input type="text" id="gender" class="form-control" name="gender">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="phone">电话</label>
+                                        <input type="text" id="phone" class="form-control" name="phone">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="email">邮箱</label>
+                                        <input type="text" id="email" class="form-control" name="email">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="username">用户名</label>
+                                        <input type="text" id="username" class="form-control" name="username">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="password">用户名</label>
+                                        <input type="text" id="password" class="form-control" name="password">
+                                    </div>
+                                    <button type = "submit" style="width: 50%" class="btn btn-primary btn-block btn-lg shadow-lg mt-5">新增</button>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="school">毕业院校</label>
+                                        <input type="text" id="school" class="form-control" name="school">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="degree">学历</label>
+                                        <input type="text" class="form-control" id="degree" name="degree">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="title">职称</label>
+                                        <input type="text" id="title" class="form-control" name="title">
+                                    </div>
+                                     <div class="form-group">
+                                        <label for="specialty">专业</label>
+                                        <input type="text" id="specialty" class="form-control" name="specialty">
+                                    </div>
+                                <div style="" class="btn-group mb-1">
+                                <div class="dropdown">
+                                    <button class="btn btn-primary dropdown-toggle me-1" type="button"
+                                        id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true"
+                                        aria-expanded="false" value="">
+                                        请选择科室
+                                    </button>
+                                    <input type="hidden" value="" id="department" name="department"/>
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                        {% for dept in deptdic %}
+                                            <a class="dropdown-item"  id="{{ dept }}" onclick=myclick(this)>{{ deptdic[dept] }}</a>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+</div>
+{% endblock %}
+{% block js %}
+<script src="{{ url_for('static', filename='vendors/apexcharts/apexcharts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/pages/dashboard.js') }}"></script>
+<script>
+    String.prototype.format = function (){
+            let args = Array.prototype.slice.call(arguments);
+            let count=0;
+            return this.replace(/%s/g, function (s,i){
+                return args[count++];
+            });
+        }
+</script>
+{% endblock %}
