@@ -235,7 +235,10 @@ def diagnosis(username):
             finishdic[cnt] = ""
     #print(finishdic)
 
-    return render_template('doctor_diagnosis.html',realname = realname,name=username, sidebarItems=doctorItems,records=records,hav=len(appointments),finishdic = finishdic,total = total_app_num,undo = undo_app_num,done = done_app_num, riskdic=risk_patient_dic)
+    ranking = ['success', 'primary', 'warning', 'danger']
+    rankchin = ['无风险', '低风险', '中风险', '高风险']
+
+    return render_template('doctor_diagnosis.html',ranking=ranking,rankchin=rankchin,realname = realname,name=username, sidebarItems=doctorItems,records=records,hav=len(appointments),finishdic = finishdic,total = total_app_num,undo = undo_app_num,done = done_app_num, riskdic=risk_patient_dic)
 
 @bp.route('/doctor/?<string:username>/add_diagnosis/<id>',methods=['GET', 'POST'])
 def add_diagnosis(username, id):
