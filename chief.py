@@ -410,7 +410,12 @@ def update_record(username, id):
         flash('Successfully modified information')
         return render_template('loading.html')
 
-    return render_template('chief_subordinate_working.html',inf=prescription_record,name=username,appid = app_id)
+    medicine_inf = db.execute("SELECT  * FROM medicine").fetchall()
+    meddic = {}
+
+    for i in medicine_inf:
+        meddic[i[0]] = i[1]
+    return render_template('chief_subordinate_working.html',inf=prescription_record,name=username,appid = app_id, meddic=meddic)
 
 # 查看下属医生
 @bp.route('/chief/?<string:username>/doctors',methods=['GET','POST'])
