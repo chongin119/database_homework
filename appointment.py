@@ -180,8 +180,8 @@ def patient_add_appointment(username):
     #print(npldic)
     return render_template('patient_add_appointment.html',addressdic = addressdic,realname = realname,name = username,sidebarItems = patientItems,appointments = dic,sum = APP_NUM,alldepartments = dicdep,alldoctor = dicdoctor,npldic = npldic)
 
-
-
+# 待写前端
+# ---------------------------------------------------
 
 @bp.route('/admin/?<string:username>/appointments',methods=['GET', 'POST'])
 def admin_appointments(username):
@@ -289,6 +289,7 @@ def admin_delete_appointment(username):
 
     return redirect(url_for('appointment.admin_appointments', username=username))
 
+# ------------------------------------------------------
 
 @bp.route('/patient/?<string:username>/add_fever_appointment', methods=['GET', 'POST'])
 def patient_add_fever_appointment(username):

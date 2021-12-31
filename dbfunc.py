@@ -1,6 +1,6 @@
 import sqlite3
 from sqlite3.dbapi2 import connect
-
+import time
 DB_path = 'testing.db'
 databasePATH = "hospital.db"
 
@@ -68,6 +68,13 @@ def get_id(db,user):
                       where username = '%s'" %user)
     for i in tt:
         return i[0]
+
+def log_write(user, action, dist):
+    date = str(time.strftime("%Y-%m-%d", time.localtime()))
+    log_path = 'log.txt'
+    with open(log_path, 'a') as f:
+        f.write(f'{date} {user} {action} {dist}\n')
+        f.close()
 
 if __name__ == '__main__':
     db = connect_db(DB_path)

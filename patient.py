@@ -179,6 +179,8 @@ def history(username):
             dicdoctor[j] = i
 
     return render_template('patient_history.html',realname = realname,name = username,sidebarItems = patientItems,alldoc = dicdoctor,records = records,rfordoc = recordsfordoc,hav = len(records))
+# 待写前端
+# ---------------------------------------------------
 
 @bp.route('/patient/?<string:username>/bill',methods=['GET','POST'])
 def bill(username):

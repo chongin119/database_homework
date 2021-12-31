@@ -374,6 +374,10 @@ def update_department(username, id):
 #     db.commit()
 #     return redirect(url_for('admin.doctors',username=username))
 
+
+# 待写前端
+# ---------------------------------------------------
+
 @bp.route('/admin/?<string:username>/records',methods=['GET', 'POST'])
 def records(username):
     # 给出所有病历和药方数据，格式(app_id,日期，病人姓名，病人id，医生姓名，医生id，体温，症状，地址，是否到高风险地区)
