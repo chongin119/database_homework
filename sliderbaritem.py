@@ -34,8 +34,10 @@ chiefItems = [
 
 adminItems = [
                 {"isTitle": False,"name":"主頁","icon":"grid-fill","filename":"admin.html","url":'admin.admin'},
+                {"isTitle": False, "name": "查询", "icon": "grid-fill", "filename": "admin_query.html", "url": 'admin.query'},
                 {"isTitle": False,"name":"所有患者","icon":"grid-fill","filename":"admin_patients.html","url":'admin.patients'},
                 {"isTitle": False,"name":"所有医生","icon":"grid-fill","filename":"admin_doctors.html","url":'admin.doctors'},
+                {"isTitle": False,"name":"所有科室","icon":"grid-fill","filename":"admin_departments.html","url":'admin.departments'},
 ]
 
 fever_doctorItems = [

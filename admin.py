@@ -3,9 +3,10 @@ from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for
 )
 from dbfunc import connect_db,match_user_pwd,disconnect_db,get_domain,insert_user_pwd
-from dbfunc import databasePATH,check_repeat
+from dbfunc import databasePATH,check_repeat, log_write
 from sliderbaritem import adminItems
 import datetime
+import required_search as rs
 bp = Blueprint('admin', __name__)
 
 db = connect_db(databasePATH)
@@ -42,7 +43,7 @@ def admin(username):
 @bp.route('/admin/?<string:username>/patients',methods=['GET','POST'])
 def patients(username):
     patients = db.execute("SELECT * FROM patient").fetchall()
-
+    log_write(user=username, action='visit', dist='patient')
     patdic = {}
     for i in patients:
         patdic[i[0]] = [i[1],i[2],i[3],i[4],i[5],i[6],i[7],i[8]]
@@ -71,6 +72,7 @@ def add_patient(username):
         real_name, DOB, passport, gender, phone,email,user,password)).lastrowid
         login_id = db.execute('''INSERT INTO login_inf(username, password, domain)
                     VALUES(?,?,?)''',(user,password,2)).lastrowid
+        log_write(user=username, action='add', dist='patient')
         db.commit()
         flash('Successfully add patient')
         return render_template('loading.html')
@@ -108,6 +110,7 @@ def update_patient(username,id):
                 "UPDATE patient SET name=?, DOB=?,passport=?,gender=?,phone=?,email=?,username=?,password=? \
                 WHERE patient_id=?",
                 (real_name,DOB, passport, gender,phone, email, user, password, patient_id))
+            log_write(user=username, action='edit', dist='patient')
             db.commit()
         else:
             db.execute('''UPDATE login_inf 
@@ -129,6 +132,8 @@ def delete_patient(username, id):
     db.execute("DELETE FROM appointment WHERE patient_id=?", (patient_id,))
     db.execute("DELETE FROM login_inf WHERE username=(SELECT username from patient WHERE patient_id=?)", (patient_id,))
     db.execute("DELETE FROM patient WHERE patient_id=?", (patient_id,))
+    log_write(user=username, action='delete', dist='patient')
+    log_write(user=username, action='delete', dist='appointment')
     db.commit()
     return render_template('loading.html')
 
@@ -145,7 +150,8 @@ def doctors(username):
                                     INNER JOIN department de ON d.department_id = de.department_id
                                     WHERE e_id NOT IN (SELECT chief_id FROM chief)  
                                 ''', ).fetchall()
-
+    log_write(user=username, action='visit', dist='employees')
+    log_write(user=username, action='visit', dist='department')
     patdic = {}
     for i in doctors:
         patdic[i[0]] = [i[1], i[2], i[3], i[4], i[5], i[6], i[7], i[8]]
@@ -182,6 +188,7 @@ def add_doctor(username):
                     INSERT INTO employees(name,passport,gender,phone,email,username,password,
                     graduate_school,degree,technical_title,specialty) VALUES(?,?,?,?,?,?,?,?,?,?,?)'''
                    , (name,passport,gender,phone,email,user,pwd,graduate_school,degree,technical_title,specialty)).lastrowid
+        log_write(user=username, action='add', dist='employees')
         db.execute('''
                             INSERT INTO doctor(doc_id,department_id) VALUES(?,?)'''
                    , (e_id,department_id))
@@ -192,7 +199,7 @@ def add_doctor(username):
         db.commit()
 
         flash('Successfully add doctor')
-        return redirect(url_for('admin.doctors', username=username))
+        return render_template('loading.html')
 
     return render_template('admin_add_doctor.html',name=username,deptdic=deptdic)
 
@@ -224,7 +231,7 @@ def update_doctor(username, id):
         department_id = request.form['department']
 
         old_username = doctor_inf[6]
-        if check_repeat(db, user):
+        if check_repeat(db, user) and user != old_username:
             flash('The username already exists')
             return redirect(url_for('admin.doctors'))
         if pwd != "NULL":
@@ -249,9 +256,11 @@ def update_doctor(username, id):
                                UPDATE doctor SET department_id=?
                                WHERE doc_id = ?
                                ''', (department_id, doc_id))
+        log_write(user=username, action='edit', dist='employees')
+        log_write(user=username, action='edit', dist='department')
         db.commit()
         flash('Successfully modified information')
-        return redirect(url_for('admin.doctors', username=username))
+        return render_template('loading.html')
 
     return render_template('admin_update_doctor.html', name=username,allinf=doctor_inf ,deptdic=deptdic,department_name=department_name)
 
@@ -265,9 +274,12 @@ def delete_doctor(username, id):
     db.execute("DELETE FROM login_inf WHERE username=(SELECT username from employees WHERE e_id=?)", (doc_id,))
     db.execute("DELETE FROM doctor WHERE doc_id=?", (doc_id,))
     db.execute("DELETE FROM employees WHERE e_id=?", (doc_id,))
-
+    log_write(user=username, action='delete', dist='prescription')
+    log_write(user=username, action='delete', dist='records')
+    log_write(user=username, action='delete', dist='appointment')
+    log_write(user=username, action='delete', dist='employees')
     db.commit()
-    return redirect(url_for('admin.doctors',username=username))
+    return render_template('loading.html')
 
 @bp.route('/admin/?<string:username>/departments',methods=['GET','POST'])
 def departments(username):
@@ -281,8 +293,15 @@ def departments(username):
                                     INNER JOIN department de ON d.department_id = de.department_id
                                     WHERE e_id IN (SELECT chief_id FROM chief)  
                                 ''', ).fetchall()
+    log_write(user=username, action='visit', dist='chief')
+    log_write(user=username, action='visit', dist='department')
+    log_write(user=username, action='visit', dist='employees')
 
-    return render_template('admin_departments.html',name=username,  sidebarItems=adminItems, department=chief_departments)
+    patdic = {}
+    for i in chief_departments:
+        patdic[i[0]] = [i[1], i[2], i[3], i[4], i[5], i[6]]
+    return render_template('admin_departments.html', patients=patdic, name=username, sidebarItems=adminItems,
+                           hav=len(chief_departments))
 
 
 @bp.route('/admin/?<string:username>/add_department',methods=['GET','POST'])
@@ -293,9 +312,11 @@ def add_department(username):
                                         FROM employees e 
                                         WHERE e_id NOT IN (SELECT chief_id FROM chief)  
                                     ''', ).fetchall()
-
+    chiefdic = {}
+    for i in candidate_chief:
+        chiefdic[i[0]] = i[1]
     if request.method == "POST":
-        name = request.form['name']
+        name = request.form['dname']
         description = request.form['description']
         chief_id = request.form['chief']
 
@@ -303,10 +324,13 @@ def add_department(username):
         INSERT INTO department(department_name,description)
         VALUES(?,?)
         ''', (name,description)).lastrowid
+
+        log_write(user=username, action='add', dist='department')
         db.execute('''
-                INSERT INTO department(chief_id,department_id)
+                INSERT INTO chief(chief_id,department_id)
                 VALUES(?,?)
                 ''', (chief_id, department_id))
+        log_write(user=username, action='add', dist='chief')
         db.execute('''
                         UPDATE doctor SET department_id=?
                         WHERE doc_id = ?
@@ -314,9 +338,9 @@ def add_department(username):
         db.commit()
 
         flash('Successfully add department')
-        return redirect(url_for('admin.departments', username=username))
+        return render_template('loading.html')
 
-    return render_template('admin_add_department.html',name=username,candidate_chief=candidate_chief)
+    return render_template('admin_add_department.html',name=username,chiefdic=chiefdic)
 
 
 @bp.route('/admin/?<string:username>/update_department/<id>', methods=['GET', 'POST'])
@@ -336,6 +360,10 @@ def update_department(username, id):
                                             FROM employees e 
                                             WHERE e_id NOT IN (SELECT chief_id FROM chief)  
                                         ''', ).fetchall()
+    chiefdic = {}
+    for i in candidate_chief:
+        chiefdic[i[0]] = i[1]
+
     if request.method == "POST":
         name = request.form['name']
         description = request.form['description']
@@ -343,15 +371,17 @@ def update_department(username, id):
 
         db.execute('''UPDATE department SET department_name = ?,description=? WHERE department_id =?''',
                    (name, description, department_id))
+        log_write(user=username, action='edit', dist='department')
         db.execute('''UPDATE chief SET chief_id = ?,department_id=? WHERE department_id =?''',
                    (chief_id, department_id, department_id))
+        log_write(user=username, action='edit', dist='chief')
         db.execute('''UPDATE doctor SET department_id=? WHERE doc_id =?''',
                    (chief_id, department_id, chief_id))
 
         flash('Successfully modified information')
-        return redirect(url_for('admin.departments', username=username))
+        return render_template('loading.html')
 
-    return render_template('admin_update_department.html', name=username,chief_departments=chief_departments,candidate_chief=candidate_chief)
+    return render_template('admin_update_department.html', name=username,allinf=chief_departments,chiefdic=chiefdic)
 
 
 # @bp.route('/admin/?<string:username>/delete_department/<id>', methods=['GET', 'POST'])
@@ -364,6 +394,10 @@ def update_department(username, id):
 #     db.commit()
 #     return redirect(url_for('admin.doctors',username=username))
 
+
+# 待写前端
+# ---------------------------------------------------
+
 @bp.route('/admin/?<string:username>/records',methods=['GET', 'POST'])
 def records(username):
     # 给出所有病历和药方数据，格式(app_id,日期，病人姓名，病人id，医生姓名，医生id，体温，症状，地址，是否到高风险地区)
@@ -374,6 +408,8 @@ def records(username):
         INNER JOIN medicine m ON m.med_id = p.med_id 
         LEFT JOIN medical_record r ON p.app_id = r.app_id
         ORDER BY p.date DESC''').fetchall()
+    log_write(user=username, action='visit', dist='prescription')
+    log_write(user=username, action='visit', dist='records')
 
     return render_template('admin_records.html',name = username,sidebarItems=adminItems,records=prescriptions_records)
 
@@ -419,6 +455,8 @@ def add_record(username):
                           (patient_id, doc_id, datetime.date.today(), temperature, chief_complaint,
                            present_illness_history, past_history, allergic_history, onset_date, current_treatment,
                            diagnosis_assessment, app_id)).lastrowid
+        log_write(user=username, action='add', dist='prescription')
+        log_write(user=username, action='add', dist='records')
         db.commit()
         flash('Successfully add record')
         return redirect(url_for('admin.records', username=username))
@@ -469,6 +507,8 @@ def update_record(username, id):
         db.execute('''UPDATE prescription SET med_id = ?,med_quantity=?
                         WHERE app_id=?'''
                    , (med_id, med_quantity, app_id))
+        log_write(user=username, action='edit', dist='prescription')
+        log_write(user=username, action='edit', dist='records')
         db.commit()
         flash('Successfully modified information')
         return redirect(url_for('admin.records'))
@@ -482,9 +522,20 @@ def delete_record(username, id):
     app_id = id
     db.execute("DELETE FROM prescription WHERE app_id=?", (app_id,))
     db.execute("DELETE FROM medical_record WHERE app_id=?", (app_id,))
-
+    log_write(user=username, action='delete', dist='prescription')
+    log_write(user=username, action='delete', dist='records')
     db.commit()
 
     return redirect(url_for('admin.records', username=username))
 
+@bp.route('/admin/?<string:username>/query',methods=['GET','POST'])
+def query(username):
+    meds = rs.MinMedIn7days()
+    departs = rs.HighTempDepartIn14days()
+    docs = rs.LowerAvgDocIn30days()
+    missed_pats = rs.MissedAppoIn30days()
+    top_doc = rs.RecPreRankTop()
+    visit_pats = rs.PatRankTop()
 
+    return render_template('admin_query.html', meds=meds, departs=departs, docs=docs, missed_pats=missed_pats,
+                           top_doc=top_doc, visit_pats=visit_pats, name=username, sidebarItems=adminItems)

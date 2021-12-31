@@ -3,7 +3,7 @@ from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for
 )
 from dbfunc import connect_db,match_user_pwd,disconnect_db,get_domain,insert_user_pwd,get_id
-from dbfunc import databasePATH
+from dbfunc import databasePATH,log_write
 from sliderbaritem import patientItems,doctorItems,chiefItems,adminItems,fever_doctorItems
 from address import addressdic
 
@@ -52,6 +52,7 @@ def doctor_appointments(username):
                                 INNER JOIN employees e ON e_id = doc_id \
                                 INNER JOIN patient p ON a.patient_id = p.patient_id \
                                 WHERE e_id=? ORDER BY date DESC", (doc_id,)).fetchall()
+    log_write(user=username, action='visit', dist='appointment')
 
     return render_template('doctor_appointments.html',realname = realname,name = username,sidebarItems=doctorItems,appointments=appointments,hav = len(appointments))
 
@@ -63,7 +64,7 @@ def chief_appointments(username):
                                 INNER JOIN employees e ON e_id = doc_id \
                                 INNER JOIN patient p ON a.patient_id = p.patient_id \
                                 WHERE e_id=? ORDER BY date DESC", (doc_id,)).fetchall()
-
+    log_write(user=username, action='visit', dist='appointment')
     return render_template('chief_appointments.html',realname = realname,name = username,sidebarItems=chiefItems,appointments=appointments,hav = len(appointments))
 
 @bp.route('/patient/?<string:username>/patient_appointments',methods=['GET','POST'])
@@ -76,6 +77,7 @@ def patient_appointments(username):
         LEFT JOIN department d ON d.department_id = a.department_id \
         WHERE patient_id=? ORDER BY date DESC", (patient_id,)
     ).fetchall()
+    log_write(user=username, action='visit', dist='appointment')
     #print(patient_id)
     #print(appointments)
     return render_template('patient_appointments.html', realname = realname,name = username,sidebarItems=patientItems,appointments=appointments,hav = len(appointments))
@@ -107,6 +109,7 @@ def patient_add_appointment(username):
         app_id = db.execute('''INSERT INTO appointment(date,patient_id,department_id,doc_id,temperature,address,symptom,risk)
                             VALUES(?,?,?,?,?,?,?,?)''',
                             (app_date, patient_id, department_id, doc_id, temperature,address,symptom,risk)).lastrowid
+        log_write(user=username, action='add', dist='appointment')
         db.commit()
         #先不提交
         
@@ -180,8 +183,8 @@ def patient_add_appointment(username):
     #print(npldic)
     return render_template('patient_add_appointment.html',addressdic = addressdic,realname = realname,name = username,sidebarItems = patientItems,appointments = dic,sum = APP_NUM,alldepartments = dicdep,alldoctor = dicdoctor,npldic = npldic)
 
-
-
+# 待写前端
+# ---------------------------------------------------
 
 @bp.route('/admin/?<string:username>/appointments',methods=['GET', 'POST'])
 def admin_appointments(username):
@@ -190,7 +193,7 @@ def admin_appointments(username):
                                 FROM appointment a \
                                 INNER JOIN employees e ON e_id = doc_id \
                                 INNER JOIN patient p ON a.patient_id = p.patient_id", ).fetchall()
-
+    log_write(user=username, action='visit', dist='appointment')
     return render_template('admin_appointments.html',name = username,sidebarItems=adminItems,appointments=appointments,hav = len(appointments))
 
 
@@ -231,7 +234,7 @@ def admin_add_appointment(username):
                            VALUES(?,?,?,?,?,?,?,?)''',
                            (app_date, patient_id, department_id, doc_id, temperature,address,symptom,risk)).lastrowid
         db.commit()
-
+        log_write(user=username, action='add', dist='appointment')
         return redirect(url_for('appointment.admin_appointments',username=username))
 
     return render_template('patient_add_appointment.html', name = username,sidebarItems = adminItems,patient_list=patient_list,all_doctors=all_doctors,all_departments=all_departments)
@@ -252,7 +255,7 @@ def admin_update_appointment(username,id):
                                 INNER JOIN employees e ON e_id = doc_id
                                 INNER JOIN department m ON a.department_id = m.department_id
                             ''').fetchall()
-
+    log_write(user=username, action='edit', dist='appointment')
     if request.method == 'POST':
         """api to add the appointment in the database"""
 
@@ -284,11 +287,14 @@ def admin_delete_appointment(username):
     db.execute("DELETE FROM appointment WHERE app_id=?", (app_id,))
     db.execute("DELETE FROM prescription WHERE app_id=?", (app_id,))
     db.execute("DELETE FROM medical_record WHERE app_id=?", (app_id,))
-
+    log_write(user=username, action='delete', dist='appointment')
+    log_write(user=username, action='delete', dist='records')
+    log_write(user=username, action='delete', dist='prescription')
     db.commit()
 
     return redirect(url_for('appointment.admin_appointments', username=username))
 
+# ------------------------------------------------------
 
 @bp.route('/patient/?<string:username>/add_fever_appointment', methods=['GET', 'POST'])
 def patient_add_fever_appointment(username):
@@ -317,6 +323,7 @@ def patient_add_fever_appointment(username):
                             VALUES(?,?,?,?,?,?,?,?)''',
                             (app_date, patient_id, department_id, doc_id, temperature,address,symptom,risk)).lastrowid
         db.commit()
+        log_write(user=username, action='add', dist='appointment')
         # 先不提交
 
         return redirect(url_for('appointment.patient_appointments',username=username))
@@ -387,7 +394,7 @@ def fever_appointments(username):
                                 INNER JOIN employees e ON e_id = doc_id \
                                 INNER JOIN patient p ON a.patient_id = p.patient_id \
                                 WHERE e_id=? ORDER BY date DESC", (doc_id,)).fetchall()
-
+    log_write(user=username, action='visit', dist='appointment')
     return render_template('fever_doctor_appointments.html',realname = realname,name = username,sidebarItems=fever_doctorItems,appointments=appointments,hav = len(appointments))
 
 

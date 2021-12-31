@@ -5,7 +5,7 @@ from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for
 )
 from dbfunc import connect_db,match_user_pwd,disconnect_db,get_domain,insert_user_pwd
-from dbfunc import databasePATH,check_repeat
+from dbfunc import databasePATH,check_repeat,log_write
 from sliderbaritem import patientItems
 bp = Blueprint('patient', __name__)
 
@@ -32,6 +32,7 @@ def patient(username):
     realname = get_name(db, username)
     if session.get(username) is not None:
         patient = db.execute("SELECT * FROM patient WHERE username=?", (username,)).fetchall()
+        log_write(user=username, action='visit', dist='patient')
         return render_template('patient.html',realname = realname,name = username,sidebarItems=patientItems, patient=patient)
     return redirect(url_for('auth.login'))
 
@@ -39,6 +40,8 @@ def patient(username):
 def departments(username):
     realname = get_name(db, username)
     departments = db.execute("SELECT * FROM department").fetchall()
+    log_write(user=username, action='visit', dist='department')
+    log_write(user=username, action='visit', dist='employees')
     dicdep = {}
     for cnt in range(len(departments)):
         i,j,k = departments[cnt][0],departments[cnt][1],departments[cnt][2]
@@ -103,6 +106,7 @@ def change_inf(username):
                 "UPDATE patient SET DOB=?,phone=?,email=?,username=? WHERE patient_id=?",
                 (DOB, phone, email, user, patient_id))
             db.commit()
+        log_write(user=username, action='edit', dist='patient')
         flash('Successfully modified information')
         return redirect(url_for('patient.patient', username=user))
 
@@ -131,7 +135,8 @@ def history(username):
     INNER JOIN medicine m ON m.med_id = p.med_id 
     LEFT JOIN medical_record r ON p.app_id = r.app_id
     WHERE p.patient_id=? AND p.date<=? ORDER BY p.date DESC''', (patient_id, datetime.date.today())).fetchall()
-
+    log_write(user=username, action='visit', dist='prescription')
+    log_write(user=username, action='visit', dist='records')
     recordsfordoc = {}
     for cnt in range(len(prescriptions_records)):
         i1,i2,i3,i4,i5,i6,i7,i8,i9,i10,i11,i12,i13 = prescriptions_records[cnt][0],prescriptions_records[cnt][1],prescriptions_records[cnt][2],prescriptions_records[cnt][3], \
@@ -179,6 +184,36 @@ def history(username):
             dicdoctor[j] = i
 
     return render_template('patient_history.html',realname = realname,name = username,sidebarItems = patientItems,alldoc = dicdoctor,records = records,rfordoc = recordsfordoc,hav = len(records))
+# 待写前端
+# ---------------------------------------------------
+
+@bp.route('/patient/?<string:username>/bill',methods=['GET','POST'])
+def bill(username):
+    patient_id = get_id(db, username)
+    realname = get_name(db, username)
+    # 格式为(价格,日期,医生,科室,药名,单价)
+    bills = db.execute('''SELECT bill_id, cost, p.date, e.name, department_name, p.med_name, med_price
+    FROM bill b INNER JOIN appointment a ON b.app_id = a.app_id
+    INNER JOIN prescription p ON p.app_id = b.app_id
+    INNER JOIN employees e ON e.e_id = a.doc_id
+    INNER JOIN employees medicine m ON m.med_id = p.med_id  
+    WHERE b.patient_id=? ORDER BY p.date DESC''', (patient_id, )).fetchall()
+    log_write(user=username, action='visit', dist='bill')
+    billdic = {}
+
+
+    return render_template('patient_bill.html',realname = realname,name = username,sidebarItems = patientItems,hav = len(bills),billdic=billdic)
+
+@bp.route('/patient/?<string:username>/pay/<id>',methods=['GET','POST'])
+def pay(username, id):
+    patient_id = get_id(db, username)
+    realname = get_name(db, username)
+    # 格式为(价格,日期,医生,科室,药名,单价)
+    bill_id = id
+    db.execute('''DELETE FROM bill WHERE bill_id=?''',(bill_id))
+    db.commit()
+    log_write(user=username, action='delete', dist='bill')
+    return render_template('loading.html')
 
 def countfunc(dicc,iid):
     count = 0
