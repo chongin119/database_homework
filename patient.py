@@ -191,12 +191,13 @@ def history(username):
 def bill(username):
     patient_id = get_id(db, username)
     realname = get_name(db, username)
-    # 格式为(价格,日期,医生,科室,药名,单价)
-    bills = db.execute('''SELECT bill_id, cost, p.date, e.name, department_name, p.med_name, med_price
+    # 格式为(价格,日期,医生,科室,药名,单价,是否付钱0为没付钱)
+    bills = db.execute('''SELECT bill_id, cost, p.date, e.name, department_name, m.med_name, med_price, is_pay
     FROM bill b INNER JOIN appointment a ON b.app_id = a.app_id
     INNER JOIN prescription p ON p.app_id = b.app_id
     INNER JOIN employees e ON e.e_id = a.doc_id
-    INNER JOIN employees medicine m ON m.med_id = p.med_id  
+    INNER JOIN medicine m ON m.med_id = p.med_id
+    INNER JOIN department d ON a.department_id = d.department_id   
     WHERE b.patient_id=? ORDER BY p.date DESC''', (patient_id, )).fetchall()
     log_write(user=username, action='visit', dist='bill')
     billdic = {}
@@ -210,9 +211,9 @@ def pay(username, id):
     realname = get_name(db, username)
     # 格式为(价格,日期,医生,科室,药名,单价)
     bill_id = id
-    db.execute('''DELETE FROM bill WHERE bill_id=?''',(bill_id))
+    db.execute('''UPDATE bill SET is_pay=1 WHERE bill_id = ?''', (bill_id,))
     db.commit()
-    log_write(user=username, action='delete', dist='bill')
+    log_write(user=username, action='edit', dist='bill')
     return render_template('loading.html')
 
 def countfunc(dicc,iid):
