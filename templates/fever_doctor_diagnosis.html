@@ -97,6 +97,7 @@
                                         <th>日期</th>
                                         <th>患者姓名</th>
                                         <th>患者电话</th>
+                                        <th>风险程度</th>
                                         <th></th>
                                         <th></th>
                                     </tr>
@@ -106,13 +107,17 @@
                                     {% if hav != 0 %}
                                         <tr>
                                             <td class="col-auto">
-                                                <p class="font-bold ms-3 mb-0">{{ records[record][0] }}</p>
-                                            </td>
-                                            <td class="col-auto">
-                                                <p class=" mb-0">{{ records[record][1] }}</p>
+                                                <p class="font-bold ms-3 mb-0">{{ records[record][1] }}</p>
                                             </td>
                                             <td class="col-auto">
                                                 <p class=" mb-0">{{ records[record][2] }}</p>
+                                            </td>
+
+                                            <td class="col-auto">
+                                                <p class=" mb-0">{{ records[record][3] }}</p>
+                                            </td>
+                                            <td class="col-auto">
+                                                <p class=" mb-0">{{ riskdic[records[record][0]] }}</p>
                                             </td>
                                             <td class="col-auto">
                                                 <button href="#"  name= "{{ name }}" class="btn btn-primary btn-block" style="float: left; width: 50%;" id="{{ records[record][3] }}" onclick=myclick(this) {{ finishdic[records[record][3]] }}>{% if finishdic[records[record][3]] == 'disabled' %}已看诊

@@ -187,10 +187,11 @@ def change_inf(username):
 def diagnosis(username):
     doc_id = get_id(db, username)
     realname = get_name(db, username)
-    appointments = db.execute("SELECT date , p.name, p.phone,a.app_id FROM appointment a \
-                                    INNER JOIN employees e ON e_id = doc_id \
-                                    INNER JOIN patient p ON a.patient_id = p.patient_id \
-                                    WHERE e_id=? and date = ? ORDER BY date DESC", (doc_id,datetime.date.today())).fetchall()
+    appointments = db.execute("SELECT p.patient_id, date , p.name, p.phone ,a.app_id FROM appointment a \
+                                        INNER JOIN employees e ON e_id = doc_id \
+                                        INNER JOIN patient p ON a.patient_id = p.patient_id \
+                                        WHERE e_id=? and date = ? ORDER BY date DESC",
+                              (doc_id, datetime.date.today())).fetchall()
     total_app_num = len(appointments)
     done_app_num = db.execute("SELECT COUNT(a.app_id) FROM appointment a \
                                         INNER JOIN employees e ON e_id = a.doc_id \
@@ -215,20 +216,31 @@ def diagnosis(username):
     for i in allmedrec:
         allmedrecc.append(i[0])
 
-
+    risk_patient = db.execute('''
+                                SELECT *
+                                FROM risky_patient
+                                ''').fetchall()
+    risk_patient_dic = {}
+    for item in risk_patient:
+        risk_patient_dic[item[0]] = item[1]
     # print(allmedrecc)
     records = {}
     for cnt in range(len(appointments)):
-        i, j, k, l = appointments[cnt][0], appointments[cnt][1], appointments[cnt][2], appointments[cnt][3]
-        records[cnt] = [i, j, k, l]
+        i, j, k, l, m = appointments[cnt][0], appointments[cnt][1], appointments[cnt][2], appointments[cnt][3], \
+                        appointments[cnt][4]
+        patient_id = i
+        if patient_id not in risk_patient_dic:
+            risk_patient_dic[patient_id] = 0
+
+        records[cnt] = [i, j, k, l, m]
 
     for cnt in range(1, las[0][0] + 1):
         if cnt in allmedrecc:
             finishdic[cnt] = 'disabled'
         else:
             finishdic[cnt] = ""
-    #print(finishdic)
-    return render_template('chief_diagnosis.html',realname = realname,name=username, sidebarItems=chiefItems,records=records,hav=len(appointments),finishdic = finishdic,total = total_app_num,undo = undo_app_num,done = done_app_num)
+    # print(finishdic)
+    return render_template('chief_diagnosis.html',realname = realname,name=username, sidebarItems=chiefItems,records=records,hav=len(appointments),finishdic = finishdic,total = total_app_num,undo = undo_app_num,done = done_app_num, riskdic=risk_patient_dic)
 
 @bp.route('/chief/?<string:username>/add_diagnosis/<id>',methods=['GET', 'POST'])
 def add_diagnosis(username, id):

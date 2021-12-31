@@ -166,7 +166,7 @@ def change_inf(username):
     #print(allinf[0])
     i, j, k, l, m, n, o,p,q,s,t = allinf[0][0], allinf[0][1], allinf[0][2], allinf[0][3], allinf[0][4], allinf[0][5],allinf[0][6],allinf[0][7],allinf[0][8],allinf[0][9],allinf[0][10]
 
-    infdic = [j, k, l, m, n, o,p,q,s,t]
+    infdic = [j, k, l, m, n, o, p, q, s, t]
     #print(infdic)
     return render_template('doctor_change_inf.html', realname = realname,name = username,sidebarItems = doctorItems,allinf = infdic)
 
@@ -174,7 +174,7 @@ def change_inf(username):
 def diagnosis(username):
     doc_id = get_id(db, username)
     realname = get_name(db, username)
-    appointments = db.execute("SELECT date , p.name, p.phone ,a.app_id FROM appointment a \
+    appointments = db.execute("SELECT p.patient_id, date , p.name, p.phone ,a.app_id FROM appointment a \
                                     INNER JOIN employees e ON e_id = doc_id \
                                     INNER JOIN patient p ON a.patient_id = p.patient_id \
                                     WHERE e_id=? and date = ? ORDER BY date DESC", (doc_id,datetime.date.today())).fetchall()
@@ -204,12 +204,22 @@ def diagnosis(username):
     for i in allmedrec:
         allmedrecc.append(i[0])
 
-
+    risk_patient = db.execute('''
+                            SELECT *
+                            FROM risky_patient
+                            ''').fetchall()
+    risk_patient_dic = {}
+    for item in risk_patient:
+        risk_patient_dic[item[0]] = item[1]
     #print(allmedrecc)
     records = {}
     for cnt in range(len(appointments)):
-        i,j,k,l = appointments[cnt][0],appointments[cnt][1],appointments[cnt][2],appointments[cnt][3]
-        records[cnt] = [i,j,k,l]
+        i,j,k,l,m = appointments[cnt][0],appointments[cnt][1],appointments[cnt][2],appointments[cnt][3], appointments[cnt][4]
+        patient_id = i
+        if patient_id not in risk_patient_dic:
+            risk_patient_dic[patient_id] = 0
+
+        records[cnt] = [i,j,k,l,m]
 
     for cnt in range(1,las[0][0]+1):
         if cnt in allmedrecc:
@@ -218,7 +228,7 @@ def diagnosis(username):
             finishdic[cnt] = ""
     #print(finishdic)
 
-    return render_template('doctor_diagnosis.html',realname = realname,name=username, sidebarItems=doctorItems,records=records,hav=len(appointments),finishdic = finishdic,total = total_app_num,undo = undo_app_num,done = done_app_num)
+    return render_template('doctor_diagnosis.html',realname = realname,name=username, sidebarItems=doctorItems,records=records,hav=len(appointments),finishdic = finishdic,total = total_app_num,undo = undo_app_num,done = done_app_num, riskdic=risk_patient_dic)
 
 @bp.route('/doctor/?<string:username>/add_diagnosis/<id>',methods=['GET', 'POST'])
 def add_diagnosis(username, id):
