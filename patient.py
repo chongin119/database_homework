@@ -201,22 +201,40 @@ def bill(username):
     WHERE b.patient_id=? ORDER BY p.date DESC''', (patient_id, )).fetchall()
     log_write(user=username, action='visit', dist='bill')
     billdic = {}
+    judgebill = {}
 
     for i in bills:
-        billdic[i[0]] = [i[1],i[2],i[3],i[4],i[5],i[6]]
+        billdic[i[0]] = [i[1],i[2],i[3],i[4],i[5],i[6],i[7]]
+        if i[7] == 1:
+            judgebill[i[0]] = "disabled"
 
-    return render_template('patient_bill.html',realname = realname,name = username,sidebarItems = patientItems,hav = len(bills),billdic=billdic)
+
+    return render_template('patient_bill.html',judgebill = judgebill,realname = realname,name = username,sidebarItems = patientItems,hav = len(bills),billdic=billdic)
 
 @bp.route('/patient/?<string:username>/pay/<id>',methods=['GET','POST'])
 def pay(username, id):
     patient_id = get_id(db, username)
     realname = get_name(db, username)
     # 格式为(价格,日期,医生,科室,药名,单价)
+    bills = db.execute('''SELECT bill_id, cost, p.date, e.name, department_name, m.med_name, med_price
+        FROM bill b INNER JOIN appointment a ON b.app_id = a.app_id
+        INNER JOIN prescription p ON p.app_id = b.app_id
+        INNER JOIN employees e ON e.e_id = a.doc_id
+        INNER JOIN medicine m ON m.med_id = p.med_id
+        INNER JOIN department d ON a.department_id = d.department_id   
+        WHERE b.bill_id=?''', (id,)).fetchall()
+
     bill_id = id
-    db.execute('''UPDATE bill SET is_pay=1 WHERE bill_id = ?''', (bill_id,))
-    db.commit()
+    if request.method == "POST":
+        db.execute('''UPDATE bill SET is_pay=1 WHERE bill_id = ?''', (bill_id,))
+        #db.commit()
+        return render_template('loading.html')
     log_write(user=username, action='edit', dist='bill')
-    return render_template('loading.html')
+
+
+    for i in bills:
+        billdic = [i[1],i[2],i[3],i[4],i[5],i[6]]
+    return render_template('patient_bill_working.html',billid = bill_id,billdic = billdic)
 
 def countfunc(dicc,iid):
     count = 0

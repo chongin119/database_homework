@@ -10,8 +10,8 @@
 {% block headscripts %}
     <script>
         function myclick(obj){
-            uurl = "/doctor/%3F"+obj.name+"/add_diagnosis/"+obj.id
-            window.open(uurl, '看診', config='height=1000,width=1000,location=no')
+            uurl = "/patient/%3F"+obj.name+"/pay/"+obj.id
+            window.open(uurl, '付款', config='height=1000,width=1000,location=no')
         }
     </script>
 {% endblock %}
@@ -50,20 +50,20 @@
                                     {% if hav != 0 %}
                                         <tr>
                                             <td class="col-auto">
-                                                <p class="font-bold ms-3 mb-0">{{ bills[bill][1] }}</p>
+                                                <p class="font-bold ms-3 mb-0">{{ billdic[bill][1] }}</p>
                                             </td>
                                             <td class="col-auto">
-                                                <p class=" mb-0">{{ bills[bill][3] }}</p>
+                                                <p class=" mb-0">{{ billdic[bill][3] }}</p>
                                             </td>
 
                                             <td class="col-auto">
-                                                <p class=" mb-0">{{ bills[bill][2] }}</p>
+                                                <p class=" mb-0">{{ billdic[bill][2] }}</p>
                                             </td>
                                             <td class="col-auto">
-                                                <p class=" mb-0">{{ bills[bill][0] }}</p>
+                                                <p class=" mb-0">{{ billdic[bill][0] }}</p>
                                             </td>
                                             <td class="col-auto">
-                                                <button href="#"  name= "{{ name }}" class="btn btn-primary btn-block" style="float: left; width: 50%;" id="{{ bill }}" onclick=myclick(this) >{% if true %}已付费
+                                                <button href="#"  name= "{{ name }}" class="btn btn-primary btn-block" style="float: left; width: 50%;" id="{{ bill }}" onclick=myclick(this) {{ judgebill[bill] }}>{% if billdic[bill][6] %}已付费
                                                     {% else %}未付费{% endif %}</button>
                                             </td>
                                         </tr>
