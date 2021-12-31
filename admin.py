@@ -16,18 +16,29 @@ def get_dept(db, id):
                                 WHERE doc_id=?",(id,)).fetchone()
     return department_id,department_name
 
+def get_id2pname(db,id):
+    cur = db.cursor()
+    tt = cur.execute("select name \
+                              from patient \
+                              where patient_id = '%s'" % id)
+    for i in tt:
+        return i[0]
+
 @bp.route('/admin/?<string:username>',methods=['GET','POST'])
 def admin(username):
     if session.get(username) is not None:
         # doctor = db.execute("SELECT * FROM employees WHERE username=?", (username,)).fetchall()
         return render_template('admin.html',name=username, sidebarItems=adminItems)
-    return redirect(url_for('auth.login'))
+    return redirect(url_for('auth.login',username = username))
 
 @bp.route('/admin/?<string:username>/patients',methods=['GET','POST'])
-
 def patients(username):
     patients = db.execute("SELECT * FROM patient").fetchall()
-    return render_template('admin_patients.html', patients=patients,name=username,sidebarItems=adminItems)
+
+    patdic = {}
+    for i in patients:
+        patdic[i[0]] = [i[1],i[2],i[3],i[4],i[5],i[6],i[7],i[8]]
+    return render_template('admin_patients.html', patients=patdic,name=username,sidebarItems=adminItems,hav=len(patients))
 
 @bp.route('/admin/?<string:username>/add_patient',methods=['GET','POST'])
 
@@ -54,18 +65,20 @@ def add_patient(username):
                     VALUES(?,?,?)''',(user,password,2)).lastrowid
         db.commit()
         flash('Successfully add patient')
-        return redirect(url_for('admin.patients'))
+        return render_template('loading.html')
 
-    return render_template('admin_add_patient.html',name=username,sidebarItems=adminItems)
+    return render_template('admin_patient_add_working.html',name=username)
 
 
 
-@bp.route('/admin/?<string:username>/patients/<id>',methods=['POST','GET'])
+@bp.route('/admin/?<string:username>/update_patients/<id>',methods=['POST','GET'])
 def update_patient(username,id):
     # 待修改的病人的数据
     patient_id = id
-    patient_inf = db.execute("SELECT * FROM patient WHERE pat_id=?", (id,)).fetchone()
+    patient_inf = db.execute("SELECT * FROM patient WHERE patient_id=?", (id,)).fetchone()
     old_username = patient_inf[7]
+    patname = get_id2pname(db,id)
+
     if request.method == 'POST':
         real_name = request.form['realname']
         DOB = request.form['DOB']
@@ -74,9 +87,9 @@ def update_patient(username,id):
         phone = request.form['phone']
         email = request.form['email']
         user = request.form['username']
-        password = request.form['password']
+        password = request.form['pwd']
 
-        if check_repeat(db, user):
+        if check_repeat(db, user) and old_username != user:
             flash('The username already exists')
             return redirect(url_for('admin.patients',username=username))
         if password != "NULL":
@@ -98,8 +111,9 @@ def update_patient(username,id):
                 (real_name, DOB, passport, gender, phone, email, user, patient_id))
             db.commit()
         flash('Successfully modified information')
-        return redirect(url_for('admin.patients'))
-    return render_template('admin_update_patient.html',patient=patient_inf,name=username,sidebarItems=adminItems)
+        return render_template('loading.html')
+
+    return render_template('admin_patient_change_working.html',allinf=patient_inf,name=username,patname = patname)
 
 @bp.route('/admin/?<string:username>/delete_patient/<id>', methods=['GET', 'POST'])
 def delete_patient(username, id):
@@ -108,8 +122,9 @@ def delete_patient(username, id):
     db.execute("DELETE FROM login_inf WHERE username=(SELECT username from patient WHERE patient_id=?)", (patient_id,))
     db.execute("DELETE FROM patient WHERE patient_id=?", (patient_id,))
     db.commit()
-    return redirect(url_for('admin.patients',username=username))
+    return render_template('loading.html')
 
+################################分隔线
 @bp.route('/admin/?<string:username>/doctors',methods=['GET','POST'])
 def doctors(username):
     # 找出全部医生，不包括科长

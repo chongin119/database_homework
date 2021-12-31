@@ -9,15 +9,86 @@
 
 {% block headscripts %}
     <script>
+        first = ""
+        second = ""
         function myclick(obj){
             iid = obj.id
             nname = obj.text
             document.getElementById("dropdownMenuButton").innerHTML = nname
             document.getElementById("dropdownMenuButton").value = 1
+            document.getElementById("card2").innerHTML = ""
             if(document.getElementById("date").value == "") {
                 return
             }
             showcontext()
+        }
+        function myclick3(obj){
+            address = {{ addressdic | safe }}
+            document.getElementById("ddrop1").innerHTML = obj.text
+            document.getElementById("drop2").innerHTML = `
+            <span style="display: block">曾到市</span>
+                                <div class="btn-group mb-1">
+
+                                    <div class="dropdown">
+                                        <button class="btn btn-primary dropdown-toggle me-1" type="button"
+                                            id="ddrop2" data-bs-toggle="dropdown" aria-haspopup="true"
+                                            aria-expanded="false" value="">
+                                            请选择市
+                                        </button>
+                                        <div id="drop2context" class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+
+                                        </div>
+                                    </div>
+                                </div>
+            `
+            contt = ""
+            first = obj.text
+            for(secondi in address[obj.text]){
+
+                contt += `
+                    <a class="dropdown-item" value=""  id="address" onclick=myclick4(this)>%s</a>
+                `.format(secondi)
+            }
+            document.getElementById("drop2context").innerHTML = contt
+        }
+
+        function myclick4(obj){
+            address = {{ addressdic | safe }}
+            document.getElementById("ddrop2").innerHTML = obj.text
+            document.getElementById("drop3").innerHTML = `
+            <span style="display: block">曾到区</span>
+                                <div class="btn-group mb-1">
+
+                                    <div class="dropdown">
+                                        <button class="btn btn-primary dropdown-toggle me-1" type="button"
+                                            id="ddrop3" data-bs-toggle="dropdown" aria-haspopup="true"
+                                            aria-expanded="false" value="">
+                                            请选择区
+                                        </button>
+                                        <div id="drop3context" class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+
+                                        </div>
+                                    </div>
+                                </div>
+            `
+
+
+
+            contt = ""
+            second = obj.text
+            for(thirdi=0; thirdi<address[first][obj.text].length;thirdi++){
+
+                contt += `
+                    <a class="dropdown-item" value=""  id="address" onclick=myclick5(this)>%s</a>
+                `.format(address[first][obj.text][thirdi])
+            }
+            document.getElementById("drop3context").innerHTML = contt
+        }
+        function myclick5(obj){
+            document.getElementById("ddrop3").innerHTML = obj.text
+            document.getElementById("province").value = first
+            document.getElementById("city").value = second
+            document.getElementById("district").value = obj.text
         }
     </script>
     <script>
@@ -28,8 +99,8 @@
             let nplpassport = npl['passport']
             let nplphone = npl['phone']
 
-            let doc_id = obj.id.split("_")[2]
-            let ddate = obj.id.split("_")[1]
+            let doc_id = obj.id.split("_")[1]
+            let ddate = obj.id.split("_")[2]
             let department_id = obj.id.split("_")[0]
             document.getElementById("card2").innerHTML =
                 `<div class="card-header">
@@ -91,8 +162,32 @@
                                         </label>
                                     </div>
                                 </div>
+                                <span style="display: block">曾到省</span>
+                                <div class="btn-group mb-1">
+
+                                    <div class="dropdown">
+                                        <button class="btn btn-primary dropdown-toggle me-1" type="button"
+                                            id="ddrop1" data-bs-toggle="dropdown" aria-haspopup="true"
+                                            aria-expanded="false" value="">
+                                            请选择省
+                                        </button>
+                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                            {% for address in addressdic.keys() %}
+                                                <a class="dropdown-item" value={{ address }} name = {{ address }} id="address" onclick=myclick3(this)>{{ address }}</a>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="drop2">
+
+                                </div>
+                                <div id="drop3">
+                                </div>
                             </div>
                         </div>
+                    <input type="hidden" id="province" name="province" value="其他">
+                    <input type="hidden" id="city" name="city" value="其他">
+                    <input type="hidden" id="district" name="district" value="其他">
                     <input type="hidden" name="de_id" value="%s">
                     <input type="hidden" name="doc_id" value="%s">
                     <input type="hidden" name="date" value="%s">
@@ -199,13 +294,21 @@
                 </table>`
             let contt = ""
 
+
             let tempappoobj = {}
-            for(let i = 0;i<appo[temp].length;i++){
-                tempappoobj[appo[temp][i][2]] = {}
-                tempappoobj[appo[temp][i][2]]['name'] = appo[temp][i][0]
-                tempappoobj[appo[temp][i][2]]['times'] = appo[temp][i][1]
+
+            if(appo[temp] == undefined){
+                tempappoobj = {}
+            }else{
+                for(let i = 0;i<appo[temp].length;i++){
+                    tempappoobj[appo[temp][i][2]] = {}
+                    tempappoobj[appo[temp][i][2]]['name'] = appo[temp][i][0]
+                    tempappoobj[appo[temp][i][2]]['times'] = appo[temp][i][1]
+                }
             }
-            //console.log(alldoc[sspecialty])
+
+
+
             for(let i=0;i<alldoc[sspecialty].length;i++){
                 let tempcota = ssum
                 if(tempappoobj[alldoc[sspecialty][i][0]] != undefined){
@@ -240,7 +343,7 @@
             document.getElementById('ttbody').innerHTML = contt
             for(let i=0;i<alldoc[sspecialty].length;i++) {
                 if(tempappoobj[alldoc[sspecialty][i][0]] != undefined){
-                    if(tempappoobj[alldoc[sspecialty][i][0]]['times'] == 1){
+                    if(tempappoobj[alldoc[sspecialty][i][0]]['times'] == ssum){
                         document.getElementById(ddicdep[sspecialty]+'_'+alldoc[sspecialty][i][0]+'_'+ddate).disabled = true
                         document.getElementById(ddicdep[sspecialty]+'_'+alldoc[sspecialty][i][0]+'_'+ddate).innerHTML = '约满'
                     }

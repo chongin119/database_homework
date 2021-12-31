@@ -5,6 +5,8 @@ from flask import (
 from dbfunc import connect_db,match_user_pwd,disconnect_db,get_domain,insert_user_pwd,get_id
 from dbfunc import databasePATH
 from sliderbaritem import patientItems,doctorItems,chiefItems,adminItems,fever_doctorItems
+from address import addressdic
+
 bp = Blueprint('appointment', __name__)
 
 db = connect_db(databasePATH)
@@ -87,25 +89,25 @@ def patient_add_appointment(username):
         patient_id = get_id(db,username)
 
         app_date = request.form['date']
-        department_name = request.form['de_id']
-        doc_name = request.form['doc_id']
-
+        department_id = request.form['de_id']
+        doc_id = request.form['doc_id']
+        print(doc_id)
         survey = None
         error = None
 
         temperature = request.form['temperature']
-        province = '北京'#未完成 先设为这个
-        city = '市辖区' #未完成 先设为这个
-        district = '海淀区' #未完成 先设为这个
+        province = request.form['province']
+        city = request.form['city']
+        district = request.form['district']
         symptom = request.form['rm']#返回为有症状或无症状
         risk = request.form['r14']#返回为曾到或未曾到
 
         address = f'省：{province}；城市：{city}；区：{district}；'
 
-        #app_id = db.execute('''INSERT INTO appointment(date,patient_id,department_id,doc_id,temperature,address,symptom,risk)
-        #                    VALUES(?,?,?,?,?,?,?,?)''',
-        #                    (app_date, patient_id, department_id, doc_id, temperature,address,symptom,risk)).lastrowid
-        #db.commit()
+        app_id = db.execute('''INSERT INTO appointment(date,patient_id,department_id,doc_id,temperature,address,symptom,risk)
+                            VALUES(?,?,?,?,?,?,?,?)''',
+                            (app_date, patient_id, department_id, doc_id, temperature,address,symptom,risk)).lastrowid
+        db.commit()
         #先不提交
         
         
@@ -176,7 +178,7 @@ def patient_add_appointment(username):
     #print(dicdoctor)
     #print(dic)
     #print(npldic)
-    return render_template('patient_add_appointment.html', realname = realname,name = username,sidebarItems = patientItems,appointments = dic,sum = APP_NUM,alldepartments = dicdep,alldoctor = dicdoctor,npldic = npldic)
+    return render_template('patient_add_appointment.html',addressdic = addressdic,realname = realname,name = username,sidebarItems = patientItems,appointments = dic,sum = APP_NUM,alldepartments = dicdep,alldoctor = dicdoctor,npldic = npldic)
 
 
 
@@ -387,4 +389,5 @@ def fever_appointments(username):
                                 WHERE e_id=? ORDER BY date DESC", (doc_id,)).fetchall()
 
     return render_template('fever_appointments.html',realname = realname,name = username,sidebarItems=fever_doctorItems,appointments=appointments,hav = len(appointments))
+
 
