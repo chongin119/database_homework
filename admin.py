@@ -192,7 +192,7 @@ def add_doctor(username):
         db.commit()
 
         flash('Successfully add doctor')
-        return redirect(url_for('admin.doctors', username=username))
+        return render_template('loading.html')
 
     return render_template('admin_add_doctor.html',name=username,deptdic=deptdic)
 
@@ -251,7 +251,7 @@ def update_doctor(username, id):
                                ''', (department_id, doc_id))
         db.commit()
         flash('Successfully modified information')
-        return redirect(url_for('admin.doctors', username=username))
+        return render_template('loading.html')
 
     return render_template('admin_update_doctor.html', name=username,allinf=doctor_inf ,deptdic=deptdic,department_name=department_name)
 
@@ -267,7 +267,7 @@ def delete_doctor(username, id):
     db.execute("DELETE FROM employees WHERE e_id=?", (doc_id,))
 
     db.commit()
-    return redirect(url_for('admin.doctors',username=username))
+    return render_template('loading.html')
 
 @bp.route('/admin/?<string:username>/departments',methods=['GET','POST'])
 def departments(username):
@@ -281,8 +281,11 @@ def departments(username):
                                     INNER JOIN department de ON d.department_id = de.department_id
                                     WHERE e_id IN (SELECT chief_id FROM chief)  
                                 ''', ).fetchall()
-
-    return render_template('admin_departments.html',name=username,  sidebarItems=adminItems, department=chief_departments)
+    patdic = {}
+    for i in chief_departments:
+        patdic[i[0]] = [i[1], i[2], i[3], i[4], i[5], i[6]]
+    return render_template('admin_departments.html', patients=patdic, name=username, sidebarItems=adminItems,
+                           hav=len(chief_departments))
 
 
 @bp.route('/admin/?<string:username>/add_department',methods=['GET','POST'])
@@ -293,9 +296,11 @@ def add_department(username):
                                         FROM employees e 
                                         WHERE e_id NOT IN (SELECT chief_id FROM chief)  
                                     ''', ).fetchall()
-
+    chiefdic = {}
+    for i in candidate_chief:
+        chiefdic[i[0]] = i[1]
     if request.method == "POST":
-        name = request.form['name']
+        name = request.form['dname']
         description = request.form['description']
         chief_id = request.form['chief']
 
@@ -304,7 +309,7 @@ def add_department(username):
         VALUES(?,?)
         ''', (name,description)).lastrowid
         db.execute('''
-                INSERT INTO department(chief_id,department_id)
+                INSERT INTO chief(chief_id,department_id)
                 VALUES(?,?)
                 ''', (chief_id, department_id))
         db.execute('''
@@ -314,9 +319,9 @@ def add_department(username):
         db.commit()
 
         flash('Successfully add department')
-        return redirect(url_for('admin.departments', username=username))
+        return render_template('loading.html')
 
-    return render_template('admin_add_department.html',name=username,candidate_chief=candidate_chief)
+    return render_template('admin_add_department.html',name=username,chiefdic=chiefdic)
 
 
 @bp.route('/admin/?<string:username>/update_department/<id>', methods=['GET', 'POST'])
@@ -336,6 +341,10 @@ def update_department(username, id):
                                             FROM employees e 
                                             WHERE e_id NOT IN (SELECT chief_id FROM chief)  
                                         ''', ).fetchall()
+    chiefdic = {}
+    for i in candidate_chief:
+        chiefdic[i[0]] = i[1]
+
     if request.method == "POST":
         name = request.form['name']
         description = request.form['description']
@@ -349,9 +358,9 @@ def update_department(username, id):
                    (chief_id, department_id, chief_id))
 
         flash('Successfully modified information')
-        return redirect(url_for('admin.departments', username=username))
+        return render_template('loading.html')
 
-    return render_template('admin_update_department.html', name=username,chief_departments=chief_departments,candidate_chief=candidate_chief)
+    return render_template('admin_update_department.html', name=username,allinf=chief_departments,chiefdic=chiefdic)
 
 
 # @bp.route('/admin/?<string:username>/delete_department/<id>', methods=['GET', 'POST'])

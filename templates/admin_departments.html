@@ -1,5 +1,5 @@
 {% set title = 'Dashboard' %}
-{% set filename = 'admin_doctors.html' %}
+{% set filename = 'admin_departments.html' %}
 
 {% extends 'layouts/master.html' %}
 
@@ -21,63 +21,43 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="alert alert-light">
-                                    <h4 class="alert-heading">医生姓名</h4>
+                                    <h4 class="alert-heading">科长姓名</h4>
                                     <p>%s</p>
                                 </div>
                                 <div class="alert alert-light">
-                                    <h4 class="alert-heading">电话</h4>
+                                    <h4 class="alert-heading">科长电话</h4>
                                     <p>%s</p>
                                 </div>
                                 <div class="alert alert-light">
-                                    <h4 class="alert-heading">邮箱</h4>
-                                    <p>%s</p>
-                                </div>
-                                <div class="alert alert-light">
-                                    <h4 class="alert-heading">科室</h4>
+                                    <h4 class="alert-heading">科长邮箱</h4>
                                     <p>%s</p>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="alert alert-light">
-                                    <h4 class="alert-heading">毕业院校</h4>
+                                    <h4 class="alert-heading">科室</h4>
                                     <p>%s</p>
                                 </div>
                                 <div class="alert alert-light">
-                                    <h4 class="alert-heading">学历</h4>
-                                    <p>%s</p>
-                                </div>
-                                <div class="alert alert-light">
-                                    <h4 class="alert-heading">职称</h4>
-                                    <p>%s</p>
-                                </div>
-                                <div class="alert alert-light">
-                                    <h4 class="alert-heading">专业</h4>
+                                    <h4 class="alert-heading">科室描述</h4>
                                     <p>%s</p>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    `.format(pat[0],pat[1],pat[2],pat[3],pat[4],pat[5],pat[6],pat[7])
+                    `.format(pat[0],pat[1],pat[2],pat[3],pat[5])
             document.getElementById("context").innerHTML = cont
         }
 
-        function myclick2(obj){
-            pat = {{ patients|safe }}
-
-            if(window.confirm("确认要删除医生"+pat[obj.id][0]+"吗")){
-                uurl = "/admin/%3F"+obj.name+"/delete_doctor/"+obj.id
-                window.open(uurl,'删除医生', config='height=250,width=250,location=no')
-            }
-        }
 
         function myclick3(obj){
-            uurl = "/admin/%3F"+obj.name+"/update_doctor/"+obj.id
-            window.open(uurl,'修改医生', config='height=1000,width=1000,location=no')
+            uurl = "/admin/%3F"+obj.name+"/update_department/"+obj.id
+            window.open(uurl,'修改科室', config='height=1000,width=1000,location=no')
         }
 
         function myclick4(obj){
-            uurl = "/admin/%3F"+obj.name+"/add_doctor"
-            window.open(uurl,'新增医生', config='height=1000,width=1000,location=no')
+            uurl = "/admin/%3F"+obj.name+"/add_department"
+            window.open(uurl,'新增科室', config='height=1000,width=1000,location=no')
         }
 
     </script>
@@ -107,8 +87,8 @@
                 </div>
                 <div class="card">
                     <div class="card-header">
-                        <h4 style="float: left; width: 85%;">所有医生</h4>
-                        <button name="{{ name }}" onclick=myclick4(this) class="btn btn-primary" style="float: left; width: 15%;">新增医生</button>
+                        <h4 style="float: left; width: 85%;">所有科室</h4>
+                        <button name="{{ name }}" onclick=myclick4(this) class="btn btn-primary" style="float: left; width: 15%;">新增科室</button>
                     </div>
 
                     <div class="card-body">
@@ -116,9 +96,9 @@
                             <table class="table table-hover table-lg">
                                 <thead>
                                     <tr>
-                                        <th>医生姓名</th>
-                                        <th>医生id</th>
-                                        <th></th>
+                                        <th>科长id</th>
+                                        <th>科室id</th>
+                                        <th>科室名</th>
                                         <th></th>
                                         <th></th>
                                     </tr>
@@ -128,19 +108,19 @@
                                         {% if hav != 0 %}
                                             <tr>
                                                 <td class="col-auto">
-                                                    <p class="mb-0">{{patients[pat][0]}}</p>
+                                                    <p class="mb-0">{{pat}}</p>
                                                 </td>
                                                 <td class="col-auto">
-                                                    <p class="mb-0">{{ pat }}</p>
+                                                    <p class="mb-0">{{ patients[pat][4]}}</p>
+                                                </td>
+                                                <td class="col-auto">
+                                                    <p class="mb-0">{{ patients[pat][3] }}</p>
                                                 </td>
                                                 <td class="col-auto">
                                                     <button href="#top" id="{{ pat }}" name="{{ name }}" class="btn btn-primary btn-block" style="float: left; width: 50%;" onclick=myclick(this)>查看详请</button>
                                                 </td>
                                                 <td class="col-auto">
                                                     <button href="#top" id="{{ pat }}" name="{{ name }}" class="btn btn-primary btn-block" style="float: left; width: 50%;" onclick=myclick3(this)>修改</button>
-                                                </td>
-                                                <td class="col-auto">
-                                                    <button href="#top" id="{{ pat }}" name="{{ name }}" class="btn btn-primary btn-block" style="float: left; width: 50%;" onclick=myclick2(this)>删除</button>
                                                 </td>
                                             </tr>
                                         {% endif %}
