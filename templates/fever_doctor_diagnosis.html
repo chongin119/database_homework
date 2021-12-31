@@ -1,0 +1,150 @@
+{% set title = 'Dashboard' %}
+{% set filename = 'fever_doctor_diagnosis.html' %}
+
+{% extends 'layouts/master.html' %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='vendors/iconly/bold.css') }}">
+{% endblock %}
+
+{% block headscripts %}
+    <script>
+        function myclick(obj){
+            uurl = "/fever_doctor/%3F"+obj.name+"/add_diagnosis/"+obj.id
+            window.open(uurl, '看診', config='height=1000,width=1000,location=no')
+        }
+        function myclick2(obj){
+            uurl = "/fever_doctor/%3F"+obj.name+"/trans_diagnosis/"+obj.id
+            window.open(uurl, '转診', config='height=1000,width=1000,location=no')
+        }
+    </script>
+{% endblock %}
+{% block content %}
+<div>
+    <div class="page-heading" style="float: left;width: 90%;">
+        <h3>Hello! 发热doctor {{realname}}!</h3>
+    </div>
+    <div class="page-heading" style="float: left; width: 10%;">
+        <button class="btn btn-primary btn-block"><a href="{{ url_for('auth.logout',username = name) }}" class="btn btn-primary btn-block">Logout</a></button>
+    </div>
+</div>
+<div class="page-content">
+        <div class="col-12  ">
+            <div class="row">
+                <div class="col-6 col-lg-3 col-md-6">
+                    <div class="card">
+                        <div class="card-body px-3 py-4-5">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="stats-icon purple">
+                                        <i class="iconly-boldShow"></i>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <h6 class="text-muted font-semibold">总看诊数</h6>
+                                    <h6 class="font-extrabold mb-0">{{ total }}</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3 col-md-6">
+                    <div class="card">
+                        <div class="card-body px-3 py-4-5">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="stats-icon blue">
+                                        <i class="iconly-boldProfile"></i>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <h6 class="text-muted font-semibold">未看诊数</h6>
+                                    <h6 class="font-extrabold mb-0">{{ undo }}</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3 col-md-6">
+                    <div class="card">
+                        <div class="card-body px-3 py-4-5">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="stats-icon green">
+                                        <i class="iconly-boldAdd-User"></i>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <h6 class="text-muted font-semibold">已完成看诊数</h6>
+                                    <h6 class="font-extrabold mb-0">{{ done }}</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 style="float: left; width: 85%;">今天看诊记录</h4>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-lg">
+                                <thead>
+                                    <tr>
+                                        <th>日期</th>
+                                        <th>患者姓名</th>
+                                        <th>患者电话</th>
+                                        <th></th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for record in records %}
+                                    {% if hav != 0 %}
+                                        <tr>
+                                            <td class="col-auto">
+                                                <p class="font-bold ms-3 mb-0">{{ records[record][0] }}</p>
+                                            </td>
+                                            <td class="col-auto">
+                                                <p class=" mb-0">{{ records[record][1] }}</p>
+                                            </td>
+                                            <td class="col-auto">
+                                                <p class=" mb-0">{{ records[record][2] }}</p>
+                                            </td>
+                                            <td class="col-auto">
+                                                <button href="#"  name= "{{ name }}" class="btn btn-primary btn-block" style="float: left; width: 50%;" id="{{ records[record][3] }}" onclick=myclick(this) {{ finishdic[records[record][3]] }}>{% if finishdic[records[record][3]] == 'disabled' %}已看诊
+                                                    {% else %}可看诊{% endif %}</button>
+                                            </td>
+                                            <td class="col-auto">
+                                                <button href="#"  name= "{{ name }}" class="btn btn-primary btn-block" style="float: left; width: 50%;" id="{{ records[record][3] }}" onclick=myclick2(this) {{ finishdic[records[record][3]] }}>{% if finishdic[records[record][3]] == 'disabled' %}已完成不能转诊
+                                                    {% else %}可转诊{% endif %}</button>
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+</div>
+{% endblock %}
+{% block js %}
+<script src="{{ url_for('static', filename='vendors/apexcharts/apexcharts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/pages/dashboard.js') }}"></script>
+<script>
+    String.prototype.format = function (){
+            let args = Array.prototype.slice.call(arguments);
+            let count=0;
+            return this.replace(/%s/g, function (s,i){
+                return args[count++];
+            });
+        }
+</script>
+{% endblock %}

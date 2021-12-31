@@ -1,0 +1,117 @@
+{% set title = 'Dashboard' %}
+{% set filename = 'fever_doctor_appointments.html' %}
+
+{% extends 'layouts/masterforworking.html' %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='vendors/iconly/bold.css') }}">
+{% endblock %}
+
+{% block headscripts %}
+    <script>
+        function myclick(obj){
+            alldep = {{ alldep | safe }}
+            alldoc = {{ alldoc | safe }}
+            document.getElementById("dropdownMenuButton").innerHTML = alldep[obj.id]
+            document.getElementById("dropdownMenuButton").value = obj.id
+            document.getElementById("depid").value = obj.id
+
+            cont = ""
+
+            for(let i in alldoc[obj.id]){
+                console.log(i)
+                cont += `
+                        <a class="dropdown-item"  id="%s" onclick=myclick2(this)>%s</a>
+                `.format(i,alldoc[obj.id][i])
+            }
+            document.getElementById("dropdoc").innerHTML = cont
+
+
+        }
+        function myclick2(obj){
+            alldoc = {{ alldoc | safe }}
+            depid = document.getElementById("depid").value
+            document.getElementById("dropdownMenuButton1").innerHTML = alldoc[depid][obj.id]
+            document.getElementById("docid").value = obj.id
+
+        }
+
+        function check(){
+            docid = document.getElementById("docid").value
+            depid = document.getElementById("depid").value
+
+            if(docid == "" || depid == ""){
+                return false
+            }else{
+                return true
+            }
+        }
+
+    </script>
+{% endblock %}
+
+{% block content %}
+<div>
+    <div class="page-heading" >
+        <h3>正在处理 {{appid}}</h3>
+    </div>
+</div>
+<div class="page-content">
+        <div class="col-12  ">
+            <div class="row">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 style="float: left; width: 85%;">正在处理 {{appid}}</h4>
+                    </div>
+                    <form method="post" onsubmit="return check()">
+                        <div class="card-body">
+                            <div style="margin-right: 50px" class="btn-group mb-1">
+                                <div class="dropdown">
+                                    <button class="btn btn-primary dropdown-toggle me-1" type="button"
+                                        id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true"
+                                        aria-expanded="false" value="">
+                                        请选择部门
+                                    </button>
+                                    <input type="hidden" value="" id="depid" name="depid"/>
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                        {% for dep in alldep %}
+                                            <a class="dropdown-item"  id="{{ dep }}" onclick=myclick(this)>{{ alldep[dep] }}</a>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="" class="btn-group mb-1">
+                                <div class="dropdown">
+                                    <button class="btn btn-primary dropdown-toggle me-1" type="button"
+                                        id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-haspopup="true"
+                                        aria-expanded="false" value="">
+                                        请先选择部门
+                                    </button>
+                                    <input type="hidden" value="" id="docid" name="docid"/>
+                                    <div id="dropdoc" class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+
+                                    </div>
+                                </div>
+                            </div>
+                            <button type = "submit" style="width: 50%;display: block" class="btn btn-primary btn-block btn-lg shadow-lg mt-5">提交</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+</div>
+{% endblock %}
+{% block js %}
+<script src="{{ url_for('static', filename='vendors/apexcharts/apexcharts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/pages/dashboard.js') }}"></script>
+<script>
+    String.prototype.format = function (){
+            let args = Array.prototype.slice.call(arguments);
+            let count=0;
+            return this.replace(/%s/g, function (s,i){
+                return args[count++];
+            });
+        }
+</script>
+{% endblock %}

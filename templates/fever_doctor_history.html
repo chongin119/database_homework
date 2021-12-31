@@ -1,0 +1,173 @@
+{% set title = 'Dashboard' %}
+{% set filename = 'fever_doctor_history.html' %}
+
+{% extends 'layouts/master.html' %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='vendors/iconly/bold.css') }}">
+{% endblock %}
+
+{% block headscripts %}
+    <script>
+        function myclick(obj){
+            docid = obj.id.split("_")[0]
+            times = obj.id.split("_")[1]
+
+            rfordoc = {{ rfordoc | safe }}
+
+            //console.log(rfordoc[docid][times])
+            i1 = rfordoc[docid][times][0]
+            i2 = rfordoc[docid][times][1]
+            i3 = rfordoc[docid][times][2]
+            i4 = rfordoc[docid][times][3]
+            i5 = rfordoc[docid][times][4]
+            i6 = rfordoc[docid][times][5]
+            i7 = rfordoc[docid][times][6]
+            i8 = rfordoc[docid][times][7]
+            i9 = rfordoc[docid][times][8]
+            i10 = rfordoc[docid][times][9]
+            i11 = rfordoc[docid][times][10]
+            i12 = rfordoc[docid][times][11]
+
+            //格式为(id,医生姓名，日期，药品名字，药品用量,体温，主诉，现病史，既往史，过敏史，发病时间，治疗情况，评估诊断)
+            cont =`
+                    <div class="card-header">
+                        <h4 style="float: left; width: 85%;">详细资料</h4>
+                    </div>
+                    <div  class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="alert alert-light">
+                                    <h4 class="alert-heading">病人姓名</h4>
+                                    <p>%s</p>
+                                </div>
+                                <div class="alert alert-light">
+                                    <h4 class="alert-heading">日期</h4>
+                                    <p>%s</p>
+                                </div>
+                                <div class="alert alert-light">
+                                    <h4 class="alert-heading">药品名字</h4>
+                                    <p>%s</p>
+                                </div>
+                                <div class="alert alert-light">
+                                    <h4 class="alert-heading">药品用量</h4>
+                                    <p>%s</p>
+                                </div>
+                                <div class="alert alert-light">
+                                    <h4 class="alert-heading">体温</h4>
+                                    <p>%s</p>
+                                </div>
+                                <div class="alert alert-light">
+                                    <h4 class="alert-heading">主诉</h4>
+                                    <p>%s</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="alert alert-light">
+                                    <h4 class="alert-heading">现病史</h4>
+                                    <p>%s</p>
+                                </div>
+                                <div class="alert alert-light">
+                                    <h4 class="alert-heading">既往史</h4>
+                                    <p>%s</p>
+                                </div>
+                                <div class="alert alert-light">
+                                    <h4 class="alert-heading">过敏史</h4>
+                                    <p>%s</p>
+                                </div>
+                                <div class="alert alert-light">
+                                    <h4 class="alert-heading">发病时间</h4>
+                                    <p>%s</p>
+                                </div>
+                                <div class="alert alert-light">
+                                    <h4 class="alert-heading">治疗情况</h4>
+                                    <p>%s</p>
+                                </div>
+                                <div class="alert alert-light">
+                                    <h4 class="alert-heading">评估诊断</h4>
+                                    <p>%s</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    `.format(i1,i2,i3,i4,i5,i6,i7,i8,i9,i10,i11,i12)
+            document.getElementById("context").innerHTML = cont
+        }
+
+    </script>
+{% endblock %}
+
+{% block content %}
+<div>
+    <div id="top" class="page-heading" style="float: left;width: 90%;">
+        <h3>Hello! 发热doctor {{realname}}!</h3>
+    </div>
+    <div class="page-heading" style="float: left; width: 10%;">
+        <button class="btn btn-primary btn-block"><a href="{{ url_for('auth.logout',username = name) }}" class="btn btn-primary btn-block">Logout</a></button>
+    </div>
+</div>
+<div class="page-content">
+        <div class="col-12  ">
+            <div class="row">
+                <div id="context" class="card">
+
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h4 style="float: left; width: 85%;">你的就诊记录</h4>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-lg">
+                                <thead>
+                                    <tr>
+                                        <th>日期</th>
+                                        <th>病人</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for record in records %}
+                                    {% if hav != 0 %}
+                                        <tr>
+                                            <td class="col-3">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar avatar-md">
+                                                        <img src="{{ url_for('static', filename='images/faces/5.jpg') }}">
+                                                    </div>
+                                                    <p class="font-bold ms-3 mb-0">{{records[record][2]}}</p>
+                                                </div>
+                                            </td>
+                                            <td class="col-auto">
+                                                <p class=" mb-0">{{alldoc[records[record][0]]}}</p>
+                                            </td>
+                                            <td class="col-auto">
+                                                <button href="#top" id={{ records[record][0] }}_{{ records[record][13] }} class="btn btn-primary btn-block" style="float: left; width: 50%;" onclick=myclick(this)>查看详请</button>
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+</div>
+{% endblock %}
+{% block js %}
+<script src="{{ url_for('static', filename='vendors/apexcharts/apexcharts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/pages/dashboard.js') }}"></script>
+<script>
+    String.prototype.format = function (){
+            let args = Array.prototype.slice.call(arguments);
+            let count=0;
+            return this.replace(/%s/g, function (s,i){
+                return args[count++];
+            });
+        }
+</script>
+{% endblock %}
