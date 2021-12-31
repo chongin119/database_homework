@@ -1,0 +1,150 @@
+{% set title = 'Dashboard' %}
+{% set filename = 'admin_departments.html' %}
+
+{% extends 'layouts/master.html' %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='vendors/iconly/bold.css') }}">
+{% endblock %}
+
+{% block headscripts %}
+    <script>
+        function myclick(obj) {
+            patid = obj.id
+            pat = {{ patients|safe }}
+            pat = pat[obj.id]
+            cont = `
+                    <div class="card-header">
+                        <h4 style="float: left; width: 85%;">详细资料</h4>
+                    </div>
+                    <div  class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="alert alert-light">
+                                    <h4 class="alert-heading">科长姓名</h4>
+                                    <p>%s</p>
+                                </div>
+                                <div class="alert alert-light">
+                                    <h4 class="alert-heading">科长电话</h4>
+                                    <p>%s</p>
+                                </div>
+                                <div class="alert alert-light">
+                                    <h4 class="alert-heading">科长邮箱</h4>
+                                    <p>%s</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="alert alert-light">
+                                    <h4 class="alert-heading">科室</h4>
+                                    <p>%s</p>
+                                </div>
+                                <div class="alert alert-light">
+                                    <h4 class="alert-heading">科室描述</h4>
+                                    <p>%s</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    `.format(pat[0],pat[1],pat[2],pat[3],pat[5])
+            document.getElementById("context").innerHTML = cont
+        }
+
+
+        function myclick3(obj){
+            uurl = "/admin/%3F"+obj.name+"/update_department/"+obj.id
+            window.open(uurl,'修改科室', config='height=1000,width=1000,location=no')
+        }
+
+        function myclick4(obj){
+            uurl = "/admin/%3F"+obj.name+"/add_department"
+            window.open(uurl,'新增科室', config='height=1000,width=1000,location=no')
+        }
+
+    </script>
+{% endblock %}
+
+{% block content %}
+<div>
+    <div id="top" class="page-heading" style="float: left;width: 90%;">
+        <h3>伟大的管理员</h3>
+    </div>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+                {% for message in messages %}
+                    <p class="auth-subtitle mb-1 " style="font-size: 15px; color: red;">{{ message }}</p>
+                {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <div class="page-heading" style="float: left; width: 10%;">
+        <button class="btn btn-primary btn-block"><a href="{{ url_for('auth.logout',username = name) }}" class="btn btn-primary btn-block">Logout</a></button>
+    </div>
+</div>
+<div class="page-content">
+        <div class="col-12  ">
+            <div class="row">
+                <div id="context" class="card">
+
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h4 style="float: left; width: 85%;">所有科室</h4>
+                        <button name="{{ name }}" onclick=myclick4(this) class="btn btn-primary" style="float: left; width: 15%;">新增科室</button>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-lg">
+                                <thead>
+                                    <tr>
+                                        <th>科长id</th>
+                                        <th>科室id</th>
+                                        <th>科室名</th>
+                                        <th></th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for pat in patients %}
+                                        {% if hav != 0 %}
+                                            <tr>
+                                                <td class="col-auto">
+                                                    <p class="mb-0">{{pat}}</p>
+                                                </td>
+                                                <td class="col-auto">
+                                                    <p class="mb-0">{{ patients[pat][4]}}</p>
+                                                </td>
+                                                <td class="col-auto">
+                                                    <p class="mb-0">{{ patients[pat][3] }}</p>
+                                                </td>
+                                                <td class="col-auto">
+                                                    <button href="#top" id="{{ pat }}" name="{{ name }}" class="btn btn-primary btn-block" style="float: left; width: 50%;" onclick=myclick(this)>查看详请</button>
+                                                </td>
+                                                <td class="col-auto">
+                                                    <button href="#top" id="{{ pat }}" name="{{ name }}" class="btn btn-primary btn-block" style="float: left; width: 50%;" onclick=myclick3(this)>修改</button>
+                                                </td>
+                                            </tr>
+                                        {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+</div>
+{% endblock %}
+{% block js %}
+<script src="{{ url_for('static', filename='vendors/apexcharts/apexcharts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/pages/dashboard.js') }}"></script>
+<script>
+    String.prototype.format = function (){
+            let args = Array.prototype.slice.call(arguments);
+            let count=0;
+            return this.replace(/%s/g, function (s,i){
+                return args[count++];
+            });
+        }
+</script>
+{% endblock %}

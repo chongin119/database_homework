@@ -1,0 +1,81 @@
+{% set title = 'Dashboard' %}
+{% set filename = 'admin_add_doctor.html' %}
+
+{% extends 'layouts/masterforworking.html' %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='vendors/iconly/bold.css') }}">
+{% endblock %}
+
+{% block headscripts %}
+    <script>
+        function myclick(obj){
+            chiefdic = {{ chiefdic | safe }}
+            document.getElementById("dropdownMenuButton").innerHTML = chiefdic[obj.id]
+            document.getElementById("chief").value = obj.id
+        }
+    </script>
+{% endblock %}
+
+{% block content %}
+<div>
+    <div class="page-heading" >
+        <h3>正在处理</h3>
+    </div>
+</div>
+<div class="page-content">
+        <div class="col-12  ">
+            <div class="row">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 style="float: left; width: 85%;">新增科室</h4>
+                    </div>
+                    <form method="post">
+                        <div class="card-body">
+                            <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="dname">科室名</label>
+                                        <input type="text" class="form-control" id="dname" name="dname">
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label for="description">科室描述</label>
+                                        <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                                    </div>
+                                    <div class="dropdown">
+                                    <button class="btn btn-primary dropdown-toggle me-1" type="button"
+                                        id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true"
+                                        aria-expanded="false" value="">
+                                        请指定科长
+                                    </button>
+                                    <input type="hidden" value="" id="chief" name="chief"/>
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                        {% for chief in chiefdic %}
+                                            <a class="dropdown-item"  id="{{ chief }}" onclick=myclick(this)>{{ chiefdic[chief] }}</a>
+                                        {% endfor %}
+                                    </div>
+
+                                    </div>
+                                    <button type = "submit" style="width: 50%" class="btn btn-primary btn-block btn-lg shadow-lg mt-5">新增</button>
+
+                        </div>
+                            </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+</div>
+{% endblock %}
+{% block js %}
+<script src="{{ url_for('static', filename='vendors/apexcharts/apexcharts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/pages/dashboard.js') }}"></script>
+<script>
+    String.prototype.format = function (){
+            let args = Array.prototype.slice.call(arguments);
+            let count=0;
+            return this.replace(/%s/g, function (s,i){
+                return args[count++];
+            });
+        }
+</script>
+{% endblock %}
