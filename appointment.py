@@ -302,7 +302,7 @@ def patient_add_fever_appointment(username):
 
         # 发热门诊预约只能选择发热门诊
         department_id = 5
-        doc_name = request.form['doc_id']
+        doc_id = request.form['doc_id']
 
         temperature = request.form['temperature']
         province = '北京'  # 未完成 先设为这个
@@ -313,13 +313,13 @@ def patient_add_fever_appointment(username):
 
         address = f'省：{province}；城市：{city}；区：{district}；'
 
-        # app_id = db.execute('''INSERT INTO appointment(date,patient_id,department_id,doc_id,temperature,address,symptom,risk)
-        #                    VALUES(?,?,?,?,?,?,?,?)''',
-        #                    (app_date, patient_id, department_id, doc_id, temperature,address,symptom,risk)).lastrowid
-        # db.commit()
+        app_id = db.execute('''INSERT INTO appointment(date,patient_id,department_id,doc_id,temperature,address,symptom,risk)
+                            VALUES(?,?,?,?,?,?,?,?)''',
+                            (app_date, patient_id, department_id, doc_id, temperature,address,symptom,risk)).lastrowid
+        db.commit()
         # 先不提交
 
-        return redirect(url_for('appointment.patient_add_fever_appointment', username=username))
+        return redirect(url_for('appointment.patient_appointments',username=username))
 
     name_and_passport_phone = db.execute('''
                                     SELECT name,passport,phone
@@ -374,7 +374,7 @@ def patient_add_fever_appointment(username):
     # print(dicdoctor)
     # print(dic)
     # print(npldic)
-    return render_template('patient_add_fever_appointment.html', realname=realname, name=username, sidebarItems=patientItems,
+    return render_template('patient_add_fever_appointment.html', addressdic = addressdic,realname=realname, name=username, sidebarItems=patientItems,
                            appointments=dic, sum=APP_NUM, alldoctor=dicdoctor, npldic=npldic)
 
 
@@ -388,6 +388,6 @@ def fever_appointments(username):
                                 INNER JOIN patient p ON a.patient_id = p.patient_id \
                                 WHERE e_id=? ORDER BY date DESC", (doc_id,)).fetchall()
 
-    return render_template('fever_appointments.html',realname = realname,name = username,sidebarItems=fever_doctorItems,appointments=appointments,hav = len(appointments))
+    return render_template('fever_doctor_appointments.html',realname = realname,name = username,sidebarItems=fever_doctorItems,appointments=appointments,hav = len(appointments))
 
 

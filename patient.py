@@ -84,7 +84,7 @@ def change_inf(username):
         if pwd != repwd:
             flash('password is not equal to confirm_password!')
             return redirect(url_for('patient.change_inf', username=username))
-        if check_repeat(db, user):
+        if check_repeat(db, user) and user != username:
             flash('The username already exists')
             return redirect(url_for('patient.change_inf', username=username))
         if pwd != "NULL":
