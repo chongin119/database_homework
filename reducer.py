@@ -21,9 +21,13 @@ def main():
                     results[action] += 1
                 else:
                     results[action] = 1
+                # print(users)
                 if username in users.keys():
-                    users[username][action] += 1
                     rank[username] += 1
+                    if action in users[username].keys():
+                        users[username][action] += 1
+                    else:
+                        users[username][action] = 1
                 else:
                     users[username] = {}
                     users[username][action] = 1
