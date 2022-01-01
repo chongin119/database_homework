@@ -13,6 +13,7 @@
             meddic = {{ meddic | safe }}
 
             document.getElementById("dropdownMenuButton1").innerHTML = meddic[obj.id]
+            console.log(document.getElementById("medid"))
             document.getElementById("medid").value = obj.id
         }
         function myclick(obj){
@@ -104,7 +105,7 @@
                                     aria-expanded="false" value="">
                                     请选择预约id
                                 </button>
-                                <input type="hidden" value="" id="medid" name="medid"/>
+
                                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                     {% for app in appdic %}
                                         <a class="dropdown-item"  id="{{ app[0] }}" onclick=myclick(this)>{{ app[0] }}</a>
