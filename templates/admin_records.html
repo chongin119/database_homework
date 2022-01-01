@@ -89,15 +89,15 @@
         function myclick2(obj){
             pat = {{ patients|safe }}
 
-            if(window.confirm("确认要删除医生"+pat[obj.id][0]+"吗")){
-                uurl = "/admin/%3F"+obj.name+"/delete_doctor/"+obj.id
-                window.open(uurl,'删除医生', config='height=250,width=250,location=no')
+            if(window.confirm("确认要删除记录"+pat[obj.id][0]+"吗")){
+                uurl = "/admin/%3F"+obj.name+"/delete_record/"+obj.id
+                window.open(uurl,'删除记录', config='height=250,width=250,location=no')
             }
         }
 
         function myclick3(obj){
-            uurl = "/admin/%3F"+obj.name+"/update_doctor/"+obj.id
-            window.open(uurl,'修改医生', config='height=1000,width=1000,location=no')
+            uurl = "/admin/%3F"+obj.name+"/update_record/"+obj.id
+            window.open(uurl,'修改记录', config='height=1000,width=1000,location=no')
         }
 
         function myclick4(obj){
