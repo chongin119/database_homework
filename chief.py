@@ -51,6 +51,7 @@ def get_dept(db, id):
 def chief(username):
     if session.get(username) is not None:
         chief_id = get_id(db, username)
+        print(chief_id)
         doctor = db.execute("SELECT * FROM employees WHERE username=?", (username,)).fetchall()
         department_id, department_name = get_dept(db, chief_id)
         realname = get_name(db,username)
@@ -245,7 +246,11 @@ def diagnosis(username):
         else:
             finishdic[cnt] = ""
     # print(finishdic)
-    return render_template('chief_diagnosis.html',realname = realname,name=username, sidebarItems=chiefItems,records=records,hav=len(appointments),finishdic = finishdic,total = total_app_num,undo = undo_app_num,done = done_app_num, riskdic=risk_patient_dic)
+
+    ranking = ['success','primary','warning','danger']
+    rankchin = ['无风险','低风险','中风险','高风险']
+
+    return render_template('chief_diagnosis.html',rankchin = rankchin,ranking = ranking,realname = realname,name=username, sidebarItems=chiefItems,records=records,hav=len(appointments),finishdic = finishdic,total = total_app_num,undo = undo_app_num,done = done_app_num, riskdic=risk_patient_dic)
 
 @bp.route('/chief/?<string:username>/add_diagnosis/<id>',methods=['GET', 'POST'])
 def add_diagnosis(username, id):

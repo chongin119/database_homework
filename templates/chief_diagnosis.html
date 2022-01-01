@@ -114,7 +114,7 @@
                                                 <p class=" mb-0">{{ records[record][3] }}</p>
                                             </td>
                                             <td class="col-auto">
-                                                <p class=" mb-0">{{ riskdic[records[record][0]] }}</p>
+                                                <p class="badge bg-{{ ranking[riskdic[records[record][0]]] }}">{{ rankchin[riskdic[records[record][0]]] }}</p>
                                             </td>
                                             <td class="col-auto">
                                                 <button href="#"  name= "{{ name }}" class="btn btn-primary btn-block" style="float: left; width: 50%;" id="{{ records[record][3] }}" onclick=myclick(this) {{ finishdic[records[record][3]] }}>{% if finishdic[records[record][3]] == 'disabled' %}已看诊

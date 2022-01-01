@@ -26,7 +26,13 @@ app.register_blueprint(chief.bp)
 app.register_blueprint(admin.bp)
 app.register_blueprint(fever_doctor.bp)
 
+@app.errorhandler(404)
+def page_not_fount(e):
+    return render_template('error-404.html')
 
+@app.errorhandler(500)
+def internal_server_error(e):
+    return render_template('error-500.html')
 
 
 
