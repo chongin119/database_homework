@@ -39,6 +39,7 @@ adminItems = [
                 {"isTitle": False,"name":"所有患者","icon":"grid-fill","filename":"admin_patients.html","url":'admin.patients'},
                 {"isTitle": False,"name":"所有医生","icon":"grid-fill","filename":"admin_doctors.html","url":'admin.doctors'},
                 {"isTitle": False,"name":"所有科室","icon":"grid-fill","filename":"admin_departments.html","url":'admin.departments'},
+                {"isTitle": False,"name":"所有就诊记录","icon":"grid-fill","filename":"admin_records.html","url":'admin.records'},
 ]
 
 fever_doctorItems = [

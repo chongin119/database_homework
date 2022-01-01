@@ -1,0 +1,203 @@
+{% set title = 'Dashboard' %}
+{% set filename = 'admin_records.html' %}
+
+{% extends 'layouts/master.html' %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='vendors/iconly/bold.css') }}">
+{% endblock %}
+
+{% block headscripts %}
+    <script>
+
+        function myclick(obj) {
+            patid = obj.id
+            pat = {{ patients|safe }}
+            pat = pat[obj.id]
+            cont = `
+                    <div class="card-header">
+                        <h4 style="float: left; width: 85%;">详细资料</h4>
+                    </div>
+                    <div  class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="alert alert-light">
+                                    <h4 class="alert-heading">预约id</h4>
+                                    <p>%s</p>
+                                </div>
+                                <div class="alert alert-light">
+                                    <h4 class="alert-heading">日期</h4>
+                                    <p>%s</p>
+                                </div>
+                                <div class="alert alert-light">
+                                    <h4 class="alert-heading">病人姓名</h4>
+                                    <p>%s</p>
+                                </div>
+                                <div class="alert alert-light">
+                                    <h4 class="alert-heading">医生姓名</h4>
+                                    <p>%s</p>
+                                </div>
+                                <div class="alert alert-light">
+                                    <h4 class="alert-heading">药名</h4>
+                                    <p>%s</p>
+                                </div>
+                                <div class="alert alert-light">
+                                    <h4 class="alert-heading">剂量</h4>
+                                    <p>%s</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="alert alert-light">
+                                    <h4 class="alert-heading">体温</h4>
+                                    <p>%s</p>
+                                </div>
+                                <div class="alert alert-light">
+                                    <h4 class="alert-heading">主诉</h4>
+                                    <p>%s</p>
+                                </div>
+                                <div class="alert alert-light">
+                                    <h4 class="alert-heading">现病史</h4>
+                                    <p>%s</p>
+                                </div>
+                                <div class="alert alert-light">
+                                    <h4 class="alert-heading">既往史</h4>
+                                    <p>%s</p>
+                                </div>
+                                <div class="alert alert-light">
+                                    <h4 class="alert-heading">过敏史</h4>
+                                    <p>%s</p>
+                                </div>
+                                <div class="alert alert-light">
+                                    <h4 class="alert-heading">发病日期</h4>
+                                    <p>%s</p>
+                                </div>
+                                <div class="alert alert-light">
+                                    <h4 class="alert-heading">治療情况</h4>
+                                    <p>%s</p>
+                                </div>
+                                <div class="alert alert-light">
+                                    <h4 class="alert-heading">评估诊断</h4>
+                                    <p>%s</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    `.format(patid,pat[3],pat[1],pat[2],pat[4],pat[5],pat[6],pat[7],pat[8],pat[9],pat[10],pat[11],pat[12],pat[13],pat[14],pat[15])
+            document.getElementById("context").innerHTML = cont
+        }
+
+        function myclick2(obj){
+            pat = {{ patients|safe }}
+
+            if(window.confirm("确认要删除医生"+pat[obj.id][0]+"吗")){
+                uurl = "/admin/%3F"+obj.name+"/delete_doctor/"+obj.id
+                window.open(uurl,'删除医生', config='height=250,width=250,location=no')
+            }
+        }
+
+        function myclick3(obj){
+            uurl = "/admin/%3F"+obj.name+"/update_doctor/"+obj.id
+            window.open(uurl,'修改医生', config='height=1000,width=1000,location=no')
+        }
+
+        function myclick4(obj){
+            uurl = "/admin/%3F"+obj.name+"/add_record"
+            window.open(uurl,'新增记录', config='height=1000,width=1000,location=no')
+        }
+
+    </script>
+{% endblock %}
+
+{% block content %}
+<div>
+    <div id="top" class="page-heading" style="float: left;width: 90%;">
+        <h3>伟大的管理员</h3>
+    </div>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+                {% for message in messages %}
+                    <p class="auth-subtitle mb-1 " style="font-size: 15px; color: red;">{{ message }}</p>
+                {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <div class="page-heading" style="float: left; width: 10%;">
+        <button class="btn btn-primary btn-block"><a href="{{ url_for('auth.logout',username = name) }}" class="btn btn-primary btn-block">Logout</a></button>
+    </div>
+</div>
+<div class="page-content">
+        <div class="col-12  ">
+            <div class="row">
+                <div id="context" class="card">
+
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h4 style="float: left; width: 85%;">所有病歴和处方</h4>
+                        <button name="{{ name }}" onclick=myclick4(this) class="btn btn-primary" style="float: left; width: 15%;">为缺病歴和处方的记录新增</button>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-lg">
+                                <thead>
+                                    <tr>
+                                        <th>预约id</th>
+                                        <th>日期</th>
+                                        <th>病人姓名</th>
+                                        <th>医生姓名</th>
+                                        <th></th>
+                                        <th></th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for pat in patients %}
+                                        {% if hav != 0 %}
+                                            <tr>
+                                                <td class="col-auto">
+                                                    <p class="mb-0">{{pat}}</p>
+                                                </td>
+                                                <td class="col-auto">
+                                                    <p class="mb-0">{{ patients[pat][3] }}</p>
+                                                </td>
+                                                <td class="col-auto">
+                                                    <p class="mb-0">{{ patients[pat][1] }}</p>
+                                                </td>
+                                                <td class="col-auto">
+                                                    <p class="mb-0">{{ patients[pat][2] }}</p>
+                                                </td>
+                                                <td class="col-auto">
+                                                    <button href="#top" id="{{ pat }}" name="{{ name }}" class="btn btn-primary btn-block" style="float: left; width: 50%;" onclick=myclick(this)>查看详请</button>
+                                                </td>
+                                                <td class="col-auto">
+                                                    <button href="#top" id="{{ pat }}" name="{{ name }}" class="btn btn-primary btn-block" style="float: left; width: 50%;" onclick=myclick3(this)>修改</button>
+                                                </td>
+                                                <td class="col-auto">
+                                                    <button href="#top" id="{{ pat }}" name="{{ name }}" class="btn btn-primary btn-block" style="float: left; width: 50%;" onclick=myclick2(this)>删除</button>
+                                                </td>
+                                            </tr>
+                                        {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+</div>
+{% endblock %}
+{% block js %}
+<script src="{{ url_for('static', filename='vendors/apexcharts/apexcharts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/pages/dashboard.js') }}"></script>
+<script>
+    String.prototype.format = function (){
+            let args = Array.prototype.slice.call(arguments);
+            let count=0;
+            return this.replace(/%s/g, function (s,i){
+                return args[count++];
+            });
+        }
+</script>
+{% endblock %}
