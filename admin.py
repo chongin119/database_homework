@@ -495,7 +495,17 @@ def update_record(username, id):
         WHERE p.app_id = ?
         AND p.date<=? ORDER BY p.date DESC''', (app_id, datetime.date.today())).fetchone()
     # 给出药的信息
+
+
+
     medicine_inf = db.execute("SELECT  * FROM medicine").fetchall()
+    meddic = {}
+    nowmedid = 0
+    for i in medicine_inf:
+        meddic[i[0]] = i[1]
+        if i[1] == prescription_record[3]:
+            nowmedid = i[0]
+
     if request.method == "POST":
 
         temperature = request.form['temperature']
@@ -511,8 +521,7 @@ def update_record(username, id):
 
         db.execute(
             "UPDATE medical_record SET temperature=?,chief_complaint=?,present_illness_history=?,past_history=?\
-            ,allergic_history=?,onset_date=?,current_treatment=?,diagnosis_assessment\
-            , degree=?, technical_title=?,specialty=?\
+            ,allergic_history=?,onset_date=?,current_treatment=?,diagnostic_assessment= ?\
              WHERE app_id=?",
             (temperature, chief_complaint, present_illness_history, past_history, allergic_history,
              onset_date, current_treatment, diagnosis_assessment, app_id))
@@ -523,13 +532,13 @@ def update_record(username, id):
         log_write(user=username, action='edit', dist='records')
         db.commit()
         flash('Successfully modified information')
-        return redirect(url_for('admin.records'))
+        return render_template('loading.html')
 
-    return render_template('admin_update_record.html', prescription_record=prescription_record, name=username,medicine_inf=medicine_inf)
+    return render_template('admin_record_update_working.html', appid = app_id,prescription_record=prescription_record, name=username,nowmedid = nowmedid,meddic = meddic)
 
 
 
-@bp.route('/admin/?<string:username>/delete_appointment/<id>', methods=['GET', 'POST'])
+@bp.route('/admin/?<string:username>/delete_record/<id>', methods=['GET', 'POST'])
 def delete_record(username, id):
     app_id = id
     db.execute("DELETE FROM prescription WHERE app_id=?", (app_id,))
@@ -538,7 +547,7 @@ def delete_record(username, id):
     log_write(user=username, action='delete', dist='records')
     db.commit()
 
-    return redirect(url_for('admin.records', username=username))
+    return render_template('loading.html')
 
 @bp.route('/admin/?<string:username>/query',methods=['GET','POST'])
 def query(username):
