@@ -61,7 +61,7 @@
                                         请选择药品
                                     </button>
                                     <input type="hidden" value="" id="medid" name="medid"/>
-                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                                         {% for med in meddic %}
                                             <a class="dropdown-item"  id="{{ med }}" onclick=myclick2(this)>{{ meddic[med] }}</a>
                                         {% endfor %}

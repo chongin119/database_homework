@@ -440,8 +440,8 @@ def update_record(username, id):
                    ,(med_id,med_quantity,app_id))
         log_write(user=username, action='edit', dist='prescription')
         log_write(user=username, action='edit', dist='records')
-        med_price = db.execute('''SELECT med_price FROM medicine m INNER JOIN prescription r 
-                                ON m.med_id = r.med_id WHERE m.med_id = ?''', (med_id,)).fetchone()[0]
+        med_price = db.execute('''SELECT med_price FROM medicine  
+                          WHERE med_id = ?''', (med_id,)).fetchone()[0]
         db.execute('''UPDATE bill SET COST = ? WHERE app_id = ?''', (med_price * med_quantity, app_id))
         log_write(user=username, action='edit', dist='bill')
         db.commit()
@@ -501,7 +501,7 @@ def add_doctor(username):
 
         if check_repeat(db, user):
             flash('The username already exists')
-            return redirect(url_for('chief.doctors'),username=username)
+            return redirect(url_for('chief.doctors',username=username))
         e_id = db.execute('''
                     INSERT INTO employees(name,passport,gender,phone,email,username,password,
                     graduate_school,degree,technical_title,specialty) VALUES(?,?,?,?,?,?,?,?,?,?,?)'''

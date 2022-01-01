@@ -2,7 +2,7 @@ import sqlite3
 from sqlite3.dbapi2 import connect
 import time
 DB_path = 'testing.db'
-databasePATH = "hospital.db"
+databasePATH = "hospital1.db"
 
 def connect_db(DB_path):
     db  = sqlite3.connect(DB_path,check_same_thread=False)
