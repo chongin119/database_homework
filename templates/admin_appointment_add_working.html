@@ -1,0 +1,278 @@
+{% set title = 'Dashboard' %}
+{% set filename = 'admin_appointment_add_working.html' %}
+
+{% extends 'layouts/masterforworking.html' %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='vendors/iconly/bold.css') }}">
+{% endblock %}
+
+{% block headscripts %}
+    <script>
+        first = ""
+        second = ""
+        dfdobj = {{ dfd | safe }}
+        docobj = {{ docdic | safe }}
+        depobj = {{ alldepartments | safe }}
+        let department_id = 0
+
+
+        function myclick(obj){
+            nname = obj.text
+            console.log(nname)
+            document.getElementById("dropdownMenuButton1").innerHTML = nname
+            document.getElementById("dropdownMenuButton2").innerHTML = ""
+            contt = ""
+            department_id = obj.id
+            for(let i =0;i<dfdobj[obj.id].length;i++){
+                tempid = dfdobj[obj.id][i]
+                contt +=`
+                            <a class="dropdown-item" value="%s" id="%s" onclick=myclick2(this) >%s</a>
+                        `.format(docobj[tempid][0],tempid,docobj[tempid][0])
+
+            }
+            document.getElementById("droptext").innerHTML = contt
+            document.getElementById("dep_id").value = obj.id
+
+        }
+
+        function myclick2(obj){
+            nname = obj.text
+            document.getElementById("dropdownMenuButton2").innerHTML = nname
+            document.getElementById("doc_id").value = obj.id
+
+
+        }
+
+        function myclick3(obj){
+            address = {{ addressdic | safe }}
+            document.getElementById("ddrop1").innerHTML = obj.text
+            document.getElementById("drop2").innerHTML = `
+            <span style="display: block">曾到市</span>
+                                <div class="btn-group mb-1">
+
+                                    <div class="dropdown">
+                                        <button class="btn btn-primary dropdown-toggle me-1" type="button"
+                                            id="ddrop2" data-bs-toggle="dropdown" aria-haspopup="true"
+                                            aria-expanded="false" value="">
+                                            请选择市
+                                        </button>
+                                        <div id="drop2context" class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+
+                                        </div>
+                                    </div>
+                                </div>
+            `
+            contt = ""
+            first = obj.text
+            for(secondi in address[obj.text]){
+
+                contt += `
+                    <a class="dropdown-item" value=""  id="address" onclick=myclick4(this)>%s</a>
+                `.format(secondi)
+            }
+            document.getElementById("drop2context").innerHTML = contt
+        }
+
+        function myclick4(obj){
+            address = {{ addressdic | safe }}
+            document.getElementById("ddrop2").innerHTML = obj.text
+            document.getElementById("drop3").innerHTML = `
+            <span style="display: block">曾到区</span>
+                                <div class="btn-group mb-1">
+
+                                    <div class="dropdown">
+                                        <button class="btn btn-primary dropdown-toggle me-1" type="button"
+                                            id="ddrop3" data-bs-toggle="dropdown" aria-haspopup="true"
+                                            aria-expanded="false" value="">
+                                            请选择区
+                                        </button>
+                                        <div id="drop3context" class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+
+                                        </div>
+                                    </div>
+                                </div>
+            `
+
+
+
+            contt = ""
+            second = obj.text
+            for(thirdi=0; thirdi<address[first][obj.text].length;thirdi++){
+
+                contt += `
+                    <a class="dropdown-item" value=""  id="address" onclick=myclick5(this)>%s</a>
+                `.format(address[first][obj.text][thirdi])
+            }
+            document.getElementById("drop3context").innerHTML = contt
+        }
+        function myclick5(obj){
+            document.getElementById("ddrop3").innerHTML = obj.text
+            document.getElementById("province").value = first
+            document.getElementById("city").value = second
+            document.getElementById("district").value = obj.text
+        }
+
+        function myclick6(obj){
+            document.getElementById('patient_id').value = obj.id
+            document.getElementById("ddrop4").innerHTML = obj.text
+        }
+    </script>
+{% endblock %}
+
+
+{% block content %}
+<div>
+    <div class="page-heading" >
+        <h3>新增预约</h3>
+    </div>
+</div>
+<div class="page-content">
+        <div class="col-12  ">
+            <div class="row">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 style="float: left; width: 85%;">新增预约</h4>
+                    </div>
+                    <form method="post">
+                            <div  class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="date">日期</label>
+                                            <input class="alert alert-secondary" style=";margin-left: 2%; height: 35px;width: 300px" id="date" name="date" type="date" value="">
+                                        </div>
+                                        <div style="margin-left: 10%;" class="btn-group mb-1">
+                                            <div class="dropdown">
+                                                <button class="btn btn-primary dropdown-toggle me-1" type="button"
+                                                    id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-haspopup="true"
+                                                    aria-expanded="false" value="">
+                                                    请选择科室
+                                                </button>
+                                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                                    {% for department in alldepartments %}
+                                                        <a class="dropdown-item" value={{ alldepartments[department][0] }} id="{{ department }}" onclick=myclick(this) >{{ alldepartments[department][0] }}</a>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div style="display:inline-block;margin-left: 10%;" class="btn-group mb-1">
+                                            <div class="dropdown">
+                                                <button class="btn btn-primary dropdown-toggle me-1" type="button"
+                                                    id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-haspopup="true"
+                                                    aria-expanded="false" value="">
+                                                    请先选择科室
+                                                </button>
+                                                <div id="droptext" class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                                    <a class="dropdown-item" value=other id="other"  >请先选择科室</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div style="display:block;margin-left: 10%;" class="btn-group mb-1">
+                                            <div class="dropdown">
+                                                <button class="btn btn-primary dropdown-toggle me-1" type="button"
+                                                    id="ddrop4" data-bs-toggle="dropdown" aria-haspopup="true"
+                                                    aria-expanded="false" value="">
+                                                    请选择病人
+                                                </button>
+                                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                                    {% for pat in patdic %}
+                                                        <a class="dropdown-item" value={{ patdic[pat] }} id="{{ pat }}" onclick=myclick6(this) >{{ patdic[pat] }}</a>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-header">
+                                        <h4>流行病调查登记表</h4>
+                                    </div>
+                                     <div class="card-body">
+                                        <form method="post">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <h6 style="display: block"><b>临床表现</b></h6>
+                                                    <div class="form-group">
+                                                        <label for="temperature ">温度（摄氏度）</label>
+                                                        <input type="text" class="form-control" id="temperature" name="temperature" value="">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <span style="display: block">是否存在以下症状（发热，咳嗽，腹泻）</span>
+                                                        <div style="display: inline-block;margin-right: 50px">
+                                                            <input class="form-check-input" type="radio" name="rm" id="rm_1" value="有症状">
+                                                            <label class="form-check-label" for="rm_1">
+                                                                是
+                                                            </label>
+                                                        </div>
+                                                        <div style="display: inline-block;margin: 5px">
+                                                            <input class="form-check-input" type="radio" name="rm" id="rm_2" value="无症状" checked>
+                                                            <label class="form-check-label" for="rm_2">
+                                                                否
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <span style="display: block">14天内是否曾到中高风险地区</span>
+                                                        <div style="display: inline-block;margin-right: 50px">
+                                                            <input class="form-check-input" type="radio" name="r14" value="曾到" id="r14_1">
+                                                            <label class="form-check-label" for="r14_1">
+                                                                是
+                                                            </label>
+                                                        </div>
+                                                        <div style="display: inline-block;margin: 5px">
+                                                            <input class="form-check-input" type="radio" name="r14" value="未曾到" id="r14_2" checked>
+                                                            <label class="form-check-label" for="r14_2">
+                                                                否
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <span style="display: block">曾到省</span>
+                                                    <div class="btn-group mb-1">
+
+                                                        <div class="dropdown">
+                                                            <button class="btn btn-primary dropdown-toggle me-1" type="button"
+                                                                id="ddrop1" data-bs-toggle="dropdown" aria-haspopup="true"
+                                                                aria-expanded="false" value="">
+                                                                请选择省
+                                                            </button>
+                                                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                                                {% for address in addressdic.keys() %}
+                                                                    <a class="dropdown-item" value={{ address }} name = {{ address }} id="address" onclick=myclick3(this)>{{ address }}</a>
+                                                                {% endfor %}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div id="drop2">
+
+                                                    </div>
+                                                    <div id="drop3">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <input type="hidden" id="province" name="province" value="其他">
+                                        <input type="hidden" id="city" name="city" value="其他">
+                                        <input type="hidden" id="district" name="district" value="其他">
+                                        <input type="hidden" id="patient_id" name="patient" value="">
+                                        <input type="hidden" id="doc_id" name="doc_id" value="">
+                                        <input type="hidden" id="de_id" name="de_id" value="">
+                                        <button type = "submit" style="width: 50%" class="btn btn-primary btn-block btn-lg shadow-lg mt-5">提交</button>
+                                    </form>
+                            </div>
+                </div>
+            </div>
+        </div>
+
+</div>
+{% endblock %}
+{% block js %}
+<script src="{{ url_for('static', filename='vendors/apexcharts/apexcharts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/pages/dashboard.js') }}"></script>
+<script>
+    String.prototype.format = function (){
+            let args = Array.prototype.slice.call(arguments);
+            let count=0;
+            return this.replace(/%s/g, function (s,i){
+                return args[count++];
+            });
+        }
+</script>
+{% endblock %}
