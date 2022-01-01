@@ -132,7 +132,7 @@ def change_inf(username):
         if check_repeat(db, user) and user != username:
             flash('The username already exists')
             return redirect(url_for('fever_doctor.change_inf', username=username))
-        if pwd != "NULL":
+        if pwd != "":
             db.execute('''UPDATE login_inf 
             SET username = ?, password=?
             WHERE username = ?''', (user, pwd, username))

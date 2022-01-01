@@ -61,13 +61,13 @@ def add_patient(username):
         phone = request.form['phone']
         email = request.form['email']
         user = request.form['username']
-        password = request.form['password']
+        password = request.form['pwd']
 
         if check_repeat(db, user):
             flash('The username already exists')
             return redirect(url_for('admin.patients',username=username))
 
-        request.form['pat_id'] = db.execute('''INSERT INTO patient(name,DOB,passport,gender,phone,email,username,password)
+        pat_id = db.execute('''INSERT INTO patient(name,DOB,passport,gender,phone,email,username,password)
                     VALUES(?,?,?,?,?,?,?,?)''', (
         real_name, DOB, passport, gender, phone,email,user,password)).lastrowid
         login_id = db.execute('''INSERT INTO login_inf(username, password, domain)
@@ -233,7 +233,7 @@ def update_doctor(username, id):
         if check_repeat(db, user) and user != old_username:
             flash('The username already exists')
             return redirect(url_for('admin.doctors'))
-        if pwd != "NULL":
+        if pwd != "":
             db.execute('''UPDATE login_inf 
             SET username = ?, password=?
             WHERE username = ?''', (user, pwd, old_username))
@@ -364,9 +364,10 @@ def update_department(username, id):
         chiefdic[i[0]] = i[1]
 
     if request.method == "POST":
-        name = request.form['name']
+        name = request.form['dname']
         description = request.form['description']
         chief_id = request.form['chief']
+        # print(name, description, chief_id)
 
         db.execute('''UPDATE department SET department_name = ?,description=? WHERE department_id =?''',
                    (name, description, department_id))
@@ -375,7 +376,7 @@ def update_department(username, id):
                    (chief_id, department_id, department_id))
         log_write(user=username, action='edit', dist='chief')
         db.execute('''UPDATE doctor SET department_id=? WHERE doc_id =?''',
-                   (chief_id, department_id, chief_id))
+                   (department_id, chief_id))
 
         flash('Successfully modified information')
         return render_template('loading.html')

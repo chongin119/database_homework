@@ -8,7 +8,14 @@
 {% endblock %}
 
 {% block headscripts %}
+ <script>
+        function myclick(obj){
+            chiefdic = {{ chiefdic | safe }}
+            document.getElementById("dropdownMenuButton").innerHTML =chiefdic[obj.id]
+            document.getElementById("chief").value = obj.id
+        }
 
+   </script>
 {% endblock %}
 
 {% block content %}

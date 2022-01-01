@@ -149,7 +149,7 @@ def change_inf(username):
         if check_repeat(db, user) and user != username :
             flash('The username already exists')
             return redirect(url_for('chief.change_inf', username=username))
-        if pwd != "NULL":
+        if pwd != "":
             db.execute('''UPDATE login_inf 
             SET username = ?, password=?
             WHERE username = ?''', (user, pwd, username))
@@ -552,7 +552,7 @@ def update_doctor(username, id):
         if check_repeat(db, user) and docuser != user:
             flash('The username already exists')
             return render_template('loading.html')
-        if pwd != "NULL":
+        if pwd != "":
             db.execute('''UPDATE login_inf 
             SET username = ?, password=?
             WHERE username = ?''', (user, pwd, old_username))
