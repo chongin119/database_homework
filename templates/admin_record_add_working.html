@@ -1,0 +1,137 @@
+{% set title = 'Dashboard' %}
+{% set filename = 'admin_record_add_working.html' %}
+
+{% extends 'layouts/masterforworking.html' %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='vendors/iconly/bold.css') }}">
+{% endblock %}
+
+{% block headscripts %}
+    <script>
+        function myclick2(obj){
+            meddic = {{ meddic | safe }}
+
+            document.getElementById("dropdownMenuButton1").innerHTML = meddic[obj.id]
+            document.getElementById("medid").value = obj.id
+        }
+        function myclick(obj){
+            document.getElementById("dropdownMenuButton").innerHTML = obj.id
+            cont = `<div class="card-body">
+                            <div class="form-group">
+                                <label for="temperature">病人温度</label>
+                                <small class="text-muted">eg.<i>36.5</i></small>
+                                <input type="text" class="form-control" id="temperature" name="temperature">
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="chc" class="form-label">主诉</label>
+                                <textarea class="form-control" id="chc" name="chc" rows="3" required></textarea>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="pih" class="form-label">现病史</label>
+                                <textarea class="form-control" id="pih" name="pih" rows="3" required></textarea>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="phistory" class="form-label">既往史</label>
+                                <textarea class="form-control" id="phistory" name="phistory" rows="3" required></textarea>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="ahistory" class="form-label">过敏史</label>
+                                <textarea class="form-control" id="ahistory" name="ahistory" rows="3" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="ondate">发病日期</label>
+                                <small class="text-muted">eg.<i>2000-01-01</i></small>
+                                <input type="text" class="form-control" id="ondate" name="ondate" >
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label for="ctreat" class="form-label">治疗情况</label>
+                                <textarea class="form-control" id="ctreat" name="ctreat" rows="3" required></textarea>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="assess" class="form-label">评估诊断</label>
+                                <textarea class="form-control" id="assess" name="assess" rows="3" required></textarea>
+                            </div>
+                            <div style="" class="btn-group mb-1">
+                                <div class="dropdown">
+                                    <button class="btn btn-primary dropdown-toggle me-1" type="button"
+                                        id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-haspopup="true"
+                                        aria-expanded="false" value="">
+                                        请选择药品
+                                    </button>
+                                    <input type="hidden" value="" id="medid" name="medid"/>
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                        {% for med in meddic %}
+                                            <a class="dropdown-item"  id="{{ med }}" onclick=myclick2(this)>{{ meddic[med] }}</a>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="quantity">用药数量</label>
+                                <small class="text-muted">eg.<i>5</i></small>
+                                <input type="text" class="form-control" id="quantity" name="quantity" >
+                            </div>
+                            <input type="hidden" value="%s" id="appid" name="appointment"/>
+                            <button type = "submit" style="width: 50%" class="btn btn-primary btn-block btn-lg shadow-lg mt-5">提交</button>
+                        </div>`.format(obj.id)
+            document.getElementById('formm').innerHTML = cont
+        }
+
+
+    </script>
+{% endblock %}
+
+{% block content %}
+<div>
+    <div class="page-heading" >
+        <h3>请先选择</h3>
+    </div>
+</div>
+<div class="page-content">
+        <div class="col-12  ">
+            <div class="row">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 style="float: left; width: 85%;">请先选择</h4>
+                    </div>
+                    <div class="card-body">
+                        <div style="" class="btn-group mb-1">
+                            <div class="dropdown">
+                                <button class="btn btn-primary dropdown-toggle me-1" type="button"
+                                    id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true"
+                                    aria-expanded="false" value="">
+                                    请选择预约id
+                                </button>
+                                <input type="hidden" value="" id="medid" name="medid"/>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    {% for app in appdic %}
+                                        <a class="dropdown-item"  id="{{ app[0] }}" onclick=myclick(this)>{{ app[0] }}</a>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <form method="post" id="formm">
+
+                    </form>
+                </div>
+            </div>
+        </div>
+
+</div>
+{% endblock %}
+{% block js %}
+<script src="{{ url_for('static', filename='vendors/apexcharts/apexcharts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/pages/dashboard.js') }}"></script>
+<script>
+    String.prototype.format = function (){
+            let args = Array.prototype.slice.call(arguments);
+            let count=0;
+            return this.replace(/%s/g, function (s,i){
+                return args[count++];
+            });
+        }
+</script>
+{% endblock %}

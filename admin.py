@@ -140,15 +140,14 @@ def delete_patient(username, id):
 ################################分隔线
 @bp.route('/admin/?<string:username>/doctors',methods=['GET','POST'])
 def doctors(username):
-    # 找出全部医生，不包括科长
+    # 找出全部医生
     # 格式为(医生id,医生姓名，电话，邮箱，科室)
     doctors = db.execute('''
                                     SELECT e_id,e.name,e.phone,e.email, department_name, graduate_school, degree
                                     , technical_title, specialty
                                     FROM employees e 
                                     INNER JOIN doctor d ON d.doc_id = e_id
-                                    INNER JOIN department de ON d.department_id = de.department_id
-                                    WHERE e_id NOT IN (SELECT chief_id FROM chief)  
+                                    INNER JOIN department de ON d.department_id = de.department_id  
                                 ''', ).fetchall()
     log_write(user=username, action='visit', dist='employees')
     log_write(user=username, action='visit', dist='department')
@@ -411,7 +410,18 @@ def records(username):
     log_write(user=username, action='visit', dist='prescription')
     log_write(user=username, action='visit', dist='records')
 
-    return render_template('admin_records.html',name = username,sidebarItems=adminItems,records=prescriptions_records)
+    predic = {}
+    for cnt in prescriptions_records:
+        lst = []
+        for i in range(len(cnt)):
+            if cnt[i] == None:
+                lst.append('无')
+            else:
+                lst.append(cnt[i])
+
+        predic[cnt[0]] = lst
+
+    return render_template('admin_records.html',patients = predic,name = username,sidebarItems=adminItems,records=prescriptions_records)
 
 @bp.route('/admin/?<string:username>/add_record',methods=['GET', 'POST'])
 def add_record(username):
@@ -419,7 +429,7 @@ def add_record(username):
     app_list = db.execute('''SELECT app_id
         FROM appointment 
         WHERE app_id NOT IN (SELECT app_id FROM medical_record)
-        AND p.date<=? ORDER BY p.date DESC''', (datetime.date.today(),)).fetchall()
+        AND date<=? ORDER BY date DESC''', (datetime.date.today(),)).fetchall()
 
     if len(app_list)==0:
         flash('所有就诊都有记录')
@@ -459,13 +469,15 @@ def add_record(username):
         log_write(user=username, action='add', dist='records')
         db.commit()
         flash('Successfully add record')
-        return redirect(url_for('admin.records', username=username))
+        return render_template('loading.html')
     medicine_inf = db.execute("SELECT  * FROM medicine").fetchall()
     meddic = {}
 
     for i in medicine_inf:
         meddic[i[0]] = i[1]
-    return render_template('admin_add_record.html', name=username, meddic=meddic)
+
+
+    return render_template('admin_record_add_working.html', appdic = app_list,name=username, meddic=meddic)
 
 
 @bp.route('/admin/?<string:username>/update_record/<id>',methods=['GET', 'POST'])
