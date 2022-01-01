@@ -293,7 +293,7 @@ def add_diagnosis(username, id):
 
     for i in medicine_inf:
         meddic[i[0]] = i[1]
-    return render_template('doctor_diagnosis_working.html', appid = app_id,name=username,appid = app_id,meddic = meddic)
+    return render_template('doctor_diagnosis_working.html',name=username,appid = app_id,meddic = meddic)
 
 
 

@@ -120,11 +120,11 @@
                                                 <p class="badge bg-{{ ranking[riskdic[records[record][0]]] }}">{{ rankchin[riskdic[records[record][0]]] }}</p>
                                             </td>
                                             <td class="col-auto">
-                                                <button href="#"  name= "{{ name }}" class="btn btn-primary btn-block" style="float: left; width: 50%;" id="{{ records[record][3] }}" onclick=myclick(this) {{ finishdic[records[record][3]] }}>{% if finishdic[records[record][3]] == 'disabled' %}已看诊
+                                                <button href="#"  name= "{{ name }}" class="btn btn-primary btn-block" style="float: left; width: 50%;" id="{{ records[record][4] }}" onclick=myclick(this) {{ finishdic[records[record][4]] }}>{% if finishdic[records[record][4]] == 'disabled' %}已看诊
                                                     {% else %}可看诊{% endif %}</button>
                                             </td>
                                             <td class="col-auto">
-                                                <button href="#"  name= "{{ name }}" class="btn btn-primary btn-block" style="float: left; width: 50%;" id="{{ records[record][3] }}" onclick=myclick2(this) {{ finishdic[records[record][3]] }}>{% if finishdic[records[record][3]] == 'disabled' %}已完成不能转诊
+                                                <button href="#"  name= "{{ name }}" class="btn btn-primary btn-block" style="float: left; width: 50%;" id="{{ records[record][4] }}" onclick=myclick2(this) {{ finishdic[records[record][4]] }}>{% if finishdic[records[record][4]] == 'disabled' %}已完成不能转诊
                                                     {% else %}可转诊{% endif %}</button>
                                             </td>
                                         </tr>
